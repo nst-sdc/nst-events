@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useRouter } from 'expo-router';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
@@ -17,11 +18,20 @@ export default function SendAlert() {
 
     const handleSend = async () => {
         if (!title || !message) {
-            // Show error popup or alert
+            Toast.show({
+                type: 'error',
+                text1: 'Missing Fields',
+                text2: 'Please enter both title and message'
+            });
             return;
         }
         await sendAlert(title, message);
-        setShowSuccess(true);
+        Toast.show({
+            type: 'success',
+            text1: 'Success',
+            text2: 'Alert sent successfully'
+        });
+        router.back();
     };
 
     const handleClosePopup = () => {
@@ -34,13 +44,7 @@ export default function SendAlert() {
             <AppHeader title="Send Alert" showBack />
             <Loader visible={isLoading} />
 
-            <Popup
-                visible={showSuccess}
-                title="Alert Sent"
-                message="Your announcement has been broadcasted successfully."
-                onClose={handleClosePopup}
-                type="success"
-            />
+
 
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
                 <ScrollView contentContainerStyle={styles.content}>

@@ -1,14 +1,14 @@
 const bcrypt = require('bcrypt');
-const { PrismaClient } = require('@prisma/client');
+
 const { generateToken } = require('../utils/jwt');
 const { generateQRCodeString } = require('../utils/qr');
-
-const prisma = new PrismaClient();
+const prisma = require('../utils/prismaClient');
 
 // Unified Login
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Login attempt:', { email, password });
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
@@ -26,6 +26,12 @@ const login = async (req, res) => {
         } else {
             role = 'participant';
             user = await prisma.participant.findUnique({ where: { email } });
+        }
+
+        console.log('User found:', user ? user.email : 'No user found');
+        if (user) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            console.log('Password match:', isMatch);
         }
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -49,6 +55,7 @@ const login = async (req, res) => {
 
         res.json({ token, user: userData, role });
     } catch (error) {
+        console.error('Login error details:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };

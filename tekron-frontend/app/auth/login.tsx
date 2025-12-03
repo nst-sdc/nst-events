@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, GRADIENTS, SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
@@ -30,14 +31,27 @@ export default function Login() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            showPopup('Error', 'Please enter both email and password', 'error');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter both email and password'
+            });
             return;
         }
 
         try {
             await login(email, password);
+            Toast.show({
+                type: 'success',
+                text1: 'Login Successful',
+                text2: 'Welcome back!'
+            });
         } catch (error: any) {
-            showPopup('Login Failed', error.message || 'An error occurred', 'error');
+            Toast.show({
+                type: 'error',
+                text1: 'Login Failed',
+                text2: error.message || 'An error occurred'
+            });
         }
     };
 

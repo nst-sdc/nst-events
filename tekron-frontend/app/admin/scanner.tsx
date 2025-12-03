@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
@@ -52,9 +53,12 @@ export default function Scanner() {
             // Reset scan state after a delay or when returning
             setTimeout(() => setScanned(false), 2000);
         } else {
-            Alert.alert('Invalid QR Code', 'Could not validate participant.', [
-                { text: 'OK', onPress: () => setScanned(false) }
-            ]);
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid QR Code',
+                text2: 'Could not validate participant.'
+            });
+            setScanned(false);
         }
     };
 
