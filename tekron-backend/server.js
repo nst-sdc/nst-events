@@ -1,4 +1,5 @@
 require('dotenv').config();
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
@@ -30,23 +31,34 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Internal Server Error' });
 });
 
-// Start Server
-const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Create HTTP Server
+const server = http.createServer(app);
 
 // Socket.IO Setup
 const io = require('socket.io')(server, {
     cors: {
-        origin: '*', // Allow all origins for now (dev mode)
+        origin: "*",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["*"],
+        credentials: true
     }
 });
 
 io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+    console.log('Socket connected:', socket.id);
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
     });
+});
+
+io.engine.on("connection_error", (err) => {
+    console.log("Engine error:", err.req ? err.req.url : 'unknown', err.code, err.message);
+});
+
+// Start Server
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on 0.0.0.0:${PORT}`);
 });
 
 // Export io for use in controllers
