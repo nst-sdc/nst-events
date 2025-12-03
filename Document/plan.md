@@ -3,19 +3,19 @@
 
 ## **Phase 1: Initialization & Planning**
 
-* [ ] Define exact event flow (registration → check-in → location assignment → updates)
-* [ ] Decide central backend: Firebase / Supabase / Node + MongoDB
-* [ ] Create GitHub repo + branches (main, dev, feature/*)
-* [ ] Set up project architecture for React Native
-* [ ] Decide UI theme + design system (colors, spacing, typography)
-* [ ] Create wireframes for all screens
-* [ ] Plan database models (Users, Events, Checkins, Alerts)
+* [x] Define exact event flow (registration → check-in → location assignment → updates)
+* [x] Decide central backend: Node + Supabase
+* [x] Create GitHub repo + branches (main, dev, feature/*)
+* [x] Set up project architecture for React Native
+* [x] Decide UI theme + design system (colors, spacing, typography)
+* [x] Create wireframes for all screens
+* [x] Plan database models (Users, Events, Checkins, Alerts)
 
 ---
 
 ## **Phase 2: Core Setup**
 
-* [ ] Initialize React Native project
+* [x] Initialize React Native project
 * [ ] Install navigation (react-navigation)
 * [ ] Install state management (Zustand / Redux / Context)
 * [ ] Set up backend with auth
