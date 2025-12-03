@@ -52,8 +52,8 @@ export default function Login() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Tekron 2.0</Text>
-                        <Text style={styles.subtitle}>Event Management App</Text>
+                        <Text style={styles.title}>Tekron @ NST</Text>
+                        <Text style={styles.subtitle}>The Ultimate Tech Showdown</Text>
                     </View>
 
                     <View style={styles.formContainer}>
@@ -61,7 +61,7 @@ export default function Login() {
                             <Ionicons name="mail-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Email"
+                                placeholder="Codename (Email)"
                                 placeholderTextColor={PALETTE.purpleLight}
                                 value={email}
                                 onChangeText={setEmail}
@@ -74,7 +74,7 @@ export default function Login() {
                             <Ionicons name="lock-closed-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Password"
+                                placeholder="Secret Key (Password)"
                                 placeholderTextColor={PALETTE.purpleLight}
                                 value={password}
                                 onChangeText={setPassword}
@@ -92,7 +92,7 @@ export default function Login() {
                                 {isLoading ? (
                                     <ActivityIndicator color={PALETTE.creamLight} />
                                 ) : (
-                                    <Text style={styles.buttonText}>Login</Text>
+                                    <Text style={styles.buttonText}>Jack In</Text>
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>

@@ -1,32 +1,32 @@
-# Tekron 2.0
+# Tekron @ NST - The Ultimate Tech Showdown
 
-Tekron 2.0 is a comprehensive event management application designed to streamline participant registration, access control, and event administration. It features a robust backend with role-based access control and a React Native frontend for participants and admins.
+Tekron is the flagship tech fest at **Newton School of Technology - Pune**. This app is your digital pass to the chaos, code, and creativity. We've built a sick backend with strict RBAC and a buttery smooth React Native frontend for all you Hackers and Ops.
 
 ## Features
 
 ### Authentication & Roles
-- **Automatic Role Assignment**: Roles are determined by email domain:
-  - `*@superadmin.com` → **SuperAdmin**
-  - `*@admin.com` → **Admin**
-  - Others → **Participant**
-- **Secure Login**: JWT-based authentication with secure storage.
-- **No Public Registration**: Accounts are pre-seeded or created by admins.
+- **Automatic Role Assignment**: Your fate is sealed by your email domain:
+  - `*@superadmin.com` → **God Mode (SuperAdmin)**
+  - `*@admin.com` → **Ops (Admin)**
+  - Others → **Hacker (Participant)**
+- **Secure Login**: JWT-based auth. No imposters allowed.
+- **No Public Registration**: Invite-only. If you're in, you're in.
 
-### Participant Features
+### Hacker Features (Participants)
 - **Unapproved Access**:
-  - View personal QR Code for entry.
-  - View static Venue Map with instructions.
-  - Restricted from accessing event details until approved.
+  - View your **Identity Matrix (QR Code)**.
+  - Check the **Battleground Map** (Venue).
+  - Locked out of the cool stuff until Ops approves you.
 - **Approved Access**:
-  - **Dashboard**: View event schedule and announcements.
-  - **Alerts**: Real-time notifications from admins.
-  - **Profile**: Manage personal details.
+  - **Dashboard**: The Mission Control. Schedule, loot, and intel.
+  - **Alerts**: Direct comms from the Ops team.
+  - **Profile**: Your digital footprint.
 
-### Admin Features
-- **Dashboard**: Live metrics (Total Participants, Pending Approvals, etc.).
-- **QR Scanner**: Scan participant QR codes to validate and approve entry.
-- **Approval Workflow**: Review and approve/reject participants.
-- **Announcements**: Send alerts to all participants.
+### Ops Features (Admins)
+- **Dashboard**: The War Room. Live stats on the horde.
+- **QR Scanner**: Validate Hackers at the gates.
+- **Approval Workflow**: Gatekeeping 101. Let 'em in or kick 'em out.
+- **Announcements**: Broadcast to the masses.
 
 ## Tech Stack
 

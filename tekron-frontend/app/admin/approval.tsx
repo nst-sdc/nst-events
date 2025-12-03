@@ -79,7 +79,7 @@ export default function Approval() {
                 <Card style={styles.detailsCard}>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Assigned Event</Text>
-                        <Text style={styles.detailValue}>Tekron 2.0 Tech Summit</Text>
+                        <Text style={styles.detailValue}>Tekron: The Glitch</Text>
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.detailRow}>
