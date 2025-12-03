@@ -1,5 +1,7 @@
+
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking, Switch } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -8,58 +10,56 @@ import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../../constants/config';
+import { IndoorMap } from '../../components/IndoorMap';
 
-export default function LimitedAccessMap() {
+export default function MapScreen() {
     const { logout } = useAuthStore();
     const [showQR, setShowQR] = useState(false);
-    const [mapData, setMapData] = useState<any>(null);
-    const [isLoadingMap, setIsLoadingMap] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [mapMode, setMapMode] = useState<'VENUE' | 'INDOOR'>('VENUE');
+    const [locations, setLocations] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [qrCodeData, setQrCodeData] = useState<string | null>(null);
 
-    // Fetch Map Data
-    const fetchMapData = async () => {
-        setIsLoadingMap(true);
-        setError(null);
+    const fetchLocations = async () => {
         try {
             const token = await SecureStore.getItemAsync('token');
-            if (!token) {
-                setError('No authentication token found');
-                setIsLoadingMap(false);
-                return;
-            }
-
-            const response = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
+            const res = await fetch(`${BACKEND_URL}/locations`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            if (res.ok) {
+                const data = await res.json();
+                setLocations(data);
+            }
 
-            if (response.ok) {
-                const data = await response.json();
-                setMapData(data);
-            } else {
-                const errData = await response.json();
-                setError(errData.message || 'Failed to load map data');
+            // Also fetch QR for the modal
+            const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (qrRes.ok) {
+                const qrData = await qrRes.json();
+                setQrCodeData(qrData.qrCode);
             }
         } catch (error) {
-            console.error('Error fetching map data:', error);
-            setError('Network error. Please check your connection.');
+            console.error('Error fetching locations:', error);
         } finally {
-            setIsLoadingMap(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchMapData();
+        fetchLocations();
     }, []);
 
     const openGoogleMaps = () => {
         Linking.openURL('https://maps.app.goo.gl/m1h5Hkgu3LsUrnLd9');
     };
 
-    // Extract src from iframe string if needed, or just use the direct URL for WebView if iframe doesn't render well
-    // WebView can render HTML string directly.
-    const mapHtml = mapData?.mapIframe
-        ? `<html><body style="margin:0;padding:0;height:100%;width:100%;display:flex;">${mapData.mapIframe}</body></html>`
-        : null;
+    // Placeholder markers for demo
+    const markers = locations.map((loc, index) => ({
+        x: 20 + (index * 10) % 60,
+        y: 30 + (index * 15) % 50,
+        label: loc.name
+    }));
 
     return (
         <View style={styles.container}>
@@ -69,68 +69,54 @@ export default function LimitedAccessMap() {
                 onRightPress={logout}
             />
 
-            {isLoadingMap ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={PALETTE.creamLight} />
-                </View>
-            ) : error ? (
-                <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle-outline" size={48} color={PALETTE.pinkDark} />
-                    <Text style={styles.errorText}>{error}</Text>
-                    <TouchableOpacity style={styles.secondaryButton} onPress={fetchMapData}>
-                        <Text style={styles.secondaryButtonText}>Retry</Text>
+            <View style={styles.toggleContainer}>
+                <TouchableOpacity
+                    style={[styles.toggleButton, mapMode === 'VENUE' && styles.activeToggle]}
+                    onPress={() => setMapMode('VENUE')}
+                >
+                    <Text style={[styles.toggleText, mapMode === 'VENUE' && styles.activeToggleText]}>Venue Map</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.toggleButton, mapMode === 'INDOOR' && styles.activeToggle]}
+                    onPress={() => setMapMode('INDOOR')}
+                >
+                    <Text style={[styles.toggleText, mapMode === 'INDOOR' && styles.activeToggleText]}>Indoor Map</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.contentContainer}>
+                {isLoading ? (
+                    <ActivityIndicator size="large" color={PALETTE.creamLight} style={{ marginTop: 50 }} />
+                ) : mapMode === 'VENUE' ? (
+                    <WebView
+                        originWhitelist={['*']}
+                        source={{ uri: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.265588856342!2d73.91411937501422!3d18.56206128253963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c147b8b3a3bf%3A0x6f7fdcc8e4136c54!2sPhoenix%20Marketcity%20-%20Viman%20Nagar!5e0!3m2!1sen!2sin!4v1709636660000!5m2!1sen!2sin' }}
+                        style={styles.webview}
+                    />
+                ) : (
+                    <IndoorMap markers={markers} />
+                )}
+            </View>
+
+            <View style={styles.footer}>
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() => setShowQR(true)}
+                >
+                    <Ionicons name="qr-code-outline" size={20} color={PALETTE.purpleDeep} />
+                    <Text style={styles.primaryButtonText}>Show My Entry Pass</Text>
+                </TouchableOpacity>
+
+                {mapMode === 'VENUE' && (
+                    <TouchableOpacity
+                        style={styles.secondaryButton}
+                        onPress={openGoogleMaps}
+                    >
+                        <Ionicons name="map-outline" size={20} color={PALETTE.creamLight} />
+                        <Text style={styles.secondaryButtonText}>Open in Google Maps</Text>
                     </TouchableOpacity>
-                </View>
-            ) : (
-                <View style={styles.contentContainer}>
-                    <View style={styles.mapContainer}>
-                        {mapHtml ? (
-                            <WebView
-                                originWhitelist={['*']}
-                                source={{ html: mapHtml }}
-                                style={styles.webview}
-                                scrollEnabled={false}
-                            />
-                        ) : (
-                            <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Map unavailable</Text>
-                            </View>
-                        )}
-                    </View>
-
-                    <View style={styles.infoContainer}>
-                        <View style={styles.statusBanner}>
-                            <Ionicons name="lock-closed" size={16} color={PALETTE.creamLight} />
-                            <Text style={styles.statusText}>Access Restricted</Text>
-                        </View>
-
-                        <Text style={styles.locationTitle}>{mapData?.locationName || 'Event Location'}</Text>
-                        <Text style={styles.instructionText}>
-                            {mapData?.instructions || 'Please proceed to the registration desk.'}
-                        </Text>
-
-                        <View style={styles.buttonGroup}>
-                            <TouchableOpacity
-                                style={styles.primaryButton}
-                                onPress={() => setShowQR(true)}
-                                activeOpacity={0.8}
-                            >
-                                <Ionicons name="qr-code-outline" size={20} color={PALETTE.purpleDeep} />
-                                <Text style={styles.primaryButtonText}>Show My QR Code</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.secondaryButton}
-                                onPress={openGoogleMaps}
-                                activeOpacity={0.8}
-                            >
-                                <Ionicons name="map-outline" size={20} color={PALETTE.creamLight} />
-                                <Text style={styles.secondaryButtonText}>Open in Google Maps</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            )}
+                )}
+            </View>
 
             <Modal
                 visible={showQR}
@@ -150,15 +136,15 @@ export default function LimitedAccessMap() {
                         <Text style={styles.modalTitle}>Your Entry Pass</Text>
 
                         <View style={styles.qrWrapper}>
-                            {mapData?.qrCode ? (
+                            {qrCodeData ? (
                                 <QRCode
-                                    value={mapData.qrCode}
+                                    value={qrCodeData}
                                     size={200}
                                     backgroundColor="white"
                                     color="black"
                                 />
                             ) : (
-                                <Text>QR Code not found</Text>
+                                <Text>Loading QR...</Text>
                             )}
                         </View>
 
@@ -177,73 +163,44 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: PALETTE.navyDark,
     },
-    loadingContainer: {
+    toggleContainer: {
+        flexDirection: 'row',
+        padding: SPACING.m,
+        gap: SPACING.m,
+    },
+    toggleButton: {
         flex: 1,
-        justifyContent: 'center',
+        paddingVertical: SPACING.s,
         alignItems: 'center',
+        borderRadius: RADIUS.m,
+        backgroundColor: PALETTE.purpleDeep,
+        borderWidth: 1,
+        borderColor: PALETTE.purpleMedium,
+    },
+    activeToggle: {
+        backgroundColor: PALETTE.pinkLight,
+        borderColor: PALETTE.pinkLight,
+    },
+    toggleText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.creamLight,
+        fontWeight: 'bold',
+    },
+    activeToggleText: {
+        color: PALETTE.navyDark,
     },
     contentContainer: {
         flex: 1,
-    },
-    mapContainer: {
-        flex: 1, // Takes up remaining space
         backgroundColor: '#000',
     },
     webview: {
         flex: 1,
-        opacity: 0.8,
     },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    errorText: {
-        color: PALETTE.creamLight,
-    },
-    infoContainer: {
+    footer: {
+        padding: SPACING.m,
         backgroundColor: PALETTE.purpleDeep,
         borderTopLeftRadius: RADIUS.l,
         borderTopRightRadius: RADIUS.l,
-        padding: SPACING.l,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        elevation: 10,
-        paddingBottom: SPACING.xl, // Extra padding for bottom safe area
-    },
-    statusBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: PALETTE.pinkDark,
-        paddingVertical: 4,
-        paddingHorizontal: SPACING.m,
-        borderRadius: RADIUS.round,
-        marginBottom: SPACING.m,
-    },
-    statusText: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.creamLight,
-        fontWeight: 'bold',
-        marginLeft: SPACING.s,
-        textTransform: 'uppercase',
-    },
-    locationTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
-        textAlign: 'center',
-        marginBottom: SPACING.s,
-    },
-    instructionText: {
-        ...TYPOGRAPHY.body,
-        color: 'rgba(255, 255, 255, 0.7)',
-        textAlign: 'center',
-        marginBottom: SPACING.l,
-    },
-    buttonGroup: {
-        width: '100%',
         gap: SPACING.m,
     },
     primaryButton: {

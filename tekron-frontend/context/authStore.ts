@@ -11,6 +11,9 @@ interface User {
     approved?: boolean;
     qrCode?: string;
     assignedEventId?: string;
+    xp?: number;
+    level?: number;
+    pushToken?: string;
 }
 
 interface AuthState {

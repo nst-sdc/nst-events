@@ -48,8 +48,26 @@ const requireApproval = async (req, res, next) => {
     }
 };
 
+const authenticateToken = (req, res, next) => authenticate(req, res, next);
+
+const authorizeRole = (allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
+        }
+        next();
+    };
+};
+
 const participantAuth = (req, res, next) => authenticate(req, res, next, 'participant');
 const adminAuth = (req, res, next) => authenticate(req, res, next, 'admin');
 const superAdminAuth = (req, res, next) => authenticate(req, res, next, 'superadmin');
 
-module.exports = { participantAuth, adminAuth, superAdminAuth, requireApproval };
+module.exports = {
+    participantAuth,
+    adminAuth,
+    superAdminAuth,
+    requireApproval,
+    authenticateToken,
+    authorizeRole
+};

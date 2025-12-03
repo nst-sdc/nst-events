@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -8,6 +8,9 @@ import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
+import { XPBar } from '../../components/XPBar';
+import { BadgeGrid } from '../../components/BadgeGrid';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 
 import { BACKEND_URL } from '../../constants/config';
 
@@ -16,24 +19,52 @@ export default function Profile() {
     const router = useRouter();
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+    const [xpData, setXpData] = useState({ xp: 0, level: 1, progress: 0, nextLevelXp: 100 });
+    const [badges, setBadges] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Initialize push notifications
+    usePushNotifications();
+
+    const fetchData = async () => {
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            const headers = { Authorization: `Bearer ${token}` };
+
+            // Fetch QR
+            const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, { headers });
+            if (qrRes.ok) {
+                const data = await qrRes.json();
+                setQrCodeData(data.qrCode);
+            }
+
+            // Fetch XP
+            const xpRes = await fetch(`${BACKEND_URL}/participant/xp`, { headers });
+            if (xpRes.ok) {
+                const data = await xpRes.json();
+                setXpData(data);
+            }
+
+            // Fetch Badges
+            const badgesRes = await fetch(`${BACKEND_URL}/participant/badges`, { headers });
+            if (badgesRes.ok) {
+                const data = await badgesRes.json();
+                setBadges(data);
+            }
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchQR = async () => {
-            try {
-                const token = await SecureStore.getItemAsync('token');
-                const response = await fetch(`${BACKEND_URL}/participant/qr`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setQrCodeData(data.qrCode);
-                }
-            } catch (error) {
-                console.error('Error fetching QR:', error);
-            }
-        };
-        fetchQR();
+        fetchData();
     }, []);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -44,7 +75,10 @@ export default function Profile() {
         <View style={styles.container}>
             <AppHeader title="Profile" />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PALETTE.creamLight} />}
+            >
                 <Card style={styles.profileCard}>
                     <View style={styles.avatarContainer}>
                         <View style={styles.avatar}>
@@ -56,6 +90,15 @@ export default function Profile() {
 
                     <Text style={styles.name}>{user?.name}</Text>
                     <Text style={styles.email}>{user?.email}</Text>
+
+                    <View style={{ width: '100%', marginBottom: SPACING.l }}>
+                        <XPBar
+                            xp={xpData.xp}
+                            level={xpData.level}
+                            progress={xpData.progress}
+                            nextLevelXp={xpData.nextLevelXp}
+                        />
+                    </View>
 
                     <View style={styles.qrContainer}>
                         {qrCodeData ? (
@@ -73,6 +116,8 @@ export default function Profile() {
                     </View>
                     <Text style={styles.qrLabel}>Scan at reception</Text>
                 </Card>
+
+                <BadgeGrid badges={badges} />
 
                 <Text style={styles.sectionTitle}>Settings</Text>
 
@@ -92,20 +137,10 @@ export default function Profile() {
 
                     <View style={styles.divider} />
 
-                    <TouchableOpacity style={styles.settingRow}>
+                    <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/participant/settings')}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="notifications-outline" size={24} color={PALETTE.creamLight} />
-                            <Text style={styles.settingText}>Notifications</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
-                    </TouchableOpacity>
-
-                    <View style={styles.divider} />
-
-                    <TouchableOpacity style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="lock-closed-outline" size={24} color={PALETTE.creamLight} />
-                            <Text style={styles.settingText}>Privacy & Security</Text>
+                            <Ionicons name="settings-outline" size={24} color={PALETTE.creamLight} />
+                            <Text style={styles.settingText}>App Settings</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
                     </TouchableOpacity>

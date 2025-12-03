@@ -24,6 +24,14 @@ model Participant {
     approvedBy        Admin?             @relation("AdminApprovals", fields: [approvedById], references: [id])
     approvals         ApprovalLog[]
     eventParticipants EventParticipant[]
+
+    // New fields
+    pushToken String? // Expo push token for notifications
+    xp        Int     @default(0)
+    level     Int     @default(1)
+
+    // Relations
+    badges ParticipantBadge[]
 }
 
 model Admin {
@@ -35,6 +43,9 @@ model Admin {
 
     approvals     ApprovalLog[] @relation("AdminApprovalLogs")
     approvedUsers Participant[] @relation("AdminApprovals")
+
+    // New field
+    pushToken String?
 }
 
 model SuperAdmin {
@@ -76,6 +87,19 @@ model Event {
     createdAt    DateTime           @default(now())
     participants Participant[]
     leaderboard  EventParticipant[]
+
+    venueId String?
+    venue   Location? @relation(fields: [venueId], references: [id])
+}
+
+model Location {
+    id       String  @id @default(uuid())
+    name     String
+    building String
+    floor    String
+    mapCode  String? // e.g. code to map overlay or image URL
+    isPublic Boolean @default(true)
+    events   Event[]
 }
 
 model EventParticipant {
@@ -96,4 +120,25 @@ model Alert {
     message    String
     createdAt  DateTime @default(now())
     senderRole String // 'admin' or 'superadmin'
+}
+
+model Badge {
+    id          String   @id @default(uuid())
+    name        String
+    description String?
+    iconUrl     String?
+    type        String // "participant", "winner", "volunteer", etc.
+    createdAt   DateTime @default(now())
+
+    awardedTo ParticipantBadge[]
+}
+
+model ParticipantBadge {
+    id            String   @id @default(uuid())
+    participantId String
+    badgeId       String
+    awardedAt     DateTime @default(now())
+
+    participant Participant @relation(fields: [participantId], references: [id])
+    badge       Badge       @relation(fields: [badgeId], references: [id])
 }

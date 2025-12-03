@@ -6,6 +6,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const participantRoutes = require('./src/routes/participantRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const superAdminRoutes = require('./src/routes/superAdminRoutes');
+const locationRoutes = require('./src/routes/location.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,10 @@ app.use('/auth', authRoutes);
 app.use('/participant', participantRoutes);
 app.use('/admin', adminRoutes);
 app.use('/superadmin', superAdminRoutes);
+app.use('/notifications', require('./src/routes/notification.routes'));
+app.use('/badges', require('./src/routes/badge.routes'));
+app.use('/xp', require('./src/routes/xp.routes'));
+app.use('/locations', locationRoutes);
 
 // Health Check
 app.get('/', (req, res) => {

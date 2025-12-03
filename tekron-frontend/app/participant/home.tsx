@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
@@ -109,6 +109,18 @@ export default function ParticipantHome() {
                     <Text style={styles.userName}>{user?.name || 'Participant'}</Text>
                 </View>
 
+                <View style={styles.xpSummary}>
+                    <View style={styles.xpRow}>
+                        <View style={styles.xpBadge}>
+                            <Text style={styles.xpBadgeText}>LVL {user?.level || 1}</Text>
+                        </View>
+                        <Text style={styles.xpText}>{user?.xp || 0} XP</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => router.push('/participant/profile')}>
+                        <Text style={styles.viewProfileText}>View Profile &gt;</Text>
+                    </TouchableOpacity>
+                </View>
+
                 {liveEvents.length > 0 && (
                     <View style={styles.liveSection}>
                         <View style={styles.liveHeader}>
@@ -144,9 +156,11 @@ export default function ParticipantHome() {
                             </View>
                             <View style={styles.eventDetails}>
                                 <Text style={styles.eventTitle}>{event.title}</Text>
-                                <Text style={styles.eventLocation}>
-                                    <Ionicons name="location-outline" size={14} color={PALETTE.purpleLight} /> {event.location}
-                                </Text>
+                                <TouchableOpacity onPress={() => router.push('/participant/map')}>
+                                    <Text style={styles.eventLocation}>
+                                        <Ionicons name="location-outline" size={14} color={PALETTE.purpleLight} /> {event.location}
+                                    </Text>
+                                </TouchableOpacity>
                                 {event.description && <Text style={styles.eventDescription}>{event.description}</Text>}
                                 {event.status === 'LIVE' && (
                                     <View style={styles.liveTag}>
@@ -297,5 +311,41 @@ const styles = StyleSheet.create({
         color: PALETTE.creamDark,
         textAlign: 'center',
         marginTop: SPACING.l,
+    },
+    xpSummary: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: PALETTE.purpleDeep,
+        padding: SPACING.m,
+        borderRadius: RADIUS.m,
+        marginBottom: SPACING.l,
+        borderWidth: 1,
+        borderColor: PALETTE.purpleMedium,
+    },
+    xpRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.s,
+    },
+    xpBadge: {
+        backgroundColor: PALETTE.pinkLight,
+        paddingHorizontal: SPACING.s,
+        paddingVertical: 2,
+        borderRadius: RADIUS.s,
+    },
+    xpBadgeText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.navyDark,
+        fontWeight: 'bold',
+    },
+    xpText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.creamLight,
+        fontWeight: 'bold',
+    },
+    viewProfileText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.purpleLight,
     },
 });
