@@ -1,6 +1,5 @@
 node_modules
-.env
+.env.local
 prisma/seed.js
 prisma/migrations
 
-tekron-backend/.env
