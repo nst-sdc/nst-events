@@ -133,9 +133,10 @@ tekron-2.0-APK/
 
 | Role | Email | Password | Access |
 |------|-------|----------|--------|
-| **SuperAdmin** | `root@superadmin.com` | `SuperAdmin@123` | Full System Access |
-| **Admin** | `john@admin.com` | `Admin@123` | Dashboard, Scanner, Approvals |
-| **Participant** | `arpit@example.com` | `User@123` | Map/QR (Unapproved), Full (Approved) |
+| **SuperAdmin** | `superadmin@superadmin.com` | `Password` | Full System Access |
+| **Admin** | `admin@admin.com` | `Password` | Dashboard, Scanner, Approvals |
+| **Participant (Approved)** | `arpit@example.com` | `ArpitSarang` | Dashboard, Events, Alerts |
+| **Participant (Unapproved)** | `maverick@example.com` | `Maverick` | Map/QR Only |
 
 ### Testing the Flow
 1. **Login as Participant** (`arpit@example.com`).
