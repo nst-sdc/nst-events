@@ -12,15 +12,18 @@ export default function Index() {
     const rootNavigationState = useRootNavigationState();
 
     useEffect(() => {
+        console.log('Index: effect triggered', { isLoading, isAuthenticated, user: user?.email, segments });
         if (isLoading || !rootNavigationState?.key) return;
 
         const inAuthGroup = segments[0] === 'auth';
 
         if (!isAuthenticated) {
             if (!inAuthGroup) {
+                console.log('Index: redirecting to login');
                 router.replace('/auth/login');
             }
         } else if (user) {
+            console.log('Index: authenticated user role:', user.role);
             if (user.role === 'admin' || user.role === 'superadmin') {
                 router.replace('/admin/dashboard');
             } else if (user.role === 'participant') {
@@ -29,6 +32,8 @@ export default function Index() {
                 } else {
                     router.replace('/participant/map');
                 }
+            } else if (user.role === 'superadmin') {
+                router.replace('/admin/dashboard');
             }
         }
     }, [isAuthenticated, user, isLoading, segments, router, rootNavigationState]);

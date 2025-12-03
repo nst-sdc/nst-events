@@ -1,5 +1,4 @@
 const { PrismaClient } = require('@prisma/client');
-require('dotenv').config();
 const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
@@ -7,89 +6,59 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('Start seeding ...');
 
-    // Clean up existing data
-    // Delete in order of dependencies (child first)
-    await prisma.approvalLog.deleteMany();
-    await prisma.alert.deleteMany();
-    await prisma.participant.deleteMany();
-    await prisma.event.deleteMany();
-    await prisma.admin.deleteMany();
-    await prisma.superAdmin.deleteMany();
+    const saltRounds = 10;
 
-    // Hash password
-    const password = await bcrypt.hash('Password', 10);
-    const arpitPassword = await bcrypt.hash('ArpitSarang', 10);
-    const maverickPassword = await bcrypt.hash('Maverick', 10);
-
-    // Create SuperAdmin
-    const superAdmin = await prisma.superAdmin.create({
-        data: {
-            email: 'superadmin@superadmin.com',
+    // SuperAdmin
+    const superAdminPassword = await bcrypt.hash('SuperAdmin@123', saltRounds);
+    const superAdmin = await prisma.superAdmin.upsert({
+        where: { email: 'root@superadmin.com' },
+        update: { password: superAdminPassword },
+        create: {
+            email: 'root@superadmin.com',
             name: 'Super Admin',
-            password: password,
+            password: superAdminPassword,
         },
     });
     console.log(`Created SuperAdmin: ${superAdmin.email}`);
 
-    // Create Admin
-    const admin = await prisma.admin.create({
-        data: {
-            email: 'admin@admin.com',
-            name: 'Admin User',
-            password: password,
+    // Admin
+    const adminPassword = await bcrypt.hash('Admin@123', saltRounds);
+    const admin = await prisma.admin.upsert({
+        where: { email: 'john@admin.com' },
+        update: { password: adminPassword },
+        create: {
+            email: 'john@admin.com',
+            name: 'John Doe',
+            password: adminPassword,
         },
     });
     console.log(`Created Admin: ${admin.email}`);
 
+    // Participant
+    const participantPassword = await bcrypt.hash('User@123', saltRounds);
+    const participant = await prisma.participant.upsert({
+        where: { email: 'arpit@example.com' },
+        update: { password: participantPassword },
+        create: {
+            email: 'arpit@example.com',
+            name: 'Arpit',
+            password: participantPassword,
+            approved: true, // "Full (Approved)"
+        },
+    });
+    console.log(`Created Participant: ${participant.email}`);
+
     // Create Event
     const event = await prisma.event.create({
         data: {
-            title: 'Tekron 2025',
-            description: 'The biggest tech event of the year.',
-            location: 'Tech Park, Innovation City',
-            startTime: new Date('2025-12-10T09:00:00Z'),
-            endTime: new Date('2025-12-12T18:00:00Z'),
+            title: 'Tekron Tech Summit 2024',
+            description: 'Annual tech summit for innovation and networking.',
+            location: 'Convention Center, Mumbai',
+            startTime: new Date('2024-12-15T09:00:00Z'),
+            endTime: new Date('2024-12-15T18:00:00Z'),
         },
     });
     console.log(`Created Event: ${event.title}`);
-
-    // Create Participants
-    // 1. Approved Participant
-    const participant1 = await prisma.participant.create({
-        data: {
-            email: 'arpit@example.com',
-            name: 'Arpit Sarang',
-            password: arpitPassword,
-            approved: true,
-            assignedEventId: event.id,
-            qrCode: JSON.stringify({ type: 'participant', email: 'arpit@example.com' }),
-            approvedById: admin.id,
-            approvedAt: new Date(),
-        },
-    });
-    console.log(`Created Participant: ${participant1.email}`);
-
-    // 2. Unapproved Participant
-    const participant2 = await prisma.participant.create({
-        data: {
-            email: 'maverick@example.com',
-            name: 'Maverick',
-            password: maverickPassword,
-            approved: false,
-            qrCode: JSON.stringify({ type: 'participant', email: 'maverick@example.com' }),
-        },
-    });
-    console.log(`Created Participant: ${participant2.email}`);
-
-    // Create Alert
-    await prisma.alert.create({
-        data: {
-            title: 'Welcome to Tekron!',
-            message: 'We are excited to have you here. Check the schedule for upcoming sessions.',
-            senderRole: 'admin',
-        },
-    });
-    console.log('Created Welcome Alert');
 
     console.log('Seeding finished.');
 }
