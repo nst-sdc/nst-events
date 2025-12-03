@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuthStore } from '../../context/authStore';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, GRADIENTS, SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
+import { useAuthStore } from '../../context/authStore';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const login = useAuthStore((state) => state.login);
+    const { login, isLoading } = useAuthStore();
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -15,24 +16,11 @@ export default function Login() {
             return;
         }
 
-        // Mock login logic for demonstration
-        // In a real app, you'd validate against a backend
-        let role: 'admin' | 'participant' = 'participant';
-        let approved = false;
-
-        if (email.includes('admin')) {
-            role = 'admin';
-        } else if (email.includes('approved')) {
-            approved = true;
+        try {
+            await login(email, password);
+        } catch (error: any) {
+            Alert.alert('Login Failed', error.message || 'An error occurred');
         }
-
-        await login(email, role, approved);
-        // Navigation is handled by the index.tsx listener
-    };
-
-    const handleDemoLogin = async (role: 'admin' | 'participant', approved: boolean) => {
-        const demoEmail = role === 'admin' ? 'admin@test.com' : (approved ? 'approved@test.com' : 'user@test.com');
-        await login(demoEmail, role, approved);
     };
 
     return (
@@ -40,67 +28,58 @@ export default function Login() {
             colors={[PALETTE.purpleDeep, PALETTE.purpleDark]}
             style={styles.container}
         >
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.content}>
-                <View style={styles.header}>
-                    <Text style={[styles.title, { color: PALETTE.creamLight }]}>Welcome Back</Text>
-                    <Text style={[styles.subtitle, { color: PALETTE.pinkLight }]}>Sign in to continue</Text>
-                </View>
-
-                <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your email"
-                            placeholderTextColor={PALETTE.purpleMedium}
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                        />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardView}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Tekron 2.0</Text>
+                        <Text style={styles.subtitle}>Event Management App</Text>
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your password"
-                            placeholderTextColor={PALETTE.purpleMedium}
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
-                    </View>
-
-                    <TouchableOpacity onPress={handleLogin} activeOpacity={0.8}>
-                        <LinearGradient
-                            colors={GRADIENTS.secondary}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={styles.button}
-                        >
-                            <Text style={styles.buttonText}>Login</Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
-
-                    <View style={styles.demoContainer}>
-                        <Text style={styles.demoTitle}>Demo Login</Text>
-                        <View style={styles.demoButtons}>
-                            <TouchableOpacity
-                                onPress={() => handleDemoLogin('admin', true)}
-                                style={[styles.demoButton, { backgroundColor: PALETTE.purpleMedium }]}
-                            >
-                                <Text style={styles.demoButtonText}>Admin</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleDemoLogin('participant', true)}
-                                style={[styles.demoButton, { backgroundColor: PALETTE.pinkDark }]}
-                            >
-                                <Text style={styles.demoButtonText}>Participant</Text>
-                            </TouchableOpacity>
+                    <View style={styles.formContainer}>
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="mail-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                                placeholderTextColor={PALETTE.purpleLight}
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                keyboardType="email-address"
+                            />
                         </View>
+
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="lock-closed-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                placeholderTextColor={PALETTE.purpleLight}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+                        </View>
+
+                        <TouchableOpacity onPress={handleLogin} activeOpacity={0.8} disabled={isLoading}>
+                            <LinearGradient
+                                colors={GRADIENTS.secondary}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.button}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color={PALETTE.creamLight} />
+                                ) : (
+                                    <Text style={styles.buttonText}>Login</Text>
+                                )}
+                            </LinearGradient>
+                        </TouchableOpacity>
                     </View>
-                </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </LinearGradient>
     );
@@ -110,79 +89,70 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    content: {
+    keyboardView: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         padding: SPACING.l,
     },
     header: {
-        marginBottom: SPACING.xl,
         alignItems: 'center',
+        marginBottom: SPACING.xxl,
     },
     title: {
         ...TYPOGRAPHY.h1,
-        marginBottom: SPACING.s,
+        color: PALETTE.creamLight,
+        fontSize: 40,
+        marginBottom: SPACING.xs,
     },
     subtitle: {
         ...TYPOGRAPHY.body,
+        color: PALETTE.pinkLight,
+        letterSpacing: 1,
     },
-    form: {
+    formContainer: {
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        padding: SPACING.l,
         borderRadius: RADIUS.l,
+        padding: SPACING.l,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        borderRadius: RADIUS.m,
         marginBottom: SPACING.m,
+        paddingHorizontal: SPACING.m,
+        height: 50,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
-    label: {
-        color: PALETTE.creamDark,
-        marginBottom: SPACING.xs,
-        fontSize: 14,
-        fontWeight: '600',
+    inputIcon: {
+        marginRight: SPACING.s,
     },
     input: {
-        backgroundColor: 'rgba(28, 32, 68, 0.5)',
-        borderRadius: RADIUS.m,
-        padding: SPACING.m,
+        flex: 1,
         color: PALETTE.creamLight,
-        borderWidth: 1,
-        borderColor: PALETTE.purpleDeep,
+        height: '100%',
     },
     button: {
-        marginTop: SPACING.m,
-        padding: SPACING.m,
+        height: 50,
         borderRadius: RADIUS.m,
+        justifyContent: 'center',
         alignItems: 'center',
+        marginTop: SPACING.s,
+        shadowColor: PALETTE.pinkDark,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
     },
     buttonText: {
-        color: PALETTE.navyDark,
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    demoContainer: {
-        marginTop: SPACING.xl,
-        alignItems: 'center',
-    },
-    demoTitle: {
-        color: PALETTE.creamDark,
-        marginBottom: SPACING.m,
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    demoButtons: {
-        flexDirection: 'row',
-        gap: SPACING.m,
-    },
-    demoButton: {
-        paddingVertical: SPACING.s,
-        paddingHorizontal: SPACING.m,
-        borderRadius: RADIUS.m,
-    },
-    demoButtonText: {
         color: PALETTE.creamLight,
+        fontSize: 18,
         fontWeight: 'bold',
-        fontSize: 12,
     },
 });

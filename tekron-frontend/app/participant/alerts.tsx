@@ -1,91 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { PALETTE, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
+import { AppHeader } from '../../components/AppHeader';
+import * as SecureStore from 'expo-secure-store';
+
+import { BACKEND_URL } from '../../constants/config';
 
 interface Alert {
     id: string;
     title: string;
     message: string;
-    time: string;
-    type: 'info' | 'warning' | 'urgent';
+    createdAt: string;
+    senderRole: string;
 }
 
 export default function Alerts() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchAlerts = async () => {
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            const response = await fetch(`${BACKEND_URL}/participant/alerts`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setAlerts(data);
+            }
+        } catch (error) {
+            console.error('Error fetching alerts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        // Mock polling for alerts
-        const fetchAlerts = () => {
-            // Simulate API call
-            setTimeout(() => {
-                setAlerts([
-                    {
-                        id: '1',
-                        title: 'Session Starting Soon',
-                        message: 'Keynote speech begins in 15 minutes at the Main Auditorium.',
-                        time: '10:45 AM',
-                        type: 'urgent',
-                    },
-                    {
-                        id: '2',
-                        title: 'Lunch Break',
-                        message: 'Lunch will be served at the cafeteria on the ground floor.',
-                        time: '12:30 PM',
-                        type: 'info',
-                    },
-                    {
-                        id: '3',
-                        title: 'Workshop Rescheduled',
-                        message: 'The AI Workshop has been moved to Room 302.',
-                        time: '02:00 PM',
-                        type: 'warning',
-                    },
-                ]);
-                setLoading(false);
-            }, 1000);
-        };
-
         fetchAlerts();
-        const interval = setInterval(fetchAlerts, 30000); // Poll every 30 seconds
-
+        // Poll every 30 seconds
+        const interval = setInterval(fetchAlerts, 30000);
         return () => clearInterval(interval);
     }, []);
 
-    const renderItem = ({ item }: { item: Alert }) => {
-        let accentColor = PALETTE.purpleMedium;
-        if (item.type === 'urgent') accentColor = PALETTE.pinkDark;
-        if (item.type === 'warning') accentColor = PALETTE.creamDark;
-
-        return (
-            <Card style={[styles.card, { borderLeftColor: accentColor }]}>
-                <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>{item.title}</Text>
-                    <Text style={styles.cardTime}>{item.time}</Text>
-                </View>
-                <Text style={styles.cardMessage}>{item.message}</Text>
-            </Card>
-        );
+    const getAlertIcon = (role: string) => {
+        if (role === 'superadmin') return 'warning';
+        return 'information-circle';
     };
 
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={PALETTE.purpleMedium} />
-            </View>
-        );
-    }
+    const getAlertColor = (role: string) => {
+        if (role === 'superadmin') return PALETTE.pinkDark;
+        return PALETTE.purpleMedium;
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headerTitle}>Alerts</Text>
-            <FlatList
-                data={alerts}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
-            />
+            <AppHeader title="Alerts" />
+
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl refreshing={loading} onRefresh={fetchAlerts} tintColor={PALETTE.creamLight} />
+                }
+            >
+                {alerts.length === 0 && !loading ? (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="notifications-off-outline" size={48} color={PALETTE.purpleLight} />
+                        <Text style={styles.emptyText}>No alerts at the moment.</Text>
+                    </View>
+                ) : (
+                    alerts.map((alert) => (
+                        <Card key={alert.id} style={styles.alertCard}>
+                            <View style={styles.alertHeader}>
+                                <View style={[styles.iconContainer, { backgroundColor: getAlertColor(alert.senderRole) }]}>
+                                    <Ionicons name={getAlertIcon(alert.senderRole)} size={20} color={PALETTE.creamLight} />
+                                </View>
+                                <View style={styles.headerText}>
+                                    <Text style={styles.alertTitle}>{alert.title}</Text>
+                                    <Text style={styles.alertTime}>{formatDate(alert.createdAt)}</Text>
+                                </View>
+                            </View>
+                            <Text style={styles.alertMessage}>{alert.message}</Text>
+                        </Card>
+                    ))
+                )}
+            </ScrollView>
         </View>
     );
 }
@@ -93,46 +98,54 @@ export default function Alerts() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.creamLight,
-        paddingTop: SPACING.xxl,
+        backgroundColor: PALETTE.navyDark,
     },
-    loadingContainer: {
+    content: {
+        padding: SPACING.l,
+        flexGrow: 1,
+    },
+    emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: PALETTE.creamLight,
+        marginTop: SPACING.xxl,
     },
-    headerTitle: {
-        ...TYPOGRAPHY.h1,
-        color: PALETTE.purpleDeep,
-        paddingHorizontal: SPACING.l,
+    emptyText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.purpleLight,
+        marginTop: SPACING.m,
+    },
+    alertCard: {
         marginBottom: SPACING.m,
-    },
-    listContent: {
-        padding: SPACING.l,
-    },
-    card: {
-        marginBottom: SPACING.m,
+        backgroundColor: PALETTE.purpleDeep,
         borderLeftWidth: 4,
-        backgroundColor: '#FFFFFF', // Clean white for alerts to stand out against cream bg
+        borderLeftColor: PALETTE.purpleMedium,
     },
-    cardHeader: {
+    alertHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: SPACING.s,
     },
-    cardTitle: {
+    iconContainer: {
+        padding: SPACING.xs,
+        borderRadius: RADIUS.s,
+        marginRight: SPACING.m,
+    },
+    headerText: {
+        flex: 1,
+    },
+    alertTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleDark,
+        color: PALETTE.creamLight,
         fontSize: 18,
     },
-    cardTime: {
+    alertTime: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleMedium,
-        fontWeight: 'bold',
+        color: PALETTE.purpleLight,
     },
-    cardMessage: {
+    alertMessage: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.navyDark,
+        color: PALETTE.creamDark,
+        lineHeight: 22,
     },
 });

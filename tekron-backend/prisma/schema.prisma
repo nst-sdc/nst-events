@@ -1,0 +1,74 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Participant {
+    id           String    @id @default(uuid())
+    email        String    @unique
+    name         String
+    password     String
+    approved     Boolean   @default(false)
+    qrCode       String?
+    approvedById String?
+    approvedAt   DateTime?
+    createdAt    DateTime  @default(now())
+
+    assignedEventId String?
+    event           Event?  @relation(fields: [assignedEventId], references: [id])
+
+    approvedBy Admin?        @relation("AdminApprovals", fields: [approvedById], references: [id])
+    approvals  ApprovalLog[]
+}
+
+model Admin {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    name      String
+    password  String
+    createdAt DateTime @default(now())
+
+    approvals     ApprovalLog[] @relation("AdminApprovalLogs")
+    approvedUsers Participant[] @relation("AdminApprovals")
+}
+
+model SuperAdmin {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    name      String
+    password  String
+    createdAt DateTime @default(now())
+}
+
+model ApprovalLog {
+    id            String   @id @default(uuid())
+    participantId String
+    adminId       String
+    approvedAt    DateTime @default(now())
+    notes         String?
+
+    participant Participant @relation(fields: [participantId], references: [id])
+    admin       Admin       @relation("AdminApprovalLogs", fields: [adminId], references: [id])
+}
+
+model Event {
+    id           String        @id @default(uuid())
+    title        String
+    description  String?
+    location     String
+    startTime    DateTime
+    endTime      DateTime
+    participants Participant[]
+}
+
+model Alert {
+    id         String   @id @default(uuid())
+    title      String
+    message    String
+    createdAt  DateTime @default(now())
+    senderRole String // 'admin' or 'superadmin'
+}

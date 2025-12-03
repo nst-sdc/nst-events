@@ -41,3 +41,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+tekron-frontend/node_modules
+tekron-backend/node_modules
+

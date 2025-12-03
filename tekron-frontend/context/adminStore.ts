@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import * as SecureStore from 'expo-secure-store';
+
+import { BACKEND_URL } from '../constants/config';
 
 interface Participant {
     id: string;
@@ -6,6 +9,8 @@ interface Participant {
     email: string;
     status: 'approved' | 'pending' | 'rejected';
     checkInTime?: string;
+    approved: boolean;
+    createdAt: string;
 }
 
 interface DashboardStats {
@@ -38,33 +43,62 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     fetchStats: async () => {
         set({ isLoading: true });
-        // Mock API call
-        setTimeout(() => {
-            set({
-                stats: {
-                    totalParticipants: 150,
-                    pendingApprovals: 12,
-                    approvedUsers: 138,
-                    todayCheckIns: 45,
-                },
-                isLoading: false,
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            const response = await fetch(`${BACKEND_URL}/admin/participants`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-        }, 1000);
+
+            if (response.ok) {
+                const participants: Participant[] = await response.json();
+
+                const totalParticipants = participants.length;
+                const approvedUsers = participants.filter(p => p.approved).length;
+                const pendingApprovals = totalParticipants - approvedUsers;
+                // Mock today check-ins for now as backend doesn't track check-in time specifically yet
+                const todayCheckIns = 0;
+
+                set({
+                    participants,
+                    stats: {
+                        totalParticipants,
+                        pendingApprovals,
+                        approvedUsers,
+                        todayCheckIns,
+                    },
+                    isLoading: false,
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            set({ isLoading: false });
+        }
     },
 
     validateParticipant: async (qrData: string) => {
         set({ isLoading: true });
         try {
-            const data = JSON.parse(qrData);
-            // Mock validation
-            const participant: Participant = {
-                id: data.id,
-                name: 'John Doe', // In real app, fetch from DB using ID
-                email: data.email,
-                status: 'pending',
-            };
+            const token = await SecureStore.getItemAsync('token');
+            const response = await fetch(`${BACKEND_URL}/admin/validate-qr`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ qrData }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                set({ isLoading: false });
+                // Map backend participant to frontend interface
+                return {
+                    ...data.participant,
+                    status: data.participant.approved ? 'approved' : 'pending'
+                };
+            }
             set({ isLoading: false });
-            return participant;
+            return null;
         } catch (e) {
             set({ isLoading: false });
             return null;
@@ -73,38 +107,53 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     approveParticipant: async (id: string) => {
         set({ isLoading: true });
-        setTimeout(() => {
-            // Update local stats for immediate feedback
-            const { stats } = get();
-            set({
-                isLoading: false,
-                stats: {
-                    ...stats,
-                    pendingApprovals: stats.pendingApprovals - 1,
-                    approvedUsers: stats.approvedUsers + 1,
-                },
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            await fetch(`${BACKEND_URL}/admin/approve/${id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
             });
-        }, 1000);
+
+            // Refresh stats
+            await get().fetchStats();
+        } catch (error) {
+            console.error('Error approving participant:', error);
+            set({ isLoading: false });
+        }
     },
 
     rejectParticipant: async (id: string) => {
         set({ isLoading: true });
-        setTimeout(() => {
-            const { stats } = get();
-            set({
-                isLoading: false,
-                stats: {
-                    ...stats,
-                    pendingApprovals: stats.pendingApprovals - 1,
-                },
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            await fetch(`${BACKEND_URL}/admin/reject/${id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
             });
-        }, 1000);
+
+            await get().fetchStats();
+        } catch (error) {
+            console.error('Error rejecting participant:', error);
+            set({ isLoading: false });
+        }
     },
 
     sendAlert: async (title: string, message: string) => {
         set({ isLoading: true });
-        setTimeout(() => {
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            await fetch(`${BACKEND_URL}/admin/alerts/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ title, message }),
+            });
             set({ isLoading: false });
-        }, 1000);
+        } catch (error) {
+            console.error('Error sending alert:', error);
+            set({ isLoading: false });
+        }
     },
 }));

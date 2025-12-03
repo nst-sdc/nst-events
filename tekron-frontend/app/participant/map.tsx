@@ -1,80 +1,150 @@
-import React from 'react';
-import { View, Text, StyleSheet, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { GradientButton } from '../../components/GradientButton';
-import { PALETTE, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
-import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { BACKEND_URL } from '../../constants/config';
 
 export default function LimitedAccessMap() {
-    const logout = useAuthStore((state) => state.logout);
-    const router = useRouter();
+    const { logout } = useAuthStore();
+    const [showQR, setShowQR] = useState(false);
+    const [mapData, setMapData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleOpenMaps = () => {
+    // Fetch Map Data
+    useEffect(() => {
+        const fetchMapData = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token');
+                const response = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setMapData(data);
+                }
+            } catch (error) {
+                console.error('Error fetching map data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMapData();
+    }, []);
+
+    const openGoogleMaps = () => {
         Linking.openURL('https://maps.app.goo.gl/m1h5Hkgu3LsUrnLd9');
     };
 
-    const handleLogout = async () => {
-        await logout();
-        router.replace('/auth/login');
-    };
-
-    const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <style>
-          body, html { margin: 0; padding: 0; height: 100%; width: 100%; }
-          iframe { width: 100%; height: 100%; border: 0; }
-        </style>
-      </head>
-      <body>
-        <iframe 
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d699.6968808032617!2d73.91286237932246!3d18.621136861780464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c7007ca391d7%3A0x9da4723c416a8ee5!2sNewton%20school%20of%20technology%20pune%20campus!5e1!3m2!1sen!2sin!4v1764750287016!5m2!1sen!2sin"
-          allowfullscreen=""
-          loading="lazy"
-        ></iframe>
-      </body>
-    </html>
-  `;
+    // Extract src from iframe string if needed, or just use the direct URL for WebView if iframe doesn't render well
+    // WebView can render HTML string directly.
+    const mapHtml = mapData?.mapIframe
+        ? `<html><body style="margin:0;padding:0;height:100%;width:100%;display:flex;">${mapData.mapIframe}</body></html>`
+        : null;
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Check-in Required</Text>
-                <Text style={styles.subtitle}>
-                    Please complete check-in at the reception desk to access event details.
-                </Text>
-            </View>
+            <AppHeader
+                title="Venue Map"
+                rightIcon="log-out-outline"
+                onRightPress={logout}
+            />
 
-            <View style={styles.mapContainer}>
-                <WebView
-                    originWhitelist={['*']}
-                    source={{ html: mapHtml }}
-                    style={styles.webview}
-                />
-            </View>
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={PALETTE.creamLight} />
+                </View>
+            ) : (
+                <View style={styles.contentContainer}>
+                    <View style={styles.mapContainer}>
+                        {mapHtml ? (
+                            <WebView
+                                originWhitelist={['*']}
+                                source={{ html: mapHtml }}
+                                style={styles.webview}
+                                scrollEnabled={false}
+                            />
+                        ) : (
+                            <View style={styles.errorContainer}>
+                                <Text style={styles.errorText}>Map unavailable</Text>
+                            </View>
+                        )}
+                    </View>
 
-            <View style={styles.footer}>
-                <Text style={styles.directionsTitle}>Directions:</Text>
-                <Text style={styles.directionsText}>
-                    Go to 4th floor of MCA Building, Ajeenkya DY Patil College – Pune.
-                </Text>
+                    <View style={styles.infoContainer}>
+                        <View style={styles.statusBanner}>
+                            <Ionicons name="lock-closed" size={16} color={PALETTE.creamLight} />
+                            <Text style={styles.statusText}>Access Restricted</Text>
+                        </View>
 
-                <GradientButton
-                    title="Open in Google Maps"
-                    onPress={handleOpenMaps}
-                    style={styles.button}
-                />
+                        <Text style={styles.locationTitle}>{mapData?.locationName || 'Event Location'}</Text>
+                        <Text style={styles.instructionText}>
+                            {mapData?.instructions || 'Please proceed to the registration desk.'}
+                        </Text>
 
-                <GradientButton
-                    title="Logout"
-                    onPress={handleLogout}
-                    style={styles.logoutButton}
-                    colors={[PALETTE.navyLight, PALETTE.navyLight]}
-                />
-            </View>
+                        <View style={styles.buttonGroup}>
+                            <TouchableOpacity
+                                style={styles.primaryButton}
+                                onPress={() => setShowQR(true)}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="qr-code-outline" size={20} color={PALETTE.purpleDeep} />
+                                <Text style={styles.primaryButtonText}>Show My QR Code</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.secondaryButton}
+                                onPress={openGoogleMaps}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="map-outline" size={20} color={PALETTE.creamLight} />
+                                <Text style={styles.secondaryButtonText}>Open in Google Maps</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            <Modal
+                visible={showQR}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setShowQR(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setShowQR(false)}
+                        >
+                            <Ionicons name="close" size={24} color={PALETTE.navyDark} />
+                        </TouchableOpacity>
+
+                        <Text style={styles.modalTitle}>Your Entry Pass</Text>
+
+                        <View style={styles.qrWrapper}>
+                            {mapData?.qrCode ? (
+                                <QRCode
+                                    value={mapData.qrCode}
+                                    size={200}
+                                    backgroundColor="white"
+                                    color="black"
+                                />
+                            ) : (
+                                <Text>QR Code not found</Text>
+                            )}
+                        </View>
+
+                        <Text style={styles.modalInstruction}>
+                            Show this to the event staff to get approved.
+                        </Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -84,49 +154,144 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: PALETTE.navyDark,
     },
-    header: {
-        padding: SPACING.l,
-        paddingTop: SPACING.xxl,
-        backgroundColor: PALETTE.purpleDeep,
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    title: {
-        ...TYPOGRAPHY.h2,
-        color: PALETTE.creamLight,
-        marginBottom: SPACING.s,
-    },
-    subtitle: {
-        ...TYPOGRAPHY.body,
-        color: PALETTE.pinkLight,
+    contentContainer: {
+        flex: 1,
     },
     mapContainer: {
-        flex: 1,
-        overflow: 'hidden',
+        flex: 1, // Takes up remaining space
+        backgroundColor: '#000',
     },
     webview: {
         flex: 1,
-        opacity: 0.99, // Fix for some Android WebView rendering issues
+        opacity: 0.8,
     },
-    footer: {
-        padding: SPACING.l,
-        backgroundColor: PALETTE.purpleDeep,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        marginTop: -20,
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    directionsTitle: {
-        ...TYPOGRAPHY.h3,
+    errorText: {
         color: PALETTE.creamLight,
-        marginBottom: SPACING.s,
     },
-    directionsText: {
-        ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
-        marginBottom: SPACING.l,
+    infoContainer: {
+        backgroundColor: PALETTE.purpleDeep,
+        borderTopLeftRadius: RADIUS.l,
+        borderTopRightRadius: RADIUS.l,
+        padding: SPACING.l,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 10,
+        paddingBottom: SPACING.xl, // Extra padding for bottom safe area
     },
-    button: {
+    statusBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: PALETTE.pinkDark,
+        paddingVertical: 4,
+        paddingHorizontal: SPACING.m,
+        borderRadius: RADIUS.round,
         marginBottom: SPACING.m,
     },
-    logoutButton: {
-        marginTop: SPACING.xs,
-    }
+    statusText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.creamLight,
+        fontWeight: 'bold',
+        marginLeft: SPACING.s,
+        textTransform: 'uppercase',
+    },
+    locationTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.creamLight,
+        textAlign: 'center',
+        marginBottom: SPACING.s,
+    },
+    instructionText: {
+        ...TYPOGRAPHY.body,
+        color: 'rgba(255, 255, 255, 0.7)',
+        textAlign: 'center',
+        marginBottom: SPACING.l,
+    },
+    buttonGroup: {
+        width: '100%',
+        gap: SPACING.m,
+    },
+    primaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: PALETTE.creamLight,
+        paddingVertical: SPACING.m,
+        borderRadius: RADIUS.m,
+        gap: SPACING.s,
+    },
+    primaryButtonText: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.purpleDeep,
+        fontSize: 16,
+    },
+    secondaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        paddingVertical: SPACING.m,
+        borderRadius: RADIUS.m,
+        gap: SPACING.s,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    secondaryButtonText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.creamLight,
+        fontWeight: 'bold',
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.l,
+    },
+    modalContent: {
+        backgroundColor: PALETTE.creamLight,
+        width: '100%',
+        borderRadius: RADIUS.l,
+        padding: SPACING.xl,
+        alignItems: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: SPACING.m,
+        right: SPACING.m,
+        padding: SPACING.s,
+    },
+    modalTitle: {
+        ...TYPOGRAPHY.h2,
+        color: PALETTE.navyDark,
+        marginBottom: SPACING.xl,
+    },
+    qrWrapper: {
+        padding: SPACING.m,
+        backgroundColor: 'white',
+        borderRadius: RADIUS.m,
+        marginBottom: SPACING.l,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    modalInstruction: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.purpleDeep,
+        textAlign: 'center',
+    },
 });

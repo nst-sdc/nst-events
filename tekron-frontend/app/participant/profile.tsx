@@ -1,105 +1,138 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
-import { Card } from '../../components/Card';
-import { GradientButton } from '../../components/GradientButton';
-import { useAuthStore } from '../../context/authStore';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { Card } from '../../components/Card';
+import { AppHeader } from '../../components/AppHeader';
+import { useAuthStore } from '../../context/authStore';
+import * as SecureStore from 'expo-secure-store';
+
+import { BACKEND_URL } from '../../constants/config';
 
 export default function Profile() {
     const { user, logout } = useAuthStore();
     const router = useRouter();
+    const [isDarkMode, setIsDarkMode] = useState(true);
+    const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchQR = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token');
+                const response = await fetch(`${BACKEND_URL}/participant/qr`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setQrCodeData(data.qrCode);
+                }
+            } catch (error) {
+                console.error('Error fetching QR:', error);
+            }
+        };
+        fetchQR();
+    }, []);
 
     const handleLogout = async () => {
         await logout();
         router.replace('/auth/login');
     };
 
-    const qrValue = JSON.stringify({
-        id: user?.id || 'unknown',
-        email: user?.email || 'unknown',
-        role: user?.role || 'participant',
-        timestamp: new Date().toISOString(),
-    });
-
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.headerTitle}>Profile</Text>
+        <View style={styles.container}>
+            <AppHeader title="Profile" />
 
-            <Card style={styles.profileCard}>
-                <View style={styles.avatarContainer}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>
-                            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                        </Text>
+            <ScrollView contentContainerStyle={styles.content}>
+                <Card style={styles.profileCard}>
+                    <View style={styles.avatarContainer}>
+                        <View style={styles.avatar}>
+                            <Text style={styles.avatarText}>
+                                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                            </Text>
+                        </View>
                     </View>
-                </View>
 
-                <Text style={styles.name}>{user?.name || 'Participant'}</Text>
-                <Text style={styles.email}>{user?.email}</Text>
+                    <Text style={styles.name}>{user?.name}</Text>
+                    <Text style={styles.email}>{user?.email}</Text>
 
-                <View style={styles.qrContainer}>
-                    <View style={styles.qrPlaceholder}>
-                        <QRCode
-                            value={qrValue}
-                            size={150}
-                            color={PALETTE.navyDark}
-                            backgroundColor="white"
+                    <View style={styles.qrContainer}>
+                        {qrCodeData ? (
+                            <QRCode
+                                value={qrCodeData}
+                                size={180}
+                                backgroundColor="white"
+                                color="black"
+                            />
+                        ) : (
+                            <View style={styles.qrPlaceholder}>
+                                <Text style={styles.qrPlaceholderText}>Loading QR...</Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text style={styles.qrLabel}>Scan at reception</Text>
+                </Card>
+
+                <Text style={styles.sectionTitle}>Settings</Text>
+
+                <Card style={styles.settingsCard}>
+                    <View style={styles.settingRow}>
+                        <View style={styles.settingLeft}>
+                            <Ionicons name="moon-outline" size={24} color={PALETTE.creamLight} />
+                            <Text style={styles.settingText}>Dark Mode</Text>
+                        </View>
+                        <Switch
+                            value={isDarkMode}
+                            onValueChange={setIsDarkMode}
+                            trackColor={{ false: PALETTE.purpleLight, true: PALETTE.purpleMedium }}
+                            thumbColor={PALETTE.creamLight}
                         />
                     </View>
-                    <Text style={styles.qrLabel}>Your Event Pass</Text>
-                </View>
-            </Card>
 
-            <View style={styles.settingsContainer}>
-                <TouchableOpacity style={styles.settingItem}>
-                    <View style={styles.settingIcon}>
-                        <Ionicons name="settings-outline" size={24} color={PALETTE.purpleDeep} />
-                    </View>
-                    <Text style={styles.settingText}>Settings</Text>
-                    <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleMedium} />
+                    <View style={styles.divider} />
+
+                    <TouchableOpacity style={styles.settingRow}>
+                        <View style={styles.settingLeft}>
+                            <Ionicons name="notifications-outline" size={24} color={PALETTE.creamLight} />
+                            <Text style={styles.settingText}>Notifications</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                    </TouchableOpacity>
+
+                    <View style={styles.divider} />
+
+                    <TouchableOpacity style={styles.settingRow}>
+                        <View style={styles.settingLeft}>
+                            <Ionicons name="lock-closed-outline" size={24} color={PALETTE.creamLight} />
+                            <Text style={styles.settingText}>Privacy & Security</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                    </TouchableOpacity>
+                </Card>
+
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Ionicons name="log-out-outline" size={24} color={PALETTE.pinkLight} />
+                    <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity style={styles.settingItem}>
-                    <View style={styles.settingIcon}>
-                        <Ionicons name="moon-outline" size={24} color={PALETTE.purpleDeep} />
-                    </View>
-                    <Text style={styles.settingText}>Dark Mode</Text>
-                    <View style={styles.toggleMock} />
-                </TouchableOpacity>
-            </View>
-
-            <GradientButton
-                title="Logout"
-                onPress={handleLogout}
-                colors={[PALETTE.purpleDeep, PALETTE.navyDark]}
-                style={styles.logoutButton}
-            />
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.creamLight,
+        backgroundColor: PALETTE.navyDark,
     },
     content: {
         padding: SPACING.l,
-        paddingTop: SPACING.xxl,
-    },
-    headerTitle: {
-        ...TYPOGRAPHY.h1,
-        color: PALETTE.purpleDeep,
-        marginBottom: SPACING.l,
     },
     profileCard: {
         alignItems: 'center',
         paddingVertical: SPACING.xl,
         marginBottom: SPACING.xl,
-        backgroundColor: PALETTE.creamDark, // Warm soft shade
+        backgroundColor: PALETTE.creamDark,
     },
     avatarContainer: {
         marginBottom: SPACING.m,
@@ -108,9 +141,11 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.navyDark,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: PALETTE.purpleDeep,
     },
     avatarText: {
         ...TYPOGRAPHY.h1,
@@ -123,51 +158,78 @@ const styles = StyleSheet.create({
     },
     email: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleDark,
+        color: PALETTE.purpleDeep,
         marginBottom: SPACING.l,
     },
     qrContainer: {
-        alignItems: 'center',
-        marginTop: SPACING.m,
         padding: SPACING.m,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'white',
         borderRadius: RADIUS.m,
+        marginBottom: SPACING.s,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     qrPlaceholder: {
-        marginBottom: SPACING.s,
+        width: 180,
+        height: 180,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    qrPlaceholderText: {
+        color: PALETTE.navyDark,
     },
     qrLabel: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleMedium,
-        fontWeight: 'bold',
+        color: PALETTE.purpleDeep,
+        opacity: 0.7,
     },
-    settingsContainer: {
+    sectionTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.creamLight,
+        marginBottom: SPACING.m,
+    },
+    settingsCard: {
+        backgroundColor: PALETTE.purpleDeep,
         marginBottom: SPACING.xl,
+        padding: 0,
     },
-    settingItem: {
+    settingRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
+        justifyContent: 'space-between',
         padding: SPACING.m,
-        borderRadius: RADIUS.m,
-        marginBottom: SPACING.s,
     },
-    settingIcon: {
-        marginRight: SPACING.m,
+    settingLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.m,
     },
     settingText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.navyDark,
-        flex: 1,
-        fontWeight: '600',
+        color: PALETTE.creamLight,
     },
-    toggleMock: {
-        width: 40,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: PALETTE.creamDark,
+    divider: {
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        marginLeft: SPACING.xl + SPACING.m,
     },
     logoutButton: {
-        marginTop: SPACING.s,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.s,
+        padding: SPACING.m,
+        borderRadius: RADIUS.m,
+        borderWidth: 1,
+        borderColor: PALETTE.pinkLight,
+        marginBottom: SPACING.xl,
+    },
+    logoutText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.pinkLight,
+        fontWeight: 'bold',
     },
 });

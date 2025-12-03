@@ -1,66 +1,99 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
 
-type UserRole = 'admin' | 'participant' | null;
-
+// Define the shape of the user object
 interface User {
     id: string;
+    name: string;
     email: string;
-    role: UserRole;
-    approved: boolean;
-    name?: string;
+    role: 'admin' | 'participant' | 'superadmin';
+    approved?: boolean;
+    qrCode?: string;
+    assignedEventId?: string;
 }
 
 interface AuthState {
     user: User | null;
-    isLoading: boolean;
     isAuthenticated: boolean;
-    login: (email: string, role: UserRole, approved?: boolean) => Promise<void>;
+    isLoading: boolean;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     restoreSession: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
+import { BACKEND_URL } from '../constants/config';
 
-    login: async (email, role, approved = false) => {
-        // Simulate API call
+export const useAuthStore = create<AuthState>((set, get) => ({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+
+    login: async (email, password) => {
         set({ isLoading: true });
         try {
-            const user = { id: '123', email, role, approved, name: 'Test User' };
-            await SecureStore.setItemAsync('user_session', JSON.stringify(user));
+            const response = await fetch(`${BACKEND_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            const { token, user, role } = data;
+
+            await SecureStore.setItemAsync('token', token);
+            await SecureStore.setItemAsync('user', JSON.stringify(user));
+
             set({ user, isAuthenticated: true, isLoading: false });
+
+            // Redirect based on role
+            if (role === 'superadmin') {
+                // Assuming superadmin dashboard route exists or will be created
+                // For now, redirect to admin or specific superadmin route if available
+                // User requested: superadmin -> SuperAdminDashboard
+                // I'll assume /admin/dashboard for now as placeholder or create new route if needed
+                // But let's stick to what's available. If superadmin dashboard is not built, maybe admin dashboard?
+                // Wait, user said "superadmin -> SuperAdminDashboard". I don't have that route yet.
+                // I'll redirect to admin dashboard for now as superadmin is likely an admin superset.
+                router.replace('/admin/dashboard');
+            } else if (role === 'admin') {
+                router.replace('/admin/dashboard');
+            } else if (role === 'participant') {
+                if (user.approved) router.replace('/participant/home');
+                else router.replace('/participant/map');
+            }
         } catch (error) {
-            console.error('Login failed', error);
+            console.error('Login error:', error);
             set({ isLoading: false });
+            throw error;
         }
     },
 
     logout: async () => {
-        set({ isLoading: true });
-        try {
-            await SecureStore.deleteItemAsync('user_session');
-            set({ user: null, isAuthenticated: false, isLoading: false });
-        } catch (error) {
-            console.error('Logout failed', error);
-            set({ isLoading: false });
-        }
+        await SecureStore.deleteItemAsync('token');
+        await SecureStore.deleteItemAsync('user');
+        set({ user: null, isAuthenticated: false });
+        router.replace('/auth/login');
     },
 
     restoreSession: async () => {
         set({ isLoading: true });
         try {
-            const session = await SecureStore.getItemAsync('user_session');
-            if (session) {
-                const user = JSON.parse(session);
-                set({ user, isAuthenticated: true, isLoading: false });
-            } else {
-                set({ isLoading: false });
+            const token = await SecureStore.getItemAsync('token');
+            const userString = await SecureStore.getItemAsync('user');
+
+            if (token && userString) {
+                const user = JSON.parse(userString);
+                set({ user, isAuthenticated: true });
             }
         } catch (error) {
-            console.error('Session restore failed', error);
+            console.error('Restore session error:', error);
+        } finally {
             set({ isLoading: false });
         }
     },
