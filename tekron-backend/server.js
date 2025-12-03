@@ -31,6 +31,23 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// Socket.IO Setup
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*', // Allow all origins for now (dev mode)
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+// Export io for use in controllers
+module.exports = { app, io };

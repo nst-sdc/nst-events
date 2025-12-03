@@ -11,6 +11,8 @@ export default function RootLayout() {
         restoreSession();
     }, [restoreSession]);
 
+
+
     return (
         <>
             <StatusBar style="light" backgroundColor={THEME.dark.background} />

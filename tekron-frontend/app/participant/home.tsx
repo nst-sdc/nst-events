@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
+import { socket } from '../../context/socket';
 
 import { BACKEND_URL } from '../../constants/config';
 
@@ -17,13 +18,16 @@ interface Event {
     location: string;
     startTime: string;
     endTime: string;
+    status: 'UPCOMING' | 'LIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
 }
 
 export default function ParticipantHome() {
     const { user, logout } = useAuthStore();
     const router = useRouter();
     const [events, setEvents] = useState<Event[]>([]);
+    const [liveEvents, setLiveEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
+    const [pulseAnim] = useState(new Animated.Value(1));
 
     const fetchEvents = async () => {
         try {
@@ -34,6 +38,7 @@ export default function ParticipantHome() {
             if (response.ok) {
                 const data = await response.json();
                 setEvents(data);
+                setLiveEvents(data.filter((e: Event) => e.status === 'LIVE'));
             }
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -44,7 +49,36 @@ export default function ParticipantHome() {
 
     useEffect(() => {
         fetchEvents();
+
+        socket.on('eventStatusUpdated', (updatedEvent: Event) => {
+            setEvents((prevEvents) => {
+                const newEvents = prevEvents.map((e) => (e.id === updatedEvent.id ? updatedEvent : e));
+                setLiveEvents(newEvents.filter((e) => e.status === 'LIVE'));
+                return newEvents;
+            });
+        });
+
+        return () => {
+            socket.off('eventStatusUpdated');
+        };
     }, []);
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.2,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, [pulseAnim]);
 
     const handleLogout = async () => {
         await logout();
@@ -75,17 +109,26 @@ export default function ParticipantHome() {
                     <Text style={styles.userName}>{user?.name || 'Participant'}</Text>
                 </View>
 
-                <Card style={styles.statusCard}>
-                    <View style={styles.statusRow}>
-                        <View style={styles.statusIcon}>
-                            <Ionicons name="checkmark-circle" size={24} color={PALETTE.purpleDeep} />
+                {liveEvents.length > 0 && (
+                    <View style={styles.liveSection}>
+                        <View style={styles.liveHeader}>
+                            <Animated.View style={[styles.liveBadge, { transform: [{ scale: pulseAnim }] }]}>
+                                <View style={styles.liveDot} />
+                            </Animated.View>
+                            <Text style={styles.liveTitle}>LIVE NOW</Text>
                         </View>
-                        <View>
-                            <Text style={styles.statusLabel}>Status</Text>
-                            <Text style={styles.statusValue}>Checked In & Approved</Text>
-                        </View>
+                        {liveEvents.map((event) => (
+                            <Card key={event.id} style={styles.liveCard}>
+                                <View style={styles.liveCardContent}>
+                                    <Text style={styles.liveEventTitle}>{event.title}</Text>
+                                    <Text style={styles.liveEventLocation}>
+                                        <Ionicons name="location" size={14} color={PALETTE.creamLight} /> {event.location}
+                                    </Text>
+                                </View>
+                            </Card>
+                        ))}
                     </View>
-                </Card>
+                )}
 
                 <Text style={styles.sectionTitle}>Today&apos;s Schedule</Text>
 
@@ -105,6 +148,11 @@ export default function ParticipantHome() {
                                     <Ionicons name="location-outline" size={14} color={PALETTE.purpleLight} /> {event.location}
                                 </Text>
                                 {event.description && <Text style={styles.eventDescription}>{event.description}</Text>}
+                                {event.status === 'LIVE' && (
+                                    <View style={styles.liveTag}>
+                                        <Text style={styles.liveTagText}>LIVE</Text>
+                                    </View>
+                                )}
                             </View>
                         </Card>
                     ))
@@ -134,26 +182,52 @@ const styles = StyleSheet.create({
         ...TYPOGRAPHY.h1,
         color: PALETTE.creamLight,
     },
-    statusCard: {
-        backgroundColor: PALETTE.creamLight,
+    liveSection: {
         marginBottom: SPACING.xl,
     },
-    statusRow: {
+    liveHeader: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: SPACING.s,
     },
-    statusIcon: {
-        marginRight: SPACING.m,
+    liveBadge: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: PALETTE.pinkLight,
+        marginRight: SPACING.s,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    statusLabel: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleDeep,
-        textTransform: 'uppercase',
+    liveDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: 'white',
+    },
+    liveTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.pinkLight,
         letterSpacing: 1,
     },
-    statusValue: {
+    liveCard: {
+        backgroundColor: PALETTE.pinkMedium,
+        marginBottom: SPACING.s,
+        borderWidth: 1,
+        borderColor: PALETTE.pinkLight,
+    },
+    liveCardContent: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    liveEventTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleDeep,
+        color: PALETTE.creamLight,
+    },
+    liveEventLocation: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.creamLight,
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
@@ -204,6 +278,20 @@ const styles = StyleSheet.create({
     eventDescription: {
         ...TYPOGRAPHY.caption,
         color: PALETTE.creamDark,
+    },
+    liveTag: {
+        position: 'absolute',
+        top: SPACING.s,
+        right: SPACING.s,
+        backgroundColor: PALETTE.pinkLight,
+        paddingHorizontal: SPACING.xs,
+        paddingVertical: 2,
+        borderRadius: RADIUS.s,
+    },
+    liveTagText: {
+        color: PALETTE.navyDark,
+        fontSize: 10,
+        fontWeight: 'bold',
     },
     emptyText: {
         color: PALETTE.creamDark,

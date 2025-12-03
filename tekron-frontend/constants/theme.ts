@@ -5,6 +5,7 @@ export const PALETTE = {
   yellowLight: '#F7E8A4',
   creamDark: '#EBD0AA',
   pinkLight: '#D9A8BD',
+  pinkMedium: '#CF96B5',
   pinkDark: '#C68AC8',
   purpleLight: '#B572D0',
   purpleMedium: '#8A5CC2',
@@ -67,6 +68,7 @@ export const TYPOGRAPHY = {
   h1: { fontSize: 32, fontWeight: 'bold' as TextStyle['fontWeight'] },
   h2: { fontSize: 24, fontWeight: 'bold' as TextStyle['fontWeight'] },
   h3: { fontSize: 20, fontWeight: '600' as TextStyle['fontWeight'] },
+  h4: { fontSize: 18, fontWeight: '600' as TextStyle['fontWeight'] },
   body: { fontSize: 16, fontWeight: 'normal' as TextStyle['fontWeight'] },
   caption: { fontSize: 12, fontWeight: 'normal' as TextStyle['fontWeight'] },
 };

@@ -106,6 +106,14 @@ export default function AdminDashboard() {
                         colors={GRADIENTS.secondary}
                     />
                 </View>
+                <View style={[styles.actionsGrid, { marginTop: SPACING.m }]}>
+                    <ActionButton
+                        title="Manage Events"
+                        icon="calendar-outline"
+                        onPress={() => router.push('/admin/events')}
+                        colors={GRADIENTS.accent}
+                    />
+                </View>
             </ScrollView>
         </View>
     );

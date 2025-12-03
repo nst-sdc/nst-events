@@ -21,8 +21,9 @@ model Participant {
     assignedEventId String?
     event           Event?  @relation(fields: [assignedEventId], references: [id])
 
-    approvedBy Admin?        @relation("AdminApprovals", fields: [approvedById], references: [id])
-    approvals  ApprovalLog[]
+    approvedBy        Admin?             @relation("AdminApprovals", fields: [approvedById], references: [id])
+    approvals         ApprovalLog[]
+    eventParticipants EventParticipant[]
 }
 
 model Admin {
@@ -55,14 +56,38 @@ model ApprovalLog {
     admin       Admin       @relation("AdminApprovalLogs", fields: [adminId], references: [id])
 }
 
+enum EventStatus {
+    UPCOMING
+    LIVE
+    PAUSED
+    COMPLETED
+    CANCELLED
+}
+
 model Event {
-    id           String        @id @default(uuid())
+    id           String             @id @default(uuid())
     title        String
     description  String?
     location     String
     startTime    DateTime
     endTime      DateTime
+    status       EventStatus        @default(UPCOMING)
+    currentRound Int?
+    createdAt    DateTime           @default(now())
     participants Participant[]
+    leaderboard  EventParticipant[]
+}
+
+model EventParticipant {
+    id            String   @id @default(uuid())
+    participantId String
+    eventId       String
+    score         Int      @default(0)
+    rank          Int?
+    updatedAt     DateTime @default(now())
+
+    participant Participant @relation(fields: [participantId], references: [id])
+    event       Event       @relation(fields: [eventId], references: [id])
 }
 
 model Alert {
