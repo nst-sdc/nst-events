@@ -5,8 +5,6 @@
 * Participant walks to the event reception counter.
 * They already have their **QR code** from their registration email.
 
----
-
 ## 2. Reception Staff Opens Scanner Interface
 
 * Staff member opens **Reception Scanner Panel** inside the Tekron Admin App (or staff version of the app).
@@ -14,8 +12,6 @@
 
   * Prevents misuse
   * Tracks which staff member checked in which participant
-
----
 
 ## 3. Staff Scans Participant’s QR Code
 
@@ -28,7 +24,7 @@ Backend steps:
 * System checks if user exists
 * System verifies if the user is already checked in or pending approval
 
----
+
 
 ## 4. Approval Process
 
@@ -57,20 +53,20 @@ User's app instantly unlocks full access.
 
 Once approved, the participant’s Tekron App automatically shows:
 
-### a) Event Dashboard
+### a. Event Dashboard
 
 * Assigned competition room
 * Building and floor
 * Reporting time
 * Check-in status: “Approved”
 
-### b) Event Details
+### b. Event Details
 
 * List of all events they registered for
 * Their timings
 * Special instructions
 
-### c) Live Alerts
+### c. Live Alerts
 
 * Real-time updates
 * Round announcements
