@@ -68,12 +68,11 @@ export default function Scanner() {
                     style={styles.camera}
                     facing="back"
                     onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-                >
-                    <View style={styles.overlay}>
-                        <View style={styles.scanFrame} />
-                        <Text style={styles.instructionText}>Align QR code within the frame</Text>
-                    </View>
-                </CameraView>
+                />
+                <View style={styles.overlay}>
+                    <View style={styles.scanFrame} />
+                    <Text style={styles.instructionText}>Align QR code within the frame</Text>
+                </View>
             </View>
         </View>
     );
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     overlay: {
-        flex: 1,
+        ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
