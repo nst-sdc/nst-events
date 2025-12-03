@@ -1,15 +1,22 @@
 import { Colors, Layout, Spacing } from '@/constants/theme';
 import React from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle, useColorScheme } from 'react-native';
+import { StyleProp, StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
 
 interface CardProps {
     children: React.ReactNode;
     style?: StyleProp<ViewStyle>;
-    variant?: 'elevated' | 'outlined' | 'flat';
+    variant?: 'elevated' | 'outlined' | 'flat' | 'glow';
+    glowColor?: 'primary' | 'secondary' | 'error';
     padding?: keyof typeof Spacing;
 }
 
-export function Card({ children, style, variant = 'elevated', padding = 'l' }: CardProps) {
+export function Card({
+    children,
+    style,
+    variant = 'elevated',
+    glowColor = 'primary',
+    padding = 'l'
+}: CardProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
 
@@ -30,14 +37,21 @@ export function Card({ children, style, variant = 'elevated', padding = 'l' }: C
                 return {
                     backgroundColor: colors.surfaceHighlight,
                 };
+            case 'glow':
+                return {
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    ...Layout.shadow.glow[glowColor],
+                };
         }
     };
 
     return (
         <View
             style={[
-                styles.card,
-                { padding: Spacing[padding], borderRadius: Layout.radius.xl },
+                styles.container,
+                { padding: Spacing[padding], borderRadius: Layout.radius.m },
                 getVariantStyle(),
                 style,
             ]}
@@ -48,7 +62,7 @@ export function Card({ children, style, variant = 'elevated', padding = 'l' }: C
 }
 
 const styles = StyleSheet.create({
-    card: {
-        overflow: 'visible', // Needed for shadows on iOS
+    container: {
+        overflow: 'visible', // Allow glow to show
     },
 });

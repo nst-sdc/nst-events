@@ -16,11 +16,11 @@
 ## **Phase 2: Core Setup**
 
 * [x] Initialize React Native project
-* [ ] Install navigation (react-navigation)
-* [ ] Install state management (Zustand / Redux / Context)
-* [ ] Set up backend with auth
-* [ ] Setup QR generator + QR scanner dependency
-* [ ] Create environment variable setup
+* [x] Install navigation (react-navigation)
+* [x] Install state management (Zustand / Redux / Context)
+* [x] Set up backend with auth
+* [x] Setup QR generator + QR scanner dependency
+* [x] Create environment variable setup
 
 ---
 

@@ -1,8 +1,9 @@
 import { Card } from '@/components/ui/Card';
-import { Colors, Fonts, Layout, Spacing } from '@/constants/theme';
+import { ThemedText } from '@/components/ui/Typography';
+import { Layout, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 interface ActionItem {
     id: string;
@@ -20,11 +21,10 @@ const ACTIONS: ActionItem[] = [
 
 export function QuickActions() {
     const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? 'light'];
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.title, { color: colors.text }]}>Quick Actions</Text>
+            <ThemedText variant="h3" style={{ marginBottom: Spacing.m }}>Quick Actions</ThemedText>
             <View style={styles.grid}>
                 {ACTIONS.map((action) => (
                     <TouchableOpacity key={action.id} style={styles.itemWrapper} activeOpacity={0.8}>
@@ -32,7 +32,7 @@ export function QuickActions() {
                             <View style={[styles.iconContainer, { backgroundColor: action.color + '15' }]}>
                                 <Ionicons name={action.icon} size={24} color={action.color} />
                             </View>
-                            <Text style={[styles.label, { color: colors.text }]}>{action.label}</Text>
+                            <ThemedText variant="body" style={{ fontWeight: '600' }}>{action.label}</ThemedText>
                         </Card>
                     </TouchableOpacity>
                 ))}
@@ -44,12 +44,6 @@ export function QuickActions() {
 const styles = StyleSheet.create({
     container: {
         marginBottom: Spacing.xl,
-    },
-    title: {
-        fontSize: 18,
-        fontFamily: Fonts.sans,
-        fontWeight: 'bold',
-        marginBottom: Spacing.m,
     },
     grid: {
         flexDirection: 'row',
@@ -70,9 +64,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: Spacing.s,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '600',
     },
 });

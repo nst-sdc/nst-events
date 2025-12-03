@@ -1,7 +1,8 @@
-import { Badge } from '@/components/ui/Badge';
-import { Colors, Fonts, Layout, Spacing } from '@/constants/theme';
+import { PixelBadge } from '@/components/ui/PixelBadge';
+import { ThemedText } from '@/components/ui/Typography';
+import { Colors, Layout, Spacing } from '@/constants/theme';
 import React from 'react';
-import { Image, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Image, StyleSheet, useColorScheme, View } from 'react-native';
 
 interface UserHeaderProps {
     name: string;
@@ -17,15 +18,14 @@ export function UserHeader({ name, role, status, avatarUrl }: UserHeaderProps) {
     return (
         <View style={styles.container}>
             <View style={styles.textContainer}>
-                <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
-                <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
+                <ThemedText variant="caption" style={{ marginBottom: Spacing.xs }}>Welcome back,</ThemedText>
+                <ThemedText variant="h2" style={{ marginBottom: Spacing.s }}>{name}</ThemedText>
                 <View style={styles.roleContainer}>
-                    <Text style={[styles.role, { color: colors.primary }]}>{role}</Text>
+                    <ThemedText variant="body" style={{ color: colors.primary, fontWeight: '600' }}>{role}</ThemedText>
                     <View style={styles.dot} />
-                    <Badge
+                    <PixelBadge
                         label={status === 'approved' ? 'Checked In' : 'Pending'}
                         status={status === 'approved' ? 'success' : 'warning'}
-                        animate={status === 'approved'}
                     />
                 </View>
             </View>
@@ -34,9 +34,9 @@ export function UserHeader({ name, role, status, avatarUrl }: UserHeaderProps) {
                     <Image source={{ uri: avatarUrl }} style={styles.avatar} />
                 ) : (
                     <View style={[styles.avatarPlaceholder, { backgroundColor: colors.surfaceHighlight }]}>
-                        <Text style={[styles.avatarText, { color: colors.textSecondary }]}>
+                        <ThemedText variant="h3" style={{ color: colors.textSecondary }}>
                             {name.charAt(0)}
-                        </Text>
+                        </ThemedText>
                     </View>
                 )}
             </View>
@@ -54,25 +54,9 @@ const styles = StyleSheet.create({
     textContainer: {
         flex: 1,
     },
-    greeting: {
-        fontSize: 14,
-        fontFamily: Fonts.sans,
-        marginBottom: Spacing.xs,
-    },
-    name: {
-        fontSize: 24,
-        fontFamily: Fonts.sans,
-        fontWeight: 'bold',
-        marginBottom: Spacing.s,
-    },
     roleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    role: {
-        fontSize: 14,
-        fontFamily: Fonts.sans,
-        fontWeight: '600',
     },
     dot: {
         width: 4,
@@ -98,9 +82,5 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    avatarText: {
-        fontSize: 20,
-        fontWeight: 'bold',
     },
 });

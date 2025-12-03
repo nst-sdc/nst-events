@@ -1,8 +1,9 @@
 import { Card } from '@/components/ui/Card';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { ThemedText } from '@/components/ui/Typography';
+import { Colors, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 interface EventCardProps {
     eventName: string;
@@ -21,10 +22,10 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
             <Card variant="outlined" style={[styles.container, { borderColor: colors.warning }]}>
                 <View style={styles.pendingContainer}>
                     <Ionicons name="alert-circle" size={32} color={colors.warning} />
-                    <Text style={[styles.pendingTitle, { color: colors.text }]}>Check-in Required</Text>
-                    <Text style={[styles.pendingText, { color: colors.textSecondary }]}>
+                    <ThemedText variant="h3" style={{ marginTop: Spacing.s, marginBottom: Spacing.xs }}>Check-in Required</ThemedText>
+                    <ThemedText variant="body" style={{ textAlign: 'center', color: colors.textSecondary }}>
                         Complete your check-in at the reception desk to view your event details.
-                    </Text>
+                    </ThemedText>
                 </View>
             </Card>
         );
@@ -34,11 +35,11 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
         <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
             <Card variant="elevated" style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={[styles.label, { color: colors.primary }]}>ASSIGNED EVENT</Text>
+                    <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: '700', letterSpacing: 1 }}>ASSIGNED EVENT</ThemedText>
                     <Ionicons name="chevron-forward" size={20} color={colors.icon} />
                 </View>
 
-                <Text style={[styles.eventName, { color: colors.text }]}>{eventName}</Text>
+                <ThemedText variant="h2" style={{ marginBottom: Spacing.l }}>{eventName}</ThemedText>
 
                 <View style={styles.divider} />
 
@@ -46,16 +47,16 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
                     <View style={styles.detailItem}>
                         <Ionicons name="time-outline" size={20} color={colors.textSecondary} style={styles.icon} />
                         <View>
-                            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Reporting Time</Text>
-                            <Text style={[styles.detailValue, { color: colors.text }]}>{time}</Text>
+                            <ThemedText variant="caption">Reporting Time</ThemedText>
+                            <ThemedText variant="body" style={{ fontWeight: '600' }}>{time}</ThemedText>
                         </View>
                     </View>
 
                     <View style={styles.detailItem}>
                         <Ionicons name="location-outline" size={20} color={colors.textSecondary} style={styles.icon} />
                         <View>
-                            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Location</Text>
-                            <Text style={[styles.detailValue, { color: colors.text }]}>{location}</Text>
+                            <ThemedText variant="caption">Location</ThemedText>
+                            <ThemedText variant="body" style={{ fontWeight: '600' }}>{location}</ThemedText>
                         </View>
                     </View>
                 </View>
@@ -74,18 +75,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: Spacing.s,
     },
-    label: {
-        fontSize: 12,
-        fontFamily: Fonts.sans,
-        fontWeight: '700',
-        letterSpacing: 1,
-    },
-    eventName: {
-        fontSize: 22,
-        fontFamily: Fonts.sans,
-        fontWeight: 'bold',
-        marginBottom: Spacing.l,
-    },
     divider: {
         height: 1,
         backgroundColor: '#E5E7EB',
@@ -103,27 +92,8 @@ const styles = StyleSheet.create({
     icon: {
         marginRight: Spacing.s,
     },
-    detailLabel: {
-        fontSize: 12,
-        marginBottom: 2,
-    },
-    detailValue: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
     pendingContainer: {
         alignItems: 'center',
         padding: Spacing.m,
-    },
-    pendingTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: Spacing.s,
-        marginBottom: Spacing.xs,
-    },
-    pendingText: {
-        textAlign: 'center',
-        fontSize: 14,
-        lineHeight: 20,
     },
 });

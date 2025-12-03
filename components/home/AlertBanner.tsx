@@ -1,7 +1,8 @@
-import { Colors, Fonts, Layout, Spacing } from '@/constants/theme';
+import { ThemedText } from '@/components/ui/Typography';
+import { Colors, Layout, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { StyleSheet, useColorScheme, View } from 'react-native';
 
 interface AlertBannerProps {
     message: string;
@@ -28,7 +29,7 @@ export function AlertBanner({ message, type = 'info' }: AlertBannerProps) {
     return (
         <View style={[styles.container, { backgroundColor: bg }]}>
             <Ionicons name={icon} size={20} color={text} style={styles.icon} />
-            <Text style={[styles.text, { color: text }]}>{message}</Text>
+            <ThemedText variant="body" style={{ flex: 1, color: text, fontWeight: '500' }}>{message}</ThemedText>
         </View>
     );
 }
@@ -43,11 +44,5 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginRight: Spacing.s,
-    },
-    text: {
-        flex: 1,
-        fontSize: 14,
-        fontFamily: Fonts.sans,
-        fontWeight: '500',
     },
 });

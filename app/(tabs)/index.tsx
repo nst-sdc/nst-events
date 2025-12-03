@@ -1,16 +1,20 @@
 import { Colors, Spacing } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AlertBanner } from '@/components/home/AlertBanner';
 import { EventCard } from '@/components/home/EventCard';
 import { QuickActions } from '@/components/home/QuickActions';
 import { UserHeader } from '@/components/home/UserHeader';
+import { Button } from '@/components/ui/Button';
+import { ThemedText } from '@/components/ui/Typography';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const router = useRouter();
 
   // Temporary state for demonstration
   const [isApproved, setIsApproved] = useState(true);
@@ -24,7 +28,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <UserHeader
-          name="Alex Chen"
+          name="Arpit Sarang"
           role="Participant"
           status={isApproved ? 'approved' : 'pending'}
         />
@@ -44,15 +48,21 @@ export default function HomeScreen() {
 
         <QuickActions />
 
-        {/* Debug Toggle - Remove in production */}
-        <TouchableOpacity
-          style={[styles.debugButton, { backgroundColor: colors.surfaceHighlight }]}
-          onPress={() => setIsApproved(!isApproved)}
-        >
-          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-            Debug: Toggle Status ({isApproved ? 'Approved' : 'Pending'})
-          </Text>
-        </TouchableOpacity>
+        {/* Debug Controls */}
+        <View style={styles.debugContainer}>
+          <ThemedText variant="caption" style={{ marginBottom: Spacing.s, textAlign: 'center' }}>Debug Controls</ThemedText>
+          <Button
+            label={`Toggle Status (${isApproved ? 'Approved' : 'Pending'})`}
+            variant="outline"
+            onPress={() => setIsApproved(!isApproved)}
+            style={{ marginBottom: Spacing.m }}
+          />
+          <Button
+            label="View UI Kit Gallery"
+            variant="pixel"
+            onPress={() => router.push('/gallery')}
+          />
+        </View>
 
       </ScrollView>
     </SafeAreaView>
@@ -67,10 +77,10 @@ const styles = StyleSheet.create({
     padding: Spacing.l,
     paddingBottom: Spacing.xxl,
   },
-  debugButton: {
-    padding: Spacing.m,
-    alignItems: 'center',
-    borderRadius: 8,
+  debugContainer: {
     marginTop: Spacing.xl,
+    padding: Spacing.m,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
   },
 });
