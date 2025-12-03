@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/Card';
+import { GlassView } from '@/components/ui/GlassView';
 import { ThemedText } from '@/components/ui/Typography';
 import { Colors, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +19,7 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
 
     if (!isApproved) {
         return (
-            <Card variant="outlined" style={[styles.container, { borderColor: colors.warning }]}>
+            <GlassView style={[styles.container, { borderColor: colors.warning }]} intensity={10}>
                 <View style={styles.pendingContainer}>
                     <Ionicons name="alert-circle" size={32} color={colors.warning} />
                     <ThemedText variant="h3" style={{ marginTop: Spacing.s, marginBottom: Spacing.xs }}>Check-in Required</ThemedText>
@@ -27,13 +27,13 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
                         Complete your check-in at the reception desk to view your event details.
                     </ThemedText>
                 </View>
-            </Card>
+            </GlassView>
         );
     }
 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
-            <Card variant="elevated" style={styles.container}>
+            <GlassView style={styles.container} intensity={20}>
                 <View style={styles.header}>
                     <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: '700', letterSpacing: 1 }}>ASSIGNED EVENT</ThemedText>
                     <Ionicons name="chevron-forward" size={20} color={colors.icon} />
@@ -60,7 +60,7 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
                         </View>
                     </View>
                 </View>
-            </Card>
+            </GlassView>
         </TouchableOpacity>
     );
 }
@@ -68,6 +68,9 @@ export function EventCard({ eventName, location, time, isApproved, onPress }: Ev
 const styles = StyleSheet.create({
     container: {
         marginBottom: Spacing.l,
+        padding: Spacing.l,
+        borderRadius: 16,
+        overflow: 'hidden',
     },
     header: {
         flexDirection: 'row',
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: '#E5E7EB',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         marginBottom: Spacing.l,
     },
     detailsRow: {

@@ -33,7 +33,17 @@ export const useAuthStore = create<AuthState>((set) => ({
                 .single();
 
             if (error) {
-                console.error('Error fetching user role:', error);
+                // Check for "Relation does not exist" error (PGRST205)
+                if (error.code === 'PGRST205') {
+                    console.warn(
+                        'WARNING: The "users" table does not exist in your Supabase database.\n' +
+                        'Please run the "schema.sql" script in your Supabase Dashboard SQL Editor to fix this.\n' +
+                        'Falling back to "participant" role (unapproved).'
+                    );
+                } else {
+                    console.error('Error fetching user role:', error);
+                }
+
                 // Fallback or handle error appropriately
                 set({
                     session,

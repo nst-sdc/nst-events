@@ -10,6 +10,7 @@ interface InputProps extends TextInputProps {
     leftIcon?: keyof typeof Ionicons.glyphMap;
     rightIcon?: keyof typeof Ionicons.glyphMap;
     onRightIconPress?: () => void;
+    icon?: keyof typeof Ionicons.glyphMap; // Alias for leftIcon
 }
 
 export function Input({
@@ -20,6 +21,7 @@ export function Input({
     onRightIconPress,
     style,
     secureTextEntry,
+    icon,
     ...rest
 }: InputProps) {
     const colorScheme = useColorScheme();
@@ -52,9 +54,9 @@ export function Input({
                     },
                 ]}
             >
-                {leftIcon && (
+                {(leftIcon || icon) && (
                     <Ionicons
-                        name={leftIcon}
+                        name={leftIcon || icon}
                         size={20}
                         color={isFocused ? colors.primary : colors.textSecondary}
                         style={styles.iconLeft}

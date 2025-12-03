@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useAuthStore } from '@/store/useAuthStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -17,6 +18,9 @@ export default function RootLayout() {
   const { session, checkSession, isLoading } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+
+  // Initialize push notifications
+  usePushNotifications();
 
   useEffect(() => {
     if (loaded) {

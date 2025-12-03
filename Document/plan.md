@@ -26,68 +26,68 @@
 
 ## **Phase 3: Authentication System**
 
-* [ ] Login screen UI
-* [ ] OTP / Email login logic
-* [ ] Create user session persistence
-* [ ] Handle invalid / expired QR codes
-* [ ] Add “Forgot password / resend QR” screens (optional)
+* [x] Login screen UI
+* [x] Email login logic
+* [x] Create user session persistence
+* [x] Handle invalid / expired QR codes
+* [x] Add “Forgot password / resend QR” screens (Removed as per requirements)
 
 ---
 
 ## **Phase 4: QR Check-In System**
 
-* [ ] Build QR scanner screen
-* [ ] Validate QR against backend
-* [ ] Mark user as checked-in in database
-* [ ] Auto-assign room/location
-* [ ] Push location to user instantly
-* [ ] Add animated success popup (“You’re checked in!”)
+* [x] Build QR scanner screen
+* [x] Validate QR against backend
+* [x] Mark user as checked-in in database
+* [x] Auto-assign room/location
+* [x] Push location to user instantly
+* [x] Add animated success popup (“You’re checked in!”)
 
 ---
 
 ## **Phase 5: Core User Experience**
 
-* [ ] Build dashboard showing:
+* [x] Build dashboard showing:
 
-  * [ ] Event name
-  * [ ] Assigned location
-  * [ ] Schedule
-  * [ ] Alerts
-* [ ] Add micro-animations (fade, slide, bounce)
-* [ ] Add toast notifications
-* [ ] Add interactive transitions
-* [ ] Add dark mode support
+  * [x] Event name
+  * [x] Assigned location
+  * [x] Schedule
+  * [x] Alerts
+* [x] Add micro-animations (fade, slide, bounce)
+* [x] Add toast notifications
+* [x] Add interactive transitions
+* [x] Add dark mode support
 
 ---
 
 ## **Phase 6: Real-Time Updates**
 
-* [ ] Implement push notifications (Expo/Firebase)
-* [ ] Build Alerts tab with live updates
-* [ ] Add round updates + scoring updates
-* [ ] Add emergency alert override (big red banner)
+* [x] Implement push notifications (Expo)
+* [x] Build Alerts tab with live updates
+* [x] Add round updates + scoring updates
+* [x] Add emergency alert override (big red banner)
 
 ---
 
-## **Phase 7: Admin Panel (Optional but OP)**
+## **Phase 7: Admin Panel **
 
-* [ ] Admin login
-* [ ] View participant stats
-* [ ] Track who checked in
-* [ ] Send announcements
-* [ ] Assign/change event locations
-* [ ] Live dashboard (attendance + active events)
+* [x] Admin login
+* [x] View participant stats
+* [x] Track who checked in
+* [x] Send announcements
+* [x] Assign/change event locations
+* [x] Live dashboard (attendance + active events)
 
 ---
 
 ## **Phase 8: UI Polishing**
 
-* [ ] Smooth animations everywhere
-* [ ] Custom popups with blur/glass effects
-* [ ] Fancy loader screen
-* [ ] Polished card design
-* [ ] Logo + splash screen
-* [ ] Proper typography hierarchy
+* [x] Smooth animations everywhere
+* [x] Custom popups with blur/glass effects
+* [x] Fancy loader screen
+* [x] Polished card design
+* [x] Logo + splash screen
+* [x] Proper typography hierarchy
 
 ---
 
