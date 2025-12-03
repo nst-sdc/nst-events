@@ -1,4 +1,4 @@
-# Tekron 2.0 - Event Management System
+# Tekron 2.0
 
 Tekron 2.0 is a comprehensive event management application designed to streamline participant registration, access control, and event administration. It features a robust backend with role-based access control and a React Native frontend for participants and admins.
 
