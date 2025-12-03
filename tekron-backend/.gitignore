@@ -1,5 +1,4 @@
 node_modules
-.env.local
-prisma/seed.js
+.env
 prisma/migrations
-
+.env.local

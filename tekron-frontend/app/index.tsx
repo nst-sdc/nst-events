@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
 import { PALETTE } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,9 +9,10 @@ export default function Index() {
     const { user, isAuthenticated, isLoading } = useAuthStore();
     const router = useRouter();
     const segments = useSegments();
+    const rootNavigationState = useRootNavigationState();
 
     useEffect(() => {
-        if (isLoading) return;
+        if (isLoading || !rootNavigationState?.key) return;
 
         const inAuthGroup = segments[0] === 'auth';
 
@@ -20,7 +21,7 @@ export default function Index() {
                 router.replace('/auth/login');
             }
         } else if (user) {
-            if (user.role === 'admin') {
+            if (user.role === 'admin' || user.role === 'superadmin') {
                 router.replace('/admin/dashboard');
             } else if (user.role === 'participant') {
                 if (user.approved) {
@@ -30,7 +31,7 @@ export default function Index() {
                 }
             }
         }
-    }, [isAuthenticated, user, isLoading, segments, router]);
+    }, [isAuthenticated, user, isLoading, segments, router, rootNavigationState]);
 
     return (
         <LinearGradient

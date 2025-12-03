@@ -13,26 +13,41 @@ export default function LimitedAccessMap() {
     const { logout } = useAuthStore();
     const [showQR, setShowQR] = useState(false);
     const [mapData, setMapData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoadingMap, setIsLoadingMap] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Fetch Map Data
-    useEffect(() => {
-        const fetchMapData = async () => {
-            try {
-                const token = await SecureStore.getItemAsync('token');
-                const response = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setMapData(data);
-                }
-            } catch (error) {
-                console.error('Error fetching map data:', error);
-            } finally {
-                setLoading(false);
+    const fetchMapData = async () => {
+        setIsLoadingMap(true);
+        setError(null);
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            if (!token) {
+                setError('No authentication token found');
+                setIsLoadingMap(false);
+                return;
             }
-        };
+
+            const response = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setMapData(data);
+            } else {
+                const errData = await response.json();
+                setError(errData.message || 'Failed to load map data');
+            }
+        } catch (error) {
+            console.error('Error fetching map data:', error);
+            setError('Network error. Please check your connection.');
+        } finally {
+            setIsLoadingMap(false);
+        }
+    };
+
+    useEffect(() => {
         fetchMapData();
     }, []);
 
@@ -54,9 +69,17 @@ export default function LimitedAccessMap() {
                 onRightPress={logout}
             />
 
-            {loading ? (
+            {isLoadingMap ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={PALETTE.creamLight} />
+                </View>
+            ) : error ? (
+                <View style={styles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={48} color={PALETTE.pinkDark} />
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={fetchMapData}>
+                        <Text style={styles.secondaryButtonText}>Retry</Text>
+                    </TouchableOpacity>
                 </View>
             ) : (
                 <View style={styles.contentContainer}>

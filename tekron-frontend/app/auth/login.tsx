@@ -4,22 +4,40 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, GRADIENTS, SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
 import { useAuthStore } from '../../context/authStore';
+import { Popup } from '../../components/Popup';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, isLoading } = useAuthStore();
 
+    // Popup State
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [popupTitle, setPopupTitle] = useState('');
+    const [popupMessage, setPopupMessage] = useState('');
+    const [popupType, setPopupType] = useState<'success' | 'error' | 'info'>('info');
+
+    const showPopup = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+        setPopupTitle(title);
+        setPopupMessage(message);
+        setPopupType(type);
+        setPopupVisible(true);
+    };
+
+    const hidePopup = () => {
+        setPopupVisible(false);
+    };
+
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please enter both email and password');
+            showPopup('Error', 'Please enter both email and password', 'error');
             return;
         }
 
         try {
             await login(email, password);
         } catch (error: any) {
-            Alert.alert('Login Failed', error.message || 'An error occurred');
+            showPopup('Login Failed', error.message || 'An error occurred', 'error');
         }
     };
 
@@ -81,7 +99,15 @@ export default function Login() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </LinearGradient>
+
+            <Popup
+                visible={popupVisible}
+                title={popupTitle}
+                message={popupMessage}
+                onClose={hidePopup}
+                type={popupType}
+            />
+        </LinearGradient >
     );
 }
 

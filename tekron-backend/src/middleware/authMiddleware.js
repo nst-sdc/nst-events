@@ -16,9 +16,6 @@ const authenticate = async (req, res, next, role) => {
     }
 
     if (role && decoded.role !== role) {
-        // Allow superadmin to access admin routes if needed, but strict separation requested.
-        // User requested: "Each role has isolated login endpoints and protected routes."
-        // So we enforce strict role check.
         return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
     }
 
@@ -26,8 +23,33 @@ const authenticate = async (req, res, next, role) => {
     next();
 };
 
+const requireApproval = async (req, res, next) => {
+    if (req.user.role !== 'participant') {
+        // Admins/SuperAdmins don't need "approval" in this context, but this middleware is for participants.
+        // If an admin hits a participant route protected by this, we might want to allow or block.
+        // Given the requirements: "View dashboard, events, schedule ONLY if approved" (Participant permissions).
+        // So this is specific to participants.
+        return next();
+    }
+
+    try {
+        const participant = await prisma.participant.findUnique({
+            where: { id: req.user.id },
+            select: { approved: true }
+        });
+
+        if (!participant || !participant.approved) {
+            return res.status(403).json({ message: 'Forbidden: Account not approved' });
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({ message: 'Server error checking approval status' });
+    }
+};
+
 const participantAuth = (req, res, next) => authenticate(req, res, next, 'participant');
 const adminAuth = (req, res, next) => authenticate(req, res, next, 'admin');
 const superAdminAuth = (req, res, next) => authenticate(req, res, next, 'superadmin');
 
-module.exports = { participantAuth, adminAuth, superAdminAuth };
+module.exports = { participantAuth, adminAuth, superAdminAuth, requireApproval };

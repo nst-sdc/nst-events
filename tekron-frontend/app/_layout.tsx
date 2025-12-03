@@ -18,8 +18,7 @@ export default function RootLayout() {
                 <Stack.Screen name="index" />
                 <Stack.Screen name="auth/login" />
                 <Stack.Screen name="admin/dashboard" />
-                <Stack.Screen name="participant/home" />
-                <Stack.Screen name="participant/map" />
+                <Stack.Screen name="participant" />
             </Stack>
         </>
     );
