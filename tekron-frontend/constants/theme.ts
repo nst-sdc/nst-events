@@ -13,6 +13,20 @@ export const PALETTE = {
   purpleDeep: '#3E3A7E',
   navyLight: '#2F345C',
   navyDark: '#1C2044',
+
+  // New Design System
+  primaryPurple: '#A06BFF',
+  primaryPurpleDeep: '#8B4DFF',
+  primaryDarkBase: '#0C0E23',
+  accentCyan: '#6BAAB3',
+  accentOrange: '#DC7C69',
+  bgDeepNight: '#151A3A',
+  bgLavenderCloud: '#8D7ADB',
+  uiWhite: '#F0E4FF',
+  textSoftLavender: '#DCD8FF',
+  textMuted: '#9A8ACF',
+  borderDefault: '#1A112B',
+  bgPanel: '#151A3A',
 };
 
 export const THEME = {
@@ -20,31 +34,31 @@ export const THEME = {
     background: PALETTE.creamLight,
     text: PALETTE.navyDark,
     card: PALETTE.creamDark,
-    primary: PALETTE.purpleDark,
-    secondary: PALETTE.purpleMedium,
-    accent: PALETTE.pinkDark,
+    primary: PALETTE.primaryPurple, // Updated to match brand
+    secondary: PALETTE.primaryPurpleDeep, // Updated to match brand
+    accent: PALETTE.accentOrange, // Updated
     tabBar: PALETTE.creamDark,
     tabIcon: PALETTE.purpleDeep,
-    tabIconSelected: PALETTE.purpleDark,
+    tabIconSelected: PALETTE.primaryPurple,
   },
   dark: {
-    background: PALETTE.navyDark,
-    text: PALETTE.creamLight,
-    card: PALETTE.navyLight,
-    primary: PALETTE.purpleMedium,
-    secondary: PALETTE.purpleLight,
-    accent: PALETTE.pinkLight,
-    tabBar: PALETTE.navyLight,
-    tabIcon: PALETTE.pinkLight,
-    tabIconSelected: PALETTE.creamLight,
+    background: PALETTE.primaryDarkBase,
+    text: PALETTE.uiWhite,
+    card: PALETTE.bgPanel,
+    primary: PALETTE.primaryPurple,
+    secondary: PALETTE.primaryPurpleDeep,
+    accent: PALETTE.accentCyan,
+    tabBar: PALETTE.bgDeepNight,
+    tabIcon: PALETTE.textMuted,
+    tabIconSelected: PALETTE.primaryPurple,
   },
 };
 
 export const GRADIENTS = {
-  primary: [PALETTE.purpleDark, PALETTE.purpleDeep] as const,
-  secondary: [PALETTE.pinkDark, PALETTE.purpleMedium] as const,
-  accent: [PALETTE.creamLight, PALETTE.creamDark] as const,
-  dark: [PALETTE.navyDark, PALETTE.navyLight] as const,
+  primary: [PALETTE.primaryPurple, PALETTE.primaryPurpleDeep] as const,
+  secondary: [PALETTE.accentCyan, PALETTE.primaryPurple] as const,
+  accent: [PALETTE.accentOrange, PALETTE.pinkLight] as const,
+  dark: [PALETTE.primaryDarkBase, PALETTE.bgDeepNight] as const,
 };
 
 export const SPACING = {
