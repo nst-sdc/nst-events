@@ -31,7 +31,11 @@ model Participant {
     level     Int     @default(1)
 
     // Relations
-    badges ParticipantBadge[]
+    badges        ParticipantBadge[]
+    feedback      Feedback[]
+    photos        Photo[]
+    reportedItems LostFoundItem[]    @relation("ReportedBy")
+    claimedItems  LostFoundItem[]    @relation("ClaimedBy")
 }
 
 model Admin {
@@ -90,6 +94,9 @@ model Event {
 
     venueId String?
     venue   Location? @relation(fields: [venueId], references: [id])
+
+    feedback   Feedback[]
+    volunteers Volunteer[]
 }
 
 model Location {
@@ -115,11 +122,12 @@ model EventParticipant {
 }
 
 model Alert {
-    id         String   @id @default(uuid())
-    title      String
-    message    String
-    createdAt  DateTime @default(now())
-    senderRole String // 'admin' or 'superadmin'
+    id          String   @id @default(uuid())
+    title       String
+    message     String
+    createdAt   DateTime @default(now())
+    senderRole  String // 'admin' or 'superadmin'
+    isEmergency Boolean  @default(false)
 }
 
 model Badge {
@@ -141,4 +149,58 @@ model ParticipantBadge {
 
     participant Participant @relation(fields: [participantId], references: [id])
     badge       Badge       @relation(fields: [badgeId], references: [id])
+}
+
+// Future Features Models
+
+model Volunteer {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    name      String
+    password  String
+    role      String   @default("volunteer")
+    createdAt DateTime @default(now())
+
+    // Volunteers can be assigned to specific events
+    assignedEventId String?
+    event           Event?  @relation(fields: [assignedEventId], references: [id])
+}
+
+model Feedback {
+    id            String   @id @default(uuid())
+    participantId String
+    eventId       String
+    rating        Int // 1-5
+    comment       String?
+    createdAt     DateTime @default(now())
+
+    participant Participant @relation(fields: [participantId], references: [id])
+    event       Event       @relation(fields: [eventId], references: [id])
+}
+
+model Photo {
+    id         String   @id @default(uuid())
+    uploaderId String
+    url        String
+    caption    String?
+    approved   Boolean  @default(false)
+    createdAt  DateTime @default(now())
+
+    uploader Participant @relation(fields: [uploaderId], references: [id])
+}
+
+model LostFoundItem {
+    id           String   @id @default(uuid())
+    type         String // LOST | FOUND
+    category     String   @default("OTHER") // ELECTRONICS | CLOTHING | ACCESSORIES | DOCUMENTS | OTHER
+    title        String
+    description  String?
+    location     String?
+    reportedById String
+    claimedById  String?
+    status       String   @default("OPEN") // OPEN | CLAIMED | CLOSED
+    createdAt    DateTime @default(now())
+
+    reportedBy Participant  @relation("ReportedBy", fields: [reportedById], references: [id])
+    claimedBy  Participant? @relation("ClaimedBy", fields: [claimedById], references: [id])
 }

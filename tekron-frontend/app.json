@@ -23,7 +23,14 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "pwa": {
+        "enabled": true,
+        "offline": {
+          "enabled": true
+        }
+      }
     },
     "plugins": [
       "expo-router",

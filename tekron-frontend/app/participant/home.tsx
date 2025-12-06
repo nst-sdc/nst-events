@@ -121,6 +121,20 @@ export default function ParticipantHome() {
                     </TouchableOpacity>
                 </View>
 
+                <TouchableOpacity
+                    style={styles.serviceCard}
+                    onPress={() => router.push('/participant/lost-found')}
+                >
+                    <View style={styles.serviceIcon}>
+                        <Ionicons name="search" size={24} color={PALETTE.navyDark} />
+                    </View>
+                    <View>
+                        <Text style={styles.serviceTitle}>Lost & Found</Text>
+                        <Text style={styles.serviceSubtitle}>Report or find lost items</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} style={{ marginLeft: 'auto' }} />
+                </TouchableOpacity>
+
                 {liveEvents.length > 0 && (
                     <View style={styles.liveSection}>
                         <View style={styles.liveHeader}>
@@ -345,6 +359,34 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     viewProfileText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.purpleLight,
+    },
+    serviceCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: PALETTE.purpleDeep,
+        padding: SPACING.m,
+        borderRadius: RADIUS.m,
+        marginBottom: SPACING.l,
+        borderWidth: 1,
+        borderColor: PALETTE.purpleMedium,
+    },
+    serviceIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: PALETTE.creamLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: SPACING.m,
+    },
+    serviceTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.creamLight,
+        fontSize: 16,
+    },
+    serviceSubtitle: {
         ...TYPOGRAPHY.caption,
         color: PALETTE.purpleLight,
     },

@@ -150,7 +150,7 @@ Now implement the following features:"
     name        String
     description String?
     iconUrl     String?
-    type        String   // "participant", "winner", "volunteer", etc.
+    type        String  
   }
 
   model ParticipantBadge {
@@ -241,7 +241,7 @@ Now implement the following features:"
 
 ---
 
-### 7️⃣ Volunteer Panel (New Role)
+### 7️⃣ Volunteer Panel (New Role) (Done)
 
 **Goal:** Support volunteers with limited but useful permissions.
 
@@ -294,7 +294,7 @@ Now implement the following features:"
 
 ---
 
-### 🔟 Feedback System Per Event
+### 1️⃣0️⃣ Feedback System Per Event (Done)
 
 **Goal:** Collect insights after every event.
 
@@ -330,7 +330,7 @@ model Feedback {
 
 ---
 
-### 1️⃣1️⃣ Emergency Broadcast Mode
+### 1️⃣1️⃣ Emergency Broadcast Mode (Done)
 
 **Goal:** Critical communication system.
 
@@ -361,7 +361,7 @@ model Feedback {
 
 ---
 
-### 1️⃣4️⃣ Photo Wall (Moderated Gallery)
+### 1️⃣4️⃣ Photo Wall (Moderated Gallery) (Done)
 
 **Goal:** Show Tekron highlights in the app.
 
@@ -397,7 +397,7 @@ model Photo {
 
 ---
 
-### 1️⃣5️⃣ Lost & Found System
+### 1️⃣5️⃣ Lost & Found System (Done)
 
 **Goal:** Simple but powerful Lost & Found.
 

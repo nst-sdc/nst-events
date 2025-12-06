@@ -92,6 +92,18 @@ export default function ParticipantLayout() {
             />
 
             <Tabs.Screen
+                name="gallery"
+                options={{
+                    title: 'Gallery',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="images-outline" size={size} color={color} />
+                    ),
+                    href: user?.approved ? '/participant/gallery' : null,
+                }}
+                redirect={!user?.approved}
+            />
+
+            <Tabs.Screen
                 name="profile"
                 options={{
                     title: 'Profile',
@@ -110,6 +122,14 @@ export default function ParticipantLayout() {
                     // It should hide the tab bar
                     tabBarStyle: { display: 'none' },
                     href: null, // Hide from tab bar
+                }}
+            />
+
+            <Tabs.Screen
+                name="lost-found"
+                options={{
+                    href: null, // Hide from tab bar
+                    tabBarStyle: { display: 'none' }, // Optional: hide tab bar when in lost-found
                 }}
             />
         </Tabs>

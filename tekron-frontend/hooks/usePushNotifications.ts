@@ -25,6 +25,12 @@ export const usePushNotifications = () => {
     const { user } = useAuthStore();
 
     const registerForPushNotificationsAsync = async () => {
+        // Check if running in Expo Go on Android, which doesn't support push notifications in SDK 53+
+        if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
+            console.warn('Push notifications are not supported in Expo Go on Android (SDK 53+). Use a development build.');
+            return;
+        }
+
         let token;
 
         if (Platform.OS === 'android') {
@@ -59,12 +65,6 @@ export const usePushNotifications = () => {
             }
 
             try {
-                // Check if running in Expo Go on Android, which doesn't support push notifications in SDK 53+
-                if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
-                    console.warn('Push notifications are not supported in Expo Go on Android (SDK 53+). Use a development build.');
-                    return;
-                }
-
                 token = (await Notifications.getExpoPushTokenAsync({
                     projectId,
                 })).data;

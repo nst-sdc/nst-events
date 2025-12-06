@@ -13,31 +13,45 @@ import { BACKEND_URL } from '../../constants/config';
 import { IndoorMap } from '../../components/IndoorMap';
 
 export default function MapScreen() {
-    const { logout } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const [showQR, setShowQR] = useState(false);
     const [mapMode, setMapMode] = useState<'VENUE' | 'INDOOR'>('VENUE');
     const [locations, setLocations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+    const [unapprovedMapData, setUnapprovedMapData] = useState<any>(null);
 
     const fetchLocations = async () => {
         try {
             const token = await SecureStore.getItemAsync('token');
-            const res = await fetch(`${BACKEND_URL}/locations`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setLocations(data);
-            }
 
-            // Also fetch QR for the modal
-            const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (qrRes.ok) {
-                const qrData = await qrRes.json();
-                setQrCodeData(qrData.qrCode);
+            if (user?.approved) {
+                const res = await fetch(`${BACKEND_URL}/locations`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setLocations(data);
+                }
+
+                // Also fetch QR for the modal
+                const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (qrRes.ok) {
+                    const qrData = await qrRes.json();
+                    setQrCodeData(qrData.qrCode);
+                }
+            } else {
+                // Fetch unapproved map data
+                const res = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUnapprovedMapData(data);
+                    setQrCodeData(data.qrCode);
+                }
             }
         } catch (error) {
             console.error('Error fetching locations:', error);
@@ -48,7 +62,7 @@ export default function MapScreen() {
 
     useEffect(() => {
         fetchLocations();
-    }, []);
+    }, [user]);
 
     const openGoogleMaps = () => {
         Linking.openURL('https://maps.app.goo.gl/m1h5Hkgu3LsUrnLd9');
@@ -61,6 +75,24 @@ export default function MapScreen() {
         label: loc.name
     }));
 
+    const wrapHtmlContent = (content: string) => `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <style>
+            body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+            iframe { width: 100%; height: 100%; border: 0; }
+        </style>
+    </head>
+    <body>
+        ${content}
+    </body>
+    </html>
+    `;
+
+    const VENUE_MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.265588856342!2d73.91411937501422!3d18.56206128253963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c147b8b3a3bf%3A0x6f7fdcc8e4136c54!2sPhoenix%20Marketcity%20-%20Viman%20Nagar!5e0!3m2!1sen!2sin!4v1709636660000!5m2!1sen!2sin';
+
     return (
         <View style={styles.container}>
             <AppHeader
@@ -69,28 +101,43 @@ export default function MapScreen() {
                 onRightPress={logout}
             />
 
-            <View style={styles.toggleContainer}>
-                <TouchableOpacity
-                    style={[styles.toggleButton, mapMode === 'VENUE' && styles.activeToggle]}
-                    onPress={() => setMapMode('VENUE')}
-                >
-                    <Text style={[styles.toggleText, mapMode === 'VENUE' && styles.activeToggleText]}>Venue Map</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.toggleButton, mapMode === 'INDOOR' && styles.activeToggle]}
-                    onPress={() => setMapMode('INDOOR')}
-                >
-                    <Text style={[styles.toggleText, mapMode === 'INDOOR' && styles.activeToggleText]}>Indoor Map</Text>
-                </TouchableOpacity>
-            </View>
+            {user?.approved && (
+                <View style={styles.toggleContainer}>
+                    <TouchableOpacity
+                        style={[styles.toggleButton, mapMode === 'VENUE' && styles.activeToggle]}
+                        onPress={() => setMapMode('VENUE')}
+                    >
+                        <Text style={[styles.toggleText, mapMode === 'VENUE' && styles.activeToggleText]}>Venue Map</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.toggleButton, mapMode === 'INDOOR' && styles.activeToggle]}
+                        onPress={() => setMapMode('INDOOR')}
+                    >
+                        <Text style={[styles.toggleText, mapMode === 'INDOOR' && styles.activeToggleText]}>Indoor Map</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
             <View style={styles.contentContainer}>
                 {isLoading ? (
                     <ActivityIndicator size="large" color={PALETTE.creamLight} style={{ marginTop: 50 }} />
+                ) : !user?.approved ? (
+                    <View style={{ flex: 1 }}>
+                        <WebView
+                            originWhitelist={['*']}
+                            source={{ html: wrapHtmlContent(unapprovedMapData?.mapIframe || '<h1>Loading Map...</h1>') }}
+                            style={styles.webview}
+                        />
+                        {unapprovedMapData?.instructions && (
+                            <View style={styles.instructionContainer}>
+                                <Text style={styles.instructionText}>{unapprovedMapData.instructions}</Text>
+                            </View>
+                        )}
+                    </View>
                 ) : mapMode === 'VENUE' ? (
                     <WebView
                         originWhitelist={['*']}
-                        source={{ uri: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.265588856342!2d73.91411937501422!3d18.56206128253963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c147b8b3a3bf%3A0x6f7fdcc8e4136c54!2sPhoenix%20Marketcity%20-%20Viman%20Nagar!5e0!3m2!1sen!2sin!4v1709636660000!5m2!1sen!2sin' }}
+                        source={{ html: wrapHtmlContent(`<iframe src="${VENUE_MAP_EMBED_URL}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`) }}
                         style={styles.webview}
                     />
                 ) : (
@@ -107,7 +154,7 @@ export default function MapScreen() {
                     <Text style={styles.primaryButtonText}>Show My Entry Pass</Text>
                 </TouchableOpacity>
 
-                {mapMode === 'VENUE' && (
+                {(mapMode === 'VENUE' || !user?.approved) && (
                     <TouchableOpacity
                         style={styles.secondaryButton}
                         onPress={openGoogleMaps}
@@ -272,6 +319,16 @@ const styles = StyleSheet.create({
     modalInstruction: {
         ...TYPOGRAPHY.body,
         color: PALETTE.purpleDeep,
+        textAlign: 'center',
+    },
+    instructionContainer: {
+        padding: SPACING.m,
+        backgroundColor: PALETTE.purpleDeep,
+        alignItems: 'center',
+    },
+    instructionText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.creamLight,
         textAlign: 'center',
     },
 });

@@ -105,48 +105,59 @@ const styles = StyleSheet.create({
     placeholderMap: {
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height * 0.6,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: '#1a1a2e', // Darker background
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: PALETTE.purpleMedium,
+        // Add a simple grid pattern effect using repeated gradients if possible, or just keep it clean
     },
     placeholderText: {
-        ...TYPOGRAPHY.body,
+        ...TYPOGRAPHY.h3,
         color: PALETTE.purpleLight,
         marginTop: SPACING.m,
     },
     marker: {
         position: 'absolute',
         alignItems: 'center',
-        width: 40,
-        height: 40,
-        marginLeft: -20,
-        marginTop: -20,
+        width: 100, // Increased width to contain label
+        marginLeft: -50, // Center horizontally
+        marginTop: -30, // Position above the point
     },
     markerLabel: {
-        backgroundColor: 'rgba(0,0,0,0.7)',
+        backgroundColor: PALETTE.purpleDeep,
         paddingHorizontal: SPACING.s,
-        paddingVertical: 2,
+        paddingVertical: 4,
         borderRadius: RADIUS.s,
-        marginTop: 2,
+        marginBottom: 4, // Space between label and icon
+        borderWidth: 1,
+        borderColor: PALETTE.purpleLight,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 3,
     },
     markerText: {
-        color: 'white',
+        color: PALETTE.creamLight,
         fontSize: 10,
         fontWeight: 'bold',
+        textAlign: 'center',
     },
     controls: {
         position: 'absolute',
         bottom: SPACING.xl,
         alignSelf: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: SPACING.m,
         paddingVertical: SPACING.s,
         borderRadius: RADIUS.round,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     hintText: {
-        color: 'white',
+        color: PALETTE.creamLight,
         fontSize: 12,
+        fontWeight: '500',
     },
 });
