@@ -67,13 +67,13 @@ const getEvents = async (req, res) => {
 
 const sendAlert = async (req, res) => {
     try {
-        const { title, message } = req.body;
+        const { title, message, isEmergency } = req.body;
         const alert = await prisma.alert.create({
             data: {
-                senderId: req.user.id,
-                senderRole: 'superadmin',
                 title,
-                message
+                message,
+                senderRole: 'superadmin',
+                isEmergency: isEmergency || false
             }
         });
         res.json({ message: 'Alert sent', alert });
@@ -82,4 +82,36 @@ const sendAlert = async (req, res) => {
     }
 };
 
-module.exports = { createAdmin, getAdmins, createEvent, getEvents, sendAlert };
+const updateEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, location, startTime, endTime, status } = req.body;
+
+        const event = await prisma.event.update({
+            where: { id },
+            data: {
+                title,
+                description,
+                location,
+                startTime: startTime ? new Date(startTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+                status
+            }
+        });
+        res.json({ message: 'Event updated', event });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const deleteEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await prisma.event.delete({ where: { id } });
+        res.json({ message: 'Event deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { createAdmin, getAdmins, createEvent, getEvents, sendAlert, updateEvent, deleteEvent };

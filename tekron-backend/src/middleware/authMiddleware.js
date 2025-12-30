@@ -2,7 +2,7 @@ const { verifyToken } = require('../utils/jwt');
 const { PrismaClient } = require('@prisma/client');
 const prisma = require('../utils/prismaClient');
 
-const authenticate = async (req, res, next, role) => {
+const authenticate = async (req, res, next, roles = []) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Unauthorized: No token provided' });
@@ -15,8 +15,13 @@ const authenticate = async (req, res, next, role) => {
         return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
 
-    if (role && decoded.role !== role) {
-        return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
+    // Role check
+    // If roles param is provided (not empty/null), check permissions
+    if (roles && roles.length > 0) {
+        const allowedRoles = Array.isArray(roles) ? roles : [roles];
+        if (!allowedRoles.includes(decoded.role)) {
+            return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
+        }
     }
 
     req.user = decoded;
@@ -59,9 +64,9 @@ const authorizeRole = (allowedRoles) => {
     };
 };
 
-const participantAuth = (req, res, next) => authenticate(req, res, next, 'participant');
-const adminAuth = (req, res, next) => authenticate(req, res, next, 'admin');
-const superAdminAuth = (req, res, next) => authenticate(req, res, next, 'superadmin');
+const participantAuth = (req, res, next) => authenticate(req, res, next, ['participant']);
+const adminAuth = (req, res, next) => authenticate(req, res, next, ['admin', 'superadmin']);
+const superAdminAuth = (req, res, next) => authenticate(req, res, next, ['superadmin']);
 
 module.exports = {
     participantAuth,

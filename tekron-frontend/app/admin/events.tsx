@@ -22,19 +22,38 @@ export default function AdminEvents() {
     const [loading, setLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
     const [currentRound, setCurrentRound] = useState('');
 
+    // New Event Form State
+    const [newEvent, setNewEvent] = useState({
+        title: '',
+        description: '',
+        location: '',
+        startTime: '',
+        endTime: ''
+    });
+
     const fetchEvents = async () => {
+        setLoading(true);
         try {
             const token = await SecureStore.getItemAsync('token');
-            // Using participant endpoint for list, admin endpoint for updates
-            // Ideally should have admin endpoint for all events including status
-            const response = await fetch(`${BACKEND_URL}/participant/events`, {
+            const response = await fetch(`${BACKEND_URL}/superadmin/events`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.ok) {
                 const data = await response.json();
                 setEvents(data);
+            } else {
+                // Fallback if not superadmin (though auth check should handle it)
+                console.log("Failed to fetch from superadmin/events, trying participant/events");
+                const res2 = await fetch(`${BACKEND_URL}/participant/events`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res2.ok) {
+                    const data = await res2.json();
+                    setEvents(data);
+                }
             }
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -47,9 +66,49 @@ export default function AdminEvents() {
         fetchEvents();
     }, []);
 
+    const handleCreateEvent = async () => {
+        if (!newEvent.title || !newEvent.location) {
+            Alert.alert('Error', 'Title and Location are required');
+            return;
+        }
+
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            const response = await fetch(`${BACKEND_URL}/superadmin/create-event`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(newEvent)
+            });
+
+            if (response.ok) {
+                Alert.alert('Success', 'Event created successfully');
+                setCreateModalVisible(false);
+                setNewEvent({ title: '', description: '', location: '', startTime: '', endTime: '' });
+                fetchEvents();
+            } else {
+                const err = await response.json();
+                Alert.alert('Error', err.message || 'Failed to create event');
+            }
+        } catch (error) {
+            console.error('Error creating event:', error);
+            Alert.alert('Error', 'Failed to create event');
+        }
+    };
+
     const updateStatus = async (id: string, status: string, round?: number) => {
         try {
             const token = await SecureStore.getItemAsync('token');
+            // Try updating via superadmin route if strictly superadmin, or admin route?
+            // superAdminRoutes has router.put('/events/:id', updateEvent);
+            // adminRoutes has router.patch('/events/:id/status', updateEventStatus);
+            // I'll try the admin route first as it's for status. 
+            // Actually, let's use the one that works for the user role.
+            // If superadmin, I can use the superadmin update endpoint which does full update.
+            // But for status update, the PATCH is cleaner.
+
             const response = await fetch(`${BACKEND_URL}/admin/events/${id}/status`, {
                 method: 'PATCH',
                 headers: {
@@ -92,10 +151,20 @@ export default function AdminEvents() {
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Manage Events" showBack />
+            <AppHeader
+                title="Manage Events"
+                showBack
+                rightIcon="add-circle-outline"
+                onRightPress={() => setCreateModalVisible(true)}
+            />
             <Loader visible={loading} />
 
             <ScrollView contentContainerStyle={styles.content}>
+                {events.length === 0 && !loading && (
+                    <Text style={{ color: PALETTE.purpleLight, textAlign: 'center', marginTop: 20 }}>
+                        No events found. Create one!
+                    </Text>
+                )}
                 {events.map((event) => (
                     <Card key={event.id} style={styles.card}>
                         <View style={styles.cardHeader}>
@@ -122,6 +191,7 @@ export default function AdminEvents() {
                 ))}
             </ScrollView>
 
+            {/* Status Update Modal */}
             <Modal
                 visible={modalVisible}
                 transparent
@@ -167,6 +237,83 @@ export default function AdminEvents() {
                         >
                             <Text style={styles.closeButtonText}>Close</Text>
                         </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Create Event Modal */}
+            <Modal
+                visible={createModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setCreateModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Create New Event</Text>
+
+                        <ScrollView>
+                            <Text style={styles.label}>Title</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newEvent.title}
+                                onChangeText={(t) => setNewEvent({ ...newEvent, title: t })}
+                                placeholder="Event Title"
+                                placeholderTextColor={PALETTE.purpleLight}
+                            />
+
+                            <Text style={styles.label}>Location</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newEvent.location}
+                                onChangeText={(t) => setNewEvent({ ...newEvent, location: t })}
+                                placeholder="Venue"
+                                placeholderTextColor={PALETTE.purpleLight}
+                            />
+
+                            <Text style={styles.label}>Description</Text>
+                            <TextInput
+                                style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
+                                value={newEvent.description}
+                                onChangeText={(t) => setNewEvent({ ...newEvent, description: t })}
+                                placeholder="Event details..."
+                                placeholderTextColor={PALETTE.purpleLight}
+                                multiline
+                            />
+
+                            <Text style={styles.label}>Start Time (YYYY-MM-DD HH:mm)</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newEvent.startTime}
+                                onChangeText={(t) => setNewEvent({ ...newEvent, startTime: t })}
+                                placeholder="2024-12-31 10:00"
+                                placeholderTextColor={PALETTE.purpleLight}
+                            />
+
+                            <Text style={styles.label}>End Time (YYYY-MM-DD HH:mm)</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newEvent.endTime}
+                                onChangeText={(t) => setNewEvent({ ...newEvent, endTime: t })}
+                                placeholder="2024-12-31 12:00"
+                                placeholderTextColor={PALETTE.purpleLight}
+                            />
+                        </ScrollView>
+
+                        <View style={styles.actionRow}>
+                            <TouchableOpacity
+                                style={[styles.actionButton, { backgroundColor: PALETTE.purpleMedium, marginRight: 8 }]}
+                                onPress={handleCreateEvent}
+                            >
+                                <Text style={styles.actionButtonText}>Create</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.actionButton, { backgroundColor: PALETTE.navyLight, marginLeft: 8 }]}
+                                onPress={() => setCreateModalVisible(false)}
+                            >
+                                <Text style={styles.actionButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -233,6 +380,7 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
         borderWidth: 1,
         borderColor: PALETTE.purpleLight,
+        maxHeight: '80%',
     },
     modalTitle: {
         ...TYPOGRAPHY.h2,

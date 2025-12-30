@@ -113,6 +113,12 @@ export default function AdminDashboard() {
                         onPress={() => router.push('/admin/events')}
                         colors={GRADIENTS.accent}
                     />
+                    <ActionButton
+                        title="Lost & Found"
+                        icon="search-outline"
+                        onPress={() => router.push('/admin/lost-found')}
+                        colors={GRADIENTS.primary}
+                    />
                 </View>
             </ScrollView>
         </View>

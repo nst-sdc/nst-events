@@ -4,10 +4,12 @@ import { useRouter } from 'expo-router';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../../constants/theme';
 import { AppHeader } from '../../../components/AppHeader';
 import { BACKEND_URL } from '../../../constants/config';
+import { useAuthStore } from '../../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
 
 export default function ReportItemScreen() {
     const router = useRouter();
+    const { logout } = useAuthStore();
     const [type, setType] = useState<'LOST' | 'FOUND'>('LOST');
     const [category, setCategory] = useState('OTHER');
     const [title, setTitle] = useState('');
@@ -46,7 +48,15 @@ export default function ReportItemScreen() {
                     { text: 'OK', onPress: () => router.back() }
                 ]);
             } else {
-                Alert.alert('Error', 'Failed to report item');
+                if (res.status === 401) {
+                    Alert.alert('Session Expired', 'Please login again', [
+                        { text: 'OK', onPress: () => logout() }
+                    ]);
+                    return;
+                }
+                const errorData = await res.json();
+                console.error('Report item error:', errorData);
+                Alert.alert('Error', errorData.message || 'Failed to report item');
             }
         } catch (error) {
             console.error('Error reporting item:', error);
