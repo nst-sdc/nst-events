@@ -1,27 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../context/authStore';
 import { BACKEND_URL } from '../constants/config';
 import * as SecureStore from 'expo-secure-store';
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
-});
+let Notifications: any;
+try {
+    Notifications = require('expo-notifications');
+} catch (error) {
+    console.warn('expo-notifications could not be loaded', error);
+}
 
 export const usePushNotifications = () => {
     const [expoPushToken, setExpoPushToken] = useState<string | undefined>();
-    const [notification, setNotification] = useState<Notifications.Notification | undefined>();
-    const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
-    const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
+    const [notification, setNotification] = useState<any | undefined>(); // Changed type to any for safety
+    const notificationListener = useRef<any | undefined>(undefined);
+    const responseListener = useRef<any | undefined>(undefined);
     const { user } = useAuthStore();
 
     const registerForPushNotificationsAsync = async () => {
@@ -33,7 +29,7 @@ export const usePushNotifications = () => {
 
         let token;
 
-        if (Platform.OS === 'android') {
+        if (Platform.OS === 'android' && Notifications) {
             await Notifications.setNotificationChannelAsync('default', {
                 name: 'default',
                 importance: Notifications.AndroidImportance.MAX,
@@ -42,7 +38,7 @@ export const usePushNotifications = () => {
             });
         }
 
-        if (Device.isDevice) {
+        if (Device.isDevice && Notifications) {
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
             if (existingStatus !== 'granted') {
@@ -77,7 +73,11 @@ export const usePushNotifications = () => {
                 console.error('Error getting push token:', e);
             }
         } else {
-            console.log('Must use physical device for Push Notifications');
+            if (!Notifications) {
+                console.warn("Notifications module not loaded");
+            } else {
+                console.log('Must use physical device for Push Notifications');
+            }
         }
 
         return token;
@@ -102,6 +102,21 @@ export const usePushNotifications = () => {
     };
 
     useEffect(() => {
+        // Check if running in Expo Go on Android, which doesn't support push notifications in SDK 53+
+        if ((Platform.OS !== 'android' || Constants.appOwnership !== 'expo') && Notifications) {
+            Notifications.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: true,
+                    shouldPlaySound: true,
+                    shouldSetBadge: false,
+                    shouldShowBanner: true,
+                    shouldShowList: true,
+                }),
+            });
+        }
+    }, []);
+
+    useEffect(() => {
         if (user) {
             registerForPushNotificationsAsync().then(token => {
                 setExpoPushToken(token);
@@ -110,13 +125,15 @@ export const usePushNotifications = () => {
                 }
             });
 
-            notificationListener.current = Notifications.addNotificationReceivedListener((notification: Notifications.Notification) => {
-                setNotification(notification);
-            });
+            if (Notifications) {
+                notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
+                    setNotification(notification);
+                });
 
-            responseListener.current = Notifications.addNotificationResponseReceivedListener((response: Notifications.NotificationResponse) => {
-                console.log(response);
-            });
+                responseListener.current = Notifications.addNotificationResponseReceivedListener((response: any) => {
+                    console.log(response);
+                });
+            }
 
             return () => {
                 if (notificationListener.current) {

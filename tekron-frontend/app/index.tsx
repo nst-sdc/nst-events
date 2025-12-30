@@ -20,20 +20,20 @@ export default function Index() {
         if (!isAuthenticated) {
             if (!inAuthGroup) {
                 console.log('Index: redirecting to login');
-                router.replace('/auth/login');
+                setTimeout(() => router.replace('/auth/login'), 0);
             }
         } else if (user) {
             console.log('Index: authenticated user role:', user.role);
             if (user.role === 'admin' || user.role === 'superadmin') {
-                router.replace('/admin/dashboard');
+                setTimeout(() => router.replace('/admin/dashboard'), 0);
             } else if (user.role === 'participant') {
                 if (user.approved) {
-                    router.replace('/participant/home');
+                    setTimeout(() => router.replace('/participant/home'), 0);
                 } else {
-                    router.replace('/participant/map');
+                    setTimeout(() => router.replace('/participant/map'), 0);
                 }
             } else if (user.role === 'superadmin') {
-                router.replace('/admin/dashboard');
+                setTimeout(() => router.replace('/admin/dashboard'), 0);
             }
         }
     }, [isAuthenticated, user, isLoading, segments, router, rootNavigationState]);
