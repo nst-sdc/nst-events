@@ -1,4 +1,4 @@
-import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -13,9 +13,10 @@ interface AppHeaderProps {
 
 export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: AppHeaderProps) {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + SPACING.m }]}>
             <View style={styles.leftContainer}>
                 {showBack && (
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -40,9 +41,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.l,
-        paddingVertical: SPACING.m,
+        paddingBottom: SPACING.m,
         backgroundColor: PALETTE.purpleDeep,
-        paddingTop: SPACING.xl, // Status bar padding
+        // paddingTop is handled dynamically via insets
     },
     leftContainer: {
         flexDirection: 'row',

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
@@ -28,6 +29,7 @@ export default function ParticipantHome() {
     const [liveEvents, setLiveEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [pulseAnim] = useState(new Animated.Value(1));
+    const insets = useSafeAreaInsets();
 
     const fetchEvents = async () => {
         try {
@@ -99,7 +101,7 @@ export default function ParticipantHome() {
             />
 
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.l }]}
                 refreshControl={
                     <RefreshControl refreshing={loading} onRefresh={fetchEvents} tintColor={PALETTE.creamLight} />
                 }

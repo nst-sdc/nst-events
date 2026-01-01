@@ -204,3 +204,11 @@ model LostFoundItem {
     reportedBy Participant  @relation("ReportedBy", fields: [reportedById], references: [id])
     claimedBy  Participant? @relation("ClaimedBy", fields: [claimedById], references: [id])
 }
+
+model MagicLinkToken {
+    id        String   @id @default(uuid())
+    email     String
+    token     String   @unique
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+}

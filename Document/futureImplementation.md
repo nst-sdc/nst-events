@@ -266,7 +266,7 @@ Now implement the following features:"
 
 ---
 
-### 9️⃣ Offline Mode / PWA Support
+### 9️⃣ Offline Mode / PWA Support (Partially Done - PWA Enabled)
 
 **Goal:** App usable even with bad/no internet.
 
@@ -436,7 +436,7 @@ model LostFoundItem {
 
 ---
 
-### 🧠 BONUS — SuperAdmin Analytics Dashboards
+### 🧠 BONUS — SuperAdmin Analytics Dashboards (Pending)
 
 **Goal:** Give SuperAdmin a full view of Tekron.
 

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ export default function AdminDashboard() {
     const router = useRouter();
     const { logout } = useAuthStore();
     const { stats, fetchStats, isLoading } = useAdminStore();
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         fetchStats();
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
             />
 
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.l }]}
                 refreshControl={
                     <RefreshControl refreshing={isLoading} onRefresh={fetchStats} tintColor={PALETTE.creamLight} />
                 }

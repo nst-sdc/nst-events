@@ -65,4 +65,130 @@ const registerParticipant = async (req, res) => {
     return res.status(403).json({ message: 'User registration is not allowed. Contact Event Management.' });
 };
 
-module.exports = { login, registerParticipant };
+const crypto = require('crypto');
+
+// Magic Login: Generate Token
+const magicLogin = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        // Check if user exists (any role)
+        let role = 'participant';
+        let user = await prisma.participant.findUnique({ where: { email } });
+
+        if (!user) {
+            if (email.endsWith('@superadmin.com')) {
+                role = 'superadmin';
+                user = await prisma.superAdmin.findUnique({ where: { email } });
+            } else if (email.endsWith('@admin.com')) {
+                role = 'admin';
+                user = await prisma.admin.findUnique({ where: { email } });
+            }
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found. Check your email or contact support.' });
+        }
+
+        // Generate Secure Token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+        // Store Token
+        await prisma.magicLinkToken.create({
+            data: {
+                email,
+                token,
+                expiresAt
+            }
+        });
+
+        // Mock Email Sending (Log Deep Link)
+        const deepLink = `tekron://auth/callback?token=${token}`;
+        console.log('---------------------------------------------------');
+        console.log('MAGIC LINK GENERATED:');
+        console.log(`Email: ${email}`);
+        console.log(`Link:  ${deepLink}`);
+        console.log('---------------------------------------------------');
+
+        res.json({ message: 'Magic link sent to your email (check console for now)' });
+
+    } catch (error) {
+        console.error('Magic Login Error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Verify Token & Login
+const verifyMagicToken = async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(400).json({ message: 'Token is required' });
+
+        // Find Token
+        const magicToken = await prisma.magicLinkToken.findUnique({ where: { token } });
+
+        if (!magicToken) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Check Expiration Explicitly
+        if (new Date() > new Date(magicToken.expiresAt)) {
+            await prisma.magicLinkToken.delete({ where: { id: magicToken.id } }); // Cleanup
+            return res.status(400).json({ message: 'Token expired' });
+        }
+
+        const email = magicToken.email;
+
+        // Find User again to generate JWT
+        let role = 'participant';
+        let user = await prisma.participant.findUnique({ where: { email } });
+
+        if (!user) {
+            if (email.endsWith('@superadmin.com')) {
+                role = 'superadmin';
+                user = await prisma.superAdmin.findUnique({ where: { email } });
+            } else if (email.endsWith('@admin.com')) {
+                role = 'admin';
+                user = await prisma.admin.findUnique({ where: { email } });
+            }
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Generate Session JWT
+        const sessionToken = generateToken({ id: user.id, role });
+
+        // Cleanup Used Token (One-time use)
+        await prisma.magicLinkToken.delete({ where: { id: magicToken.id } });
+
+        // Return same response structure as normal login
+        const userData = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role,
+        };
+
+        if (role === 'participant') {
+            userData.approved = user.approved;
+            userData.qrCode = user.qrCode;
+        }
+
+        res.json({
+            message: 'Login successful',
+            token: sessionToken,
+            user: userData,
+            role
+        });
+
+    } catch (error) {
+        console.error('Verify Token Error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { login, registerParticipant, magicLogin, verifyMagicToken };

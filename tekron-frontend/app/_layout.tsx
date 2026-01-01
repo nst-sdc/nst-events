@@ -4,6 +4,7 @@ import { useAuthStore } from '../context/authStore';
 import { StatusBar } from 'expo-status-bar';
 import { THEME } from '../constants/theme';
 import Toast from 'react-native-toast-message';
+import AuthLinkHandler from './utils/AuthLinkHandler';
 
 export default function RootLayout() {
     const restoreSession = useAuthStore((state) => state.restoreSession);
@@ -23,6 +24,7 @@ export default function RootLayout() {
                 <Stack.Screen name="admin/dashboard" />
                 <Stack.Screen name="participant" />
             </Stack>
+            <AuthLinkHandler />
             <Toast />
         </>
     );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +12,7 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, isLoading } = useAuthStore();
+    const insets = useSafeAreaInsets();
 
     // Popup State
     const [popupVisible, setPopupVisible] = useState(false);
@@ -58,7 +60,7 @@ export default function Login() {
     return (
         <LinearGradient
             colors={[PALETTE.purpleDeep, PALETTE.purpleDark]}
-            style={styles.container}
+            style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

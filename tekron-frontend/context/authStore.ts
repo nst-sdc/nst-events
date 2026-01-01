@@ -23,6 +23,7 @@ interface AuthState {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     restoreSession: () => Promise<void>;
+    setSession: (user: User, token: string) => Promise<void>;
 }
 
 import { BACKEND_URL } from '../constants/config';
@@ -82,6 +83,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await SecureStore.deleteItemAsync('user');
         set({ user: null, isAuthenticated: false });
         router.replace('/auth/login');
+    },
+
+    setSession: async (user, token) => {
+        await SecureStore.setItemAsync('token', token);
+        await SecureStore.setItemAsync('user', JSON.stringify(user));
+        set({ user, isAuthenticated: true, isLoading: false });
     },
 
     restoreSession: async () => {
