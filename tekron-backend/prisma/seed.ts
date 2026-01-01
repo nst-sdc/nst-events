@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -67,7 +67,7 @@ async function main() {
         { name: 'Innovation Hub', building: 'Block D', floor: '4th Floor', mapCode: 'HUB-401', isPublic: true },
     ];
 
-    const createdLocations = [];
+    const createdLocations: any[] = [];
     for (const loc of locationsData) {
         const createdLoc = await prisma.location.create({ data: loc });
         createdLocations.push(createdLoc);
@@ -167,8 +167,9 @@ async function main() {
         }
     ];
 
-    const createdEvents = [];
+    const createdEvents: any[] = [];
     for (const evt of eventsData) {
+        // @ts-ignore
         const createdEvent = await prisma.event.create({ data: evt });
         createdEvents.push(createdEvent);
         console.log(`Event created: ${createdEvent.title}`);
