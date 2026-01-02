@@ -1,279 +1,160 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, EventStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker/locale/en_IN';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Start seeding Tekron database...');
+    console.log('🌱 Starting secure seed...');
 
-    // ------------------------------------------
-    // 1. CLEAN DATABASE IN PROPER DEPENDENCY ORDER
-    // ------------------------------------------
-
+    // 1. Cleanup
+    console.log('🧹 Cleaning up database...');
     await prisma.approvalLog.deleteMany();
+    await prisma.magicLinkToken.deleteMany();
     await prisma.eventParticipant.deleteMany();
-    await prisma.alert.deleteMany();
-    await prisma.participant.deleteMany();
-    await prisma.event.deleteMany();
-    await prisma.location.deleteMany();
-    await prisma.admin.deleteMany();
-    await prisma.superAdmin.deleteMany();
+    await prisma.participantBadge.deleteMany();
+    await prisma.feedback.deleteMany();
+    await prisma.photo.deleteMany();
+    await prisma.lostFoundItem.deleteMany();
+    await prisma.admin.deleteMany(); // Reset Admins
+    await prisma.participant.deleteMany(); // Reset Participants
+    await prisma.event.deleteMany(); // Reset Events
 
-    // ------------------------------------------
-    // 2. HASH PASSWORDS
-    // ------------------------------------------
-    const defaultPass = await bcrypt.hash('Password', 10);
-    const arpitPass = await bcrypt.hash('ArpitSarang', 10);
-    const maverickPass = await bcrypt.hash('Maverick', 10);
+    // 2. Master User "Arpit Sarang"
+    const masterPassword = await bcrypt.hash('ArpitSarang', 10);
 
-    // ------------------------------------------
-    // 3. CREATE SUPERADMIN
-    // ------------------------------------------
-    const superAdmin = await prisma.superAdmin.create({
-        data: {
-            email: 'superadmin@superadmin.com',
-            name: 'Super Admin',
-            password: defaultPass,
-        },
-    });
-    console.log(`SuperAdmin created: ${superAdmin.email}`);
-
-    // ------------------------------------------
-    // 4. CREATE ADMIN
-    // ------------------------------------------
-    const admin = await prisma.admin.create({
-        data: {
-            email: 'admin@admin.com',
-            name: 'Event Admin',
-            password: defaultPass,
-        },
-    });
-    console.log(`Admin created: ${admin.email}`);
-
-    // ------------------------------------------
-    // 5. CREATE LOCATIONS & EVENTS
-    // ------------------------------------------
-
-    const locationsData = [
-        { name: 'Main Auditorium', building: 'Block A', floor: 'Ground', mapCode: 'AUD-001', isPublic: true },
-        { name: 'Seminar Hall 1', building: 'Block A', floor: '1st Floor', mapCode: 'SEM-101', isPublic: true },
-        { name: 'Computer Lab 1', building: 'Block B', floor: '2nd Floor', mapCode: 'LAB-201', isPublic: true },
-        { name: 'Computer Lab 2', building: 'Block B', floor: '2nd Floor', mapCode: 'LAB-202', isPublic: true },
-        { name: 'Workshop Area', building: 'Block C', floor: 'Ground', mapCode: 'WS-001', isPublic: true },
-        { name: 'Conference Room', building: 'Admin Block', floor: '3rd Floor', mapCode: 'CONF-301', isPublic: true },
-        { name: 'Open Air Theatre', building: 'Campus Grounds', floor: 'Ground', mapCode: 'OAT-001', isPublic: true },
-        { name: 'Cafeteria', building: 'Student Center', floor: 'Ground', mapCode: 'CAFE-001', isPublic: true },
-        { name: 'Library Discussion Room', building: 'Library', floor: '1st Floor', mapCode: 'LIB-101', isPublic: true },
-        { name: 'Innovation Hub', building: 'Block D', floor: '4th Floor', mapCode: 'HUB-401', isPublic: true },
-    ];
-
-    const createdLocations: any[] = [];
-    for (const loc of locationsData) {
-        const createdLoc = await prisma.location.create({ data: loc });
-        createdLocations.push(createdLoc);
-        console.log(`Location created: ${loc.name}`);
-    }
-
-    const eventsData = [
-        {
-            title: 'Tekron 2025 Opening Ceremony',
-            description: 'Grand opening of the tech fest.',
-            location: 'Main Auditorium - Room 001',
-            startTime: new Date('2025-12-10T09:00:00Z'),
-            endTime: new Date('2025-12-10T11:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[0].id
-        },
-        {
-            title: 'AI & ML Workshop',
-            description: 'Hands-on session on Artificial Intelligence.',
-            location: 'Computer Lab 1 - Room 201',
-            startTime: new Date('2025-12-10T12:00:00Z'),
-            endTime: new Date('2025-12-10T15:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[2].id
-        },
-        {
-            title: 'Hackathon Kickoff',
-            description: 'Start of the 24-hour hackathon.',
-            location: 'Seminar Hall 1 - Room 101',
-            startTime: new Date('2025-12-10T16:00:00Z'),
-            endTime: new Date('2025-12-10T17:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[1].id
-        },
-        {
-            title: 'Cybersecurity Talk',
-            description: 'Expert talk on modern security threats.',
-            location: 'Conference Room - Room 301',
-            startTime: new Date('2025-12-11T10:00:00Z'),
-            endTime: new Date('2025-12-11T12:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[5].id
-        },
-        {
-            title: 'Robotics Showcase',
-            description: 'Display of student robotics projects.',
-            location: 'Workshop Area - Room 001',
-            startTime: new Date('2025-12-11T14:00:00Z'),
-            endTime: new Date('2025-12-11T17:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[4].id
-        },
-        {
-            title: 'Coding Contest',
-            description: 'Competitive programming challenge.',
-            location: 'Computer Lab 2 - Room 202',
-            startTime: new Date('2025-12-11T09:00:00Z'),
-            endTime: new Date('2025-12-11T12:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[3].id
-        },
-        {
-            title: 'Cultural Night',
-            description: 'Music and dance performances.',
-            location: 'Open Air Theatre - Room 001',
-            startTime: new Date('2025-12-11T19:00:00Z'),
-            endTime: new Date('2025-12-11T22:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[6].id
-        },
-        {
-            title: 'Startup Pitch',
-            description: 'Students pitch their startup ideas.',
-            location: 'Innovation Hub - Room 401',
-            startTime: new Date('2025-12-12T10:00:00Z'),
-            endTime: new Date('2025-12-12T13:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[9].id
-        },
-        {
-            title: 'Networking Lunch',
-            description: 'Lunch with industry experts.',
-            location: 'Cafeteria - Room 001',
-            startTime: new Date('2025-12-12T13:00:00Z'),
-            endTime: new Date('2025-12-12T14:30:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[7].id
-        },
-        {
-            title: 'Closing Ceremony',
-            description: 'Prize distribution and closing remarks.',
-            location: 'Main Auditorium - Room 001',
-            startTime: new Date('2025-12-12T16:00:00Z'),
-            endTime: new Date('2025-12-12T18:00:00Z'),
-            status: 'UPCOMING',
-            venueId: createdLocations[0].id
-        }
-    ];
-
-    const createdEvents: any[] = [];
-    for (const evt of eventsData) {
-        // @ts-ignore
-        const createdEvent = await prisma.event.create({ data: evt });
-        createdEvents.push(createdEvent);
-        console.log(`Event created: ${createdEvent.title}`);
-    }
-
-    // Assign one event to variables for later use in seed
-    const event = createdEvents[0];
-
-    // ------------------------------------------
-    // 6. CREATE PARTICIPANTS
-    // ------------------------------------------
-
-    // Approved Participant
-    const participant1 = await prisma.participant.create({
-        data: {
-            email: 'arpit@example.com',
+    const arpit = await prisma.participant.upsert({
+        where: { email: 'arpitsarang@gmail.com' },
+        update: {
             name: 'Arpit Sarang',
-            password: arpitPass,
+            password: masterPassword,
             approved: true,
-            assignedEventId: event.id,
-            qrCode: JSON.stringify({
-                type: 'participant',
-                email: 'arpit@example.com',
-                eventId: event.id,
-            }),
-            approvedById: admin.id,
-            approvedAt: new Date(),
+        },
+        create: {
+            email: 'arpitsarang@gmail.com',
+            name: 'Arpit Sarang',
+            password: masterPassword,
+            approved: true,
         },
     });
-    console.log(`Approved Participant created: ${participant1.email}`);
 
-    // Unapproved Participant
-    const participant2 = await prisma.participant.create({
+    console.log('👤 Upserted Master User: Arpit Sarang');
+
+    // 3. Magic Link for Arpit
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await prisma.magicLinkToken.create({
         data: {
-            email: 'maverick@example.com',
-            name: 'Maverick',
-            password: maverickPass,
-            approved: false,
-            qrCode: JSON.stringify({
-                type: 'participant',
-                email: 'maverick@example.com',
-            }),
+            email: arpit.email,
+            token: token,
+            expiresAt: expiresAt,
         },
     });
-    console.log(`Unapproved Participant created: ${participant2.email}`);
 
-    // ------------------------------------------
-    // 7. CREATE EVENT PARTICIPANT RECORDS
-    // ------------------------------------------
+    console.log(`🚀 ARPIT LOGIN LINK: tekron://auth/callback?token=${token}`);
 
-    await prisma.eventParticipant.create({
+    // 4. Create 2 Admins
+    const admins = ['admin1@tekron.com', 'admin2@tekron.com'];
+    for (const adminEmail of admins) {
+        let adminPass = faker.internet.password();
+        if (adminEmail === 'admin1@tekron.com') {
+            adminPass = 'AdminPass123!';
+        }
+        const adminHash = await bcrypt.hash(adminPass, 10);
+
+        await prisma.admin.create({
+            data: {
+                email: adminEmail,
+                name: faker.person.fullName(),
+                password: adminHash,
+            }
+        });
+        console.log(`🛡️ Created Admin: ${adminEmail} (Pass: ${adminPass})`);
+    }
+
+    // 5. Dummy Participants (50 Unique Passwords)
+    // 5. Dummy Participants
+    console.log('👥 Creating 50 Dummy Participants...');
+
+    // Create deterministic test user first
+    const testUserPass = await bcrypt.hash('TestPass123!', 10);
+    await prisma.participant.create({
         data: {
-            participantId: participant1.id,
-            eventId: event.id,
-            score: 0,
-            rank: null,
+            email: 'testuser@tekron.com',
+            name: 'Test Participant',
+            password: testUserPass,
+            approved: true,
+            xp: 100,
+            level: 5
+        }
+    });
+    console.log(`   [FIXED TEST USER] Email: testuser@tekron.com | Pass: TestPass123!`);
+
+    for (let i = 0; i < 50; i++) {
+        const plainPassword = faker.internet.password();
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+        const email = faker.internet.email();
+        const name = faker.person.fullName();
+
+        await prisma.participant.create({
+            data: {
+                email: email,
+                name: name,
+                password: hashedPassword,
+                approved: faker.datatype.boolean(),
+                xp: faker.number.int({ min: 0, max: 1000 }),
+                level: faker.number.int({ min: 1, max: 10 }),
+            },
+        });
+
+        // Log first 5 for testing
+        if (i < 5) {
+            console.log(`   [TEST USER ${i + 1}] Email: ${email} | Pass: ${plainPassword}`);
+        }
+    }
+
+    // 6. Dummy Events
+    const events = [
+        {
+            title: 'Hackron 2.0',
+            description: 'The ultimate hackathon event.',
+            location: 'Main Auditorium',
+            startTime: new Date(new Date().setHours(9, 0, 0, 0)),
+            endTime: new Date(new Date().setHours(21, 0, 0, 0)),
+            status: EventStatus.UPCOMING,
         },
+        {
+            title: 'RoboWars',
+            description: 'Battle of the bots.',
+            location: 'Open Ground',
+            startTime: new Date(new Date().setDate(new Date().getDate() + 1)),
+            endTime: new Date(new Date().setDate(new Date().getDate() + 1)),
+            status: EventStatus.UPCOMING,
+        },
+        {
+            title: 'Keynote Session',
+            description: 'Insights from industry leaders.',
+            location: 'Seminar Hall',
+            startTime: new Date(new Date().setDate(new Date().getDate() + 2)),
+            endTime: new Date(new Date().setDate(new Date().getDate() + 2)),
+            status: EventStatus.UPCOMING,
+        },
+    ];
+
+    await prisma.event.createMany({
+        data: events
     });
 
-    await prisma.eventParticipant.create({
-        data: {
-            participantId: participant2.id,
-            eventId: event.id,
-            score: 0,
-            rank: null,
-        },
-    });
+    console.log('📅 Created 3 Dummy Events');
 
-    console.log('Event participants linked');
-
-    // ------------------------------------------
-    // 8. CREATE APPROVAL LOG
-    // ------------------------------------------
-
-    await prisma.approvalLog.create({
-        data: {
-            participantId: participant1.id,
-            adminId: admin.id,
-            notes: 'Approved during initial onboarding',
-        },
-    });
-
-    console.log('Approval log created');
-
-    // ------------------------------------------
-    // 9. CREATE ALERT
-    // ------------------------------------------
-
-    await prisma.alert.create({
-        data: {
-            title: 'Welcome to Tekron',
-            message: 'Your journey at Tekron 2025 starts now. Check the schedule for upcoming sessions.',
-            senderRole: 'admin',
-        },
-    });
-
-    console.log('Alert created');
-
-    console.log('Seeding completed.');
+    console.log('✅ Secure Seeding completed!');
 }
 
 main()
     .catch((e) => {
-        console.error('Seeding failed:', e);
+        console.error(e);
         process.exit(1);
     })
     .finally(async () => {
