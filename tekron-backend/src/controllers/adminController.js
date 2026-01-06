@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = require('../utils/prismaClient');
+const { generateQRCodeString } = require('../utils/qr');
 
 // Get All Participants
 const getParticipants = async (req, res) => {
@@ -79,6 +80,7 @@ const approveParticipant = async (req, res) => {
                     approved: true,
                     approvedById: adminId,
                     approvedAt: new Date(),
+                    qrCode: generateQRCodeString(participant.id, participant.createdAt)
                 },
                 include: { approvedBy: true }
             });

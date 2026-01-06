@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = require('../utils/prismaClient');
+const { generateQRCodeString } = require('../utils/qr');
 
 const MAP_IFRAME = '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d699.6968808032617!2d73.91286237932246!3d18.621136861780464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c7007ca391d7%3A0x9da4723c416a8ee5!2sNewton%20school%20of%20technology%20pune%20campus!5e1!3m2!1sen!2sin!4v1764750287016!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
 
@@ -51,11 +52,20 @@ const getParticipantStatus = async (req, res) => {
 // Get QR Code
 const getParticipantQR = async (req, res) => {
     try {
-        const participant = await prisma.participant.findUnique({
+        let participant = await prisma.participant.findUnique({
             where: { id: req.user.id }
         });
 
         if (!participant) return res.status(404).json({ message: 'Participant not found' });
+
+        // Self-healing: If approved but no QR, generate it now
+        if (participant.approved && !participant.qrCode) {
+            const qrCode = generateQRCodeString(participant.id, participant.createdAt);
+            participant = await prisma.participant.update({
+                where: { id: participant.id },
+                data: { qrCode }
+            });
+        }
 
         res.json({
             approved: participant.approved,

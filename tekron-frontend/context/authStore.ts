@@ -92,24 +92,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     restoreSession: async () => {
-        console.log('restoreSession: starting');
+
         set({ isLoading: true });
         try {
             const token = await SecureStore.getItemAsync('token');
             const userString = await SecureStore.getItemAsync('user');
-            console.log('restoreSession: token found?', !!token);
+
 
             if (token && userString) {
                 const user = JSON.parse(userString);
-                console.log('restoreSession: restoring user', user.email);
+
                 set({ user, isAuthenticated: true });
             } else {
-                console.log('restoreSession: no session found');
+
             }
         } catch (error) {
             console.error('Restore session error:', error);
         } finally {
-            console.log('restoreSession: finished, setting isLoading false');
+
             set({ isLoading: false });
         }
     },

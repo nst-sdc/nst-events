@@ -31,7 +31,7 @@ export default function AuthLinkHandler() {
         // Check if it's our auth callback
         if (!url || !url.includes('auth/callback')) return;
 
-        console.log('Deep link received:', url);
+
 
         try {
             // Extract token from query params

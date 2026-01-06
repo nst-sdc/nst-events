@@ -11,6 +11,7 @@ import { Popup } from '../../components/Popup';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading } = useAuthStore();
     const insets = useSafeAreaInsets();
 
@@ -94,8 +95,15 @@ export default function Login() {
                                 placeholderTextColor={PALETTE.purpleLight}
                                 value={password}
                                 onChangeText={setPassword}
-                                secureTextEntry
+                                secureTextEntry={!showPassword}
                             />
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <Ionicons
+                                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                    size={20}
+                                    color={PALETTE.purpleLight}
+                                />
+                            </TouchableOpacity>
                         </View>
 
                         <TouchableOpacity onPress={handleLogin} activeOpacity={0.8} disabled={isLoading}>

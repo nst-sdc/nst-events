@@ -8,7 +8,8 @@ const prisma = require('../utils/prismaClient');
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('Login attempt:', { email, password });
+
+
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
@@ -16,22 +17,25 @@ const login = async (req, res) => {
         let user;
         let role;
 
-        // Determine role based on email domain
-        if (email.endsWith('@superadmin.com')) {
+        // Determine role based on email domain or specific test accounts
+        if (email.endsWith('@superadmin.com') || email === 'superadmin@gmail.com') {
             role = 'superadmin';
             user = await prisma.superAdmin.findUnique({ where: { email } });
-        } else if (email.endsWith('@admin.com')) {
+        } else if (email.endsWith('@admin.com') || email === 'admin@gmail.com') {
             role = 'admin';
             user = await prisma.admin.findUnique({ where: { email } });
+        } else if (email === 'volunteer@gmail.com') {
+            role = 'volunteer';
+            user = await prisma.volunteer.findUnique({ where: { email } });
         } else {
             role = 'participant';
             user = await prisma.participant.findUnique({ where: { email } });
         }
 
-        console.log('User found:', user ? user.email : 'No user found');
+
         if (user) {
             const isMatch = await bcrypt.compare(password, user.password);
-            console.log('Password match:', isMatch);
+
         }
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -106,11 +110,8 @@ const magicLogin = async (req, res) => {
 
         // Mock Email Sending (Log Deep Link)
         const deepLink = `tekron://auth/callback?token=${token}`;
-        console.log('---------------------------------------------------');
-        console.log('MAGIC LINK GENERATED:');
-        console.log(`Email: ${email}`);
-        console.log(`Link:  ${deepLink}`);
-        console.log('---------------------------------------------------');
+
+
 
         res.json({ message: 'Magic link sent to your email (check console for now)' });
 

@@ -12,18 +12,18 @@ export default function Index() {
     const rootNavigationState = useRootNavigationState();
 
     useEffect(() => {
-        console.log('Index: effect triggered', { isLoading, isAuthenticated, user: user?.email, segments });
+
         if (isLoading || !rootNavigationState?.key) return;
 
         const inAuthGroup = segments[0] === 'auth';
 
         if (!isAuthenticated) {
             if (!inAuthGroup) {
-                console.log('Index: redirecting to login');
+
                 setTimeout(() => router.replace('/auth/login'), 0);
             }
         } else if (user) {
-            console.log('Index: authenticated user role:', user.role);
+
             if (user.role === 'admin' || user.role === 'superadmin') {
                 setTimeout(() => router.replace('/admin/dashboard'), 0);
             } else if (user.role === 'participant') {

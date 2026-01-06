@@ -132,6 +132,13 @@ export default function ParticipantLayout() {
                     tabBarStyle: { display: 'none' }, // Optional: hide tab bar when in lost-found
                 }}
             />
+
+            <Tabs.Screen
+                name="settings"
+                options={{
+                    href: null, // Hide from tab bar
+                }}
+            />
         </Tabs>
     );
 }

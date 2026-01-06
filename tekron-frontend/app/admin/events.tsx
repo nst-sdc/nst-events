@@ -46,7 +46,7 @@ export default function AdminEvents() {
                 setEvents(data);
             } else {
                 // Fallback if not superadmin (though auth check should handle it)
-                console.log("Failed to fetch from superadmin/events, trying participant/events");
+
                 const res2 = await fetch(`${BACKEND_URL}/participant/events`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

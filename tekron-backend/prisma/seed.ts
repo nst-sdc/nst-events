@@ -1,9 +1,19 @@
 import { PrismaClient, EventStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { faker } from '@faker-js/faker/locale/en_IN';
+
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
+
+const generateQRCodeString = (participantId: string, createdAt: Date) => {
+    const data = {
+        id: participantId,
+        timestamp: new Date(createdAt).toISOString(),
+        type: 'participant_qr'
+    };
+    return JSON.stringify(data);
+};
 
 async function main() {
     console.log('🌱 Starting secure seed...');
@@ -19,10 +29,14 @@ async function main() {
     await prisma.lostFoundItem.deleteMany();
     await prisma.admin.deleteMany(); // Reset Admins
     await prisma.participant.deleteMany(); // Reset Participants
+    await prisma.volunteer.deleteMany();
+    await prisma.superAdmin.deleteMany();
     await prisma.event.deleteMany(); // Reset Events
 
     // 2. Master User "Arpit Sarang"
     const masterPassword = await bcrypt.hash('ArpitSarang', 10);
+    // Use fixed ID for master user to generate stable QR
+    const arpitId = 'master-admin-id';
 
     const arpit = await prisma.participant.upsert({
         where: { email: 'arpitsarang@gmail.com' },
@@ -30,16 +44,63 @@ async function main() {
             name: 'Arpit Sarang',
             password: masterPassword,
             approved: true,
+            // We can't easily update QR here without knowing the ID first if upsert is update, 
+            // but for seed repeatedly running it's fine. 
+            // Simplified: won't set QR on update to avoid complexity
         },
         create: {
             email: 'arpitsarang@gmail.com',
             name: 'Arpit Sarang',
             password: masterPassword,
             approved: true,
+            qrCode: generateQRCodeString('arpit-sarang-id', new Date())
         },
     });
 
     console.log('👤 Upserted Master User: Arpit Sarang');
+
+    // 2.1 Specific Role Users
+    const userPass = await bcrypt.hash('user123@', 10);
+    const userId = faker.string.uuid();
+    await prisma.participant.create({
+        data: {
+            id: userId,
+            email: 'user@gmail.com',
+            name: 'User',
+            password: userPass,
+            approved: true,
+            qrCode: generateQRCodeString(userId, new Date())
+        }
+    });
+
+    const adminSpecificPass = await bcrypt.hash('admin123@', 10);
+    await prisma.admin.create({
+        data: {
+            email: 'admin@gmail.com',
+            name: 'Admin',
+            password: adminSpecificPass,
+        }
+    });
+
+    const volPass = await bcrypt.hash('volunteer123@', 10);
+    await prisma.volunteer.create({
+        data: {
+            email: 'volunteer@gmail.com',
+            name: 'Volunteer',
+            password: volPass,
+        }
+    });
+
+    const superAdminPass = await bcrypt.hash('superadmin123@', 10);
+    await prisma.superAdmin.create({
+        data: {
+            email: 'superadmin@gmail.com',
+            name: 'Super Admin',
+            password: superAdminPass,
+        }
+    });
+
+    console.log('✅ Created User, Admin, Volunteer, SuperAdmin');
 
     // 3. Magic Link for Arpit
     const token = crypto.randomBytes(32).toString('hex');
@@ -80,14 +141,17 @@ async function main() {
 
     // Create deterministic test user first
     const testUserPass = await bcrypt.hash('TestPass123!', 10);
+    const testUserId = faker.string.uuid();
     await prisma.participant.create({
         data: {
+            id: testUserId,
             email: 'testuser@tekron.com',
             name: 'Test Participant',
             password: testUserPass,
             approved: true,
             xp: 100,
-            level: 5
+            level: 5,
+            qrCode: generateQRCodeString(testUserId, new Date())
         }
     });
     console.log(`   [FIXED TEST USER] Email: testuser@tekron.com | Pass: TestPass123!`);
