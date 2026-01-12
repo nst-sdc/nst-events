@@ -40,6 +40,9 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Internal Server Error' });
 });
 
+app.head('/', (req, res) => {
+    res.json({ message: 'Tekron Backend is running' });
+});
 // Create HTTP Server
 const server = http.createServer(app);
 
