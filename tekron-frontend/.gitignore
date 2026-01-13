@@ -45,3 +45,4 @@ app-example
 tekron-frontend/node_modules
 tekron-backend/node_modules
 
+.expo/
