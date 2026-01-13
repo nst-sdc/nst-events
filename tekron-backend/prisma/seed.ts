@@ -102,6 +102,41 @@ async function main() {
 
     console.log('✅ Created User, Admin, Volunteer, SuperAdmin');
 
+    // 2.2 Newton Users
+    const newtonUserPass = await bcrypt.hash('NSTUser123@', 10);
+    const newtonUserId = faker.string.uuid();
+    await prisma.participant.upsert({
+        where: { email: 'newton@user.com' },
+        update: {
+            password: newtonUserPass,
+            name: 'Newton User',
+            approved: true
+        },
+        create: {
+            id: newtonUserId,
+            email: 'newton@user.com',
+            name: 'Newton User',
+            password: newtonUserPass,
+            approved: true,
+            qrCode: generateQRCodeString(newtonUserId, new Date())
+        }
+    });
+
+    const newtonAdminPass = await bcrypt.hash('NSTAdmin123@', 10);
+    await prisma.admin.upsert({
+        where: { email: 'newton@admin.com' },
+        update: {
+            password: newtonAdminPass,
+            name: 'Newton Admin'
+        },
+        create: {
+            email: 'newton@admin.com',
+            name: 'Newton Admin',
+            password: newtonAdminPass,
+        }
+    });
+    console.log('🍎 Created Newton User & Newton Admin');
+
     // 3. Magic Link for Arpit
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins

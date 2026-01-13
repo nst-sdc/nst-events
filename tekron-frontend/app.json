@@ -24,7 +24,8 @@
         "CAMERA",
         "INTERNET",
         "VIBRATE"
-      ]
+      ],
+      "package": "com.newtonschooloftechnology.tekron"
     },
     "web": {
       "output": "static",
@@ -58,8 +59,9 @@
       "reactCompiler": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "2606670e-e7d6-419b-a026-621d99951e73"
+        "projectId": "92a75240-89a1-405f-bf79-73c6ac1a44cb"
       }
     }
   }
