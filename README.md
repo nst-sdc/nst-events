@@ -154,6 +154,3 @@ tekron-2.0-APK/
 3. Commit your changes.
 4. Push to the branch.
 5. Open a Pull Request.
-
----
-Built with by the Tekron Team.
