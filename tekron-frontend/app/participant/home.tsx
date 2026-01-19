@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Animated, TouchableOpacity, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
 import { Card } from '../../components/Card';
-import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
 import { socket } from '../../context/socket';
-
 import { BACKEND_URL } from '../../constants/config';
 
 interface Event {
@@ -94,100 +93,145 @@ export default function ParticipantHome() {
 
     return (
         <View style={styles.container}>
-            <AppHeader
-                title="Dashboard"
-                rightIcon="log-out-outline"
-                onRightPress={handleLogout}
-            />
-
-            <ScrollView
-                contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.l }]}
-                refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={fetchEvents} tintColor={PALETTE.creamLight} />
-                }
+            <LinearGradient
+                colors={[...GRADIENTS.header]}
+                style={[styles.heroSection, { paddingTop: insets.top + SPACING.l }]}
             >
-                <View style={styles.greetingContainer}>
-                    <Text style={styles.greeting}>Hello,</Text>
-                    <Text style={styles.userName}>{user?.name || 'Participant'}</Text>
-                </View>
-
-                <View style={styles.xpSummary}>
-                    <View style={styles.xpRow}>
-                        <View style={styles.xpBadge}>
-                            <Text style={styles.xpBadgeText}>LVL {user?.level || 1}</Text>
-                        </View>
-                        <Text style={styles.xpText}>{user?.xp || 0} XP</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => router.push('/participant/profile')}>
-                        <Text style={styles.viewProfileText}>View Profile &gt;</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity
-                    style={styles.serviceCard}
-                    onPress={() => router.push('/participant/lost-found')}
-                >
-                    <View style={styles.serviceIcon}>
-                        <Ionicons name="search" size={24} color={PALETTE.navyDark} />
-                    </View>
+                <View style={styles.heroHeader}>
                     <View>
-                        <Text style={styles.serviceTitle}>Lost & Found</Text>
-                        <Text style={styles.serviceSubtitle}>Report or find lost items</Text>
+                        <Text style={styles.greeting}>Welcome back,</Text>
+                        <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Participant'}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} style={{ marginLeft: 'auto' }} />
-                </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity onPress={() => router.push('/participant/alerts')} style={styles.iconBtn}>
+                            <Ionicons name="notifications-outline" size={24} color={PALETTE.white} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleLogout} style={styles.iconBtn}>
+                            <Ionicons name="log-out-outline" size={24} color={PALETTE.white} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
-                {liveEvents.length > 0 && (
-                    <View style={styles.liveSection}>
-                        <View style={styles.liveHeader}>
-                            <Animated.View style={[styles.liveBadge, { transform: [{ scale: pulseAnim }] }]}>
-                                <View style={styles.liveDot} />
-                            </Animated.View>
-                            <Text style={styles.liveTitle}>LIVE NOW</Text>
+                <View style={styles.statsRow}>
+                    <View style={styles.statPill}>
+                        <View style={styles.statIconContainer}>
+                            <Ionicons name="trophy" size={16} color={PALETTE.primaryOrange} />
                         </View>
-                        {liveEvents.map((event) => (
-                            <Card key={event.id} style={styles.liveCard}>
-                                <View style={styles.liveCardContent}>
-                                    <Text style={styles.liveEventTitle}>{event.title}</Text>
-                                    <Text style={styles.liveEventLocation}>
-                                        <Ionicons name="location" size={14} color={PALETTE.creamLight} /> {event.location}
-                                    </Text>
-                                </View>
-                            </Card>
-                        ))}
+                        <Text style={styles.statText}>{user?.xp || 0} XP</Text>
                     </View>
-                )}
+                    <View style={styles.statPill}>
+                        <Text style={[styles.statText, { color: PALETTE.primaryMint }]}>Level {user?.level || 1}</Text>
+                    </View>
+                </View>
+            </LinearGradient>
 
-                <Text style={styles.sectionTitle}>Today&apos;s Schedule</Text>
+            <View style={styles.contentContainer}>
+                <ScrollView
+                    contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.xl }}
+                    refreshControl={
+                        <RefreshControl refreshing={loading} onRefresh={fetchEvents} tintColor={PALETTE.primaryBlue} />
+                    }
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Quick Access Grid */}
+                    <View style={styles.quickAccessContainer}>
+                        <Text style={styles.sectionHeader}>Quick Access</Text>
+                        <View style={styles.actionGrid}>
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/participant/profile')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.blueLight }]}>
+                                    <Ionicons name="person" size={24} color={PALETTE.primaryBlue} />
+                                </View>
+                                <Text style={styles.actionLabel}>Profile</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/participant/map')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.mintLight }]}>
+                                    <Ionicons name="map" size={24} color={PALETTE.primaryMint} />
+                                </View>
+                                <Text style={styles.actionLabel}>Map</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/participant/lost-found')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.orangeLight }]}>
+                                    <Ionicons name="search" size={24} color={PALETTE.primaryOrange} />
+                                </View>
+                                <Text style={styles.actionLabel}>Lost</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/participant/gallery')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.lightGray }]}>
+                                    <Ionicons name="images" size={24} color={PALETTE.darkGray} />
+                                </View>
+                                <Text style={styles.actionLabel}>Gallery</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
-                {events.length === 0 && !loading ? (
-                    <Text style={styles.emptyText}>No events scheduled.</Text>
-                ) : (
-                    events.map((event) => (
-                        <Card key={event.id} style={styles.eventCard}>
-                            <View style={styles.timeContainer}>
-                                <Text style={styles.timeText}>{formatDate(event.startTime)}</Text>
-                                <View style={styles.timeLine} />
-                                <Text style={styles.timeText}>{formatDate(event.endTime)}</Text>
+                    {/* Live Events Carousel */}
+                    {liveEvents.length > 0 && (
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeaderRow}>
+                                <Text style={styles.sectionHeader}>Live Now</Text>
+                                <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                                    <View style={styles.liveIndicator} />
+                                </Animated.View>
                             </View>
-                            <View style={styles.eventDetails}>
-                                <Text style={styles.eventTitle}>{event.title}</Text>
-                                <TouchableOpacity onPress={() => router.push('/participant/map')}>
-                                    <Text style={styles.eventLocation}>
-                                        <Ionicons name="location-outline" size={14} color={PALETTE.purpleLight} /> {event.location}
-                                    </Text>
-                                </TouchableOpacity>
-                                {event.description && <Text style={styles.eventDescription}>{event.description}</Text>}
-                                {event.status === 'LIVE' && (
-                                    <View style={styles.liveTag}>
-                                        <Text style={styles.liveTagText}>LIVE</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
+                                {liveEvents.map((event) => (
+                                    <LinearGradient
+                                        key={event.id}
+                                        colors={[PALETTE.primaryOrange, PALETTE.orangeDark]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={styles.liveCard}
+                                    >
+                                        <Text style={styles.liveCardTitle} numberOfLines={1}>{event.title}</Text>
+                                        <View style={styles.liveCardLocationRow}>
+                                            <Ionicons name="location" size={12} color={PALETTE.white} />
+                                            <Text style={styles.liveCardLocation} numberOfLines={1}>{event.location}</Text>
+                                        </View>
+                                        <View style={styles.liveLabel}>
+                                            <Text style={styles.liveLabelText}>LIVE</Text>
+                                        </View>
+                                    </LinearGradient>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    )}
+
+                    {/* Timeline */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionHeader}>Today's Schedule</Text>
+                        {events.length === 0 && !loading ? (
+                            <View style={styles.emptyState}>
+                                <Ionicons name="calendar-outline" size={48} color={PALETTE.mediumGray} />
+                                <Text style={styles.emptyText}>No events currently scheduled.</Text>
+                            </View>
+                        ) : (
+                            <View style={styles.timeline}>
+                                {events.map((event, index) => (
+                                    <View key={event.id} style={styles.timelineItem}>
+                                        <View style={styles.timelineLeft}>
+                                            <Text style={styles.timelineTime}>{formatDate(event.startTime)}</Text>
+                                            <View style={[styles.timelineLine, index === events.length - 1 && { height: 0 }]} />
+                                            <View style={styles.timelineDot} />
+                                        </View>
+                                        <TouchableOpacity style={styles.timelineContent} onPress={() => router.push('/participant/map')}>
+                                            <View style={styles.timelineCard}>
+                                                <Text style={styles.timelineTitle}>{event.title}</Text>
+                                                <View style={styles.timelineLocationRow}>
+                                                    <Ionicons name="location-outline" size={14} color={PALETTE.primaryBlue} />
+                                                    <Text style={styles.timelineLocation}>{event.location}</Text>
+                                                </View>
+                                                {event.status === 'LIVE' && (
+                                                    <Text style={styles.timelineStatus}>Happening Now</Text>
+                                                )}
+                                            </View>
+                                        </TouchableOpacity>
                                     </View>
-                                )}
+                                ))}
                             </View>
-                        </Card>
-                    ))
-                )}
-            </ScrollView>
+                        )}
+                    </View>
+                </ScrollView>
+            </View>
         </View>
     );
 }
@@ -195,201 +239,254 @@ export default function ParticipantHome() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
-    content: {
-        padding: SPACING.l,
+    heroSection: {
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        paddingHorizontal: SPACING.l,
+        paddingBottom: SPACING.xl + SPACING.m,
+        zIndex: 1,
     },
-    greetingContainer: {
+    heroHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
         marginBottom: SPACING.l,
     },
     greeting: {
-        ...TYPOGRAPHY.h2,
-        color: PALETTE.creamDark,
-        fontWeight: 'normal',
+        ...TYPOGRAPHY.body,
+        color: PALETTE.blueLight,
+        fontSize: 16,
     },
     userName: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
+        fontSize: 32,
     },
-    liveSection: {
-        marginBottom: SPACING.xl,
-    },
-    liveHeader: {
+    headerActions: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: SPACING.s,
-    },
-    liveBadge: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: PALETTE.pinkLight,
-        marginRight: SPACING.s,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    liveDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: 'white',
-    },
-    liveTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.pinkLight,
-        letterSpacing: 1,
-    },
-    liveCard: {
-        backgroundColor: PALETTE.pinkMedium,
-        marginBottom: SPACING.s,
-        borderWidth: 1,
-        borderColor: PALETTE.pinkLight,
-    },
-    liveCardContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    liveEventTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
-    },
-    liveEventLocation: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.creamLight,
-    },
-    sectionTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
-        marginBottom: SPACING.m,
-    },
-    eventCard: {
-        flexDirection: 'row',
-        marginBottom: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
-        padding: 0,
-        overflow: 'hidden',
-    },
-    timeContainer: {
-        padding: SPACING.m,
-        backgroundColor: 'rgba(0,0,0,0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 80,
-    },
-    timeText: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
-        fontWeight: 'bold',
-    },
-    timeLine: {
-        height: 20,
-        width: 1,
-        backgroundColor: PALETTE.purpleLight,
-        marginVertical: SPACING.xs,
-    },
-    eventDetails: {
-        flex: 1,
-        padding: SPACING.m,
-        justifyContent: 'center',
-    },
-    eventTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
-        fontSize: 18,
-        marginBottom: 4,
-    },
-    eventLocation: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
-        marginBottom: SPACING.s,
-    },
-    eventDescription: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
-    },
-    liveTag: {
-        position: 'absolute',
-        top: SPACING.s,
-        right: SPACING.s,
-        backgroundColor: PALETTE.pinkLight,
-        paddingHorizontal: SPACING.xs,
-        paddingVertical: 2,
-        borderRadius: RADIUS.s,
-    },
-    liveTagText: {
-        color: PALETTE.navyDark,
-        fontSize: 10,
-        fontWeight: 'bold',
-    },
-    emptyText: {
-        color: PALETTE.creamDark,
-        textAlign: 'center',
-        marginTop: SPACING.l,
-    },
-    xpSummary: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: PALETTE.purpleDeep,
-        padding: SPACING.m,
-        borderRadius: RADIUS.m,
-        marginBottom: SPACING.l,
-        borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
-    },
-    xpRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
         gap: SPACING.s,
     },
-    xpBadge: {
-        backgroundColor: PALETTE.pinkLight,
-        paddingHorizontal: SPACING.s,
+    iconBtn: {
+        padding: SPACING.s,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: RADIUS.round,
+    },
+    statsRow: {
+        flexDirection: 'row',
+        gap: SPACING.m,
+    },
+    statPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        paddingHorizontal: SPACING.m,
+        paddingVertical: 6,
+        borderRadius: RADIUS.l,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.2)',
+    },
+    statIconContainer: {
+        marginRight: SPACING.s,
+    },
+    statText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.white,
+        fontWeight: '600',
+    },
+    contentContainer: {
+        flex: 1,
+        marginTop: -SPACING.xl,
+        zIndex: 2,
+    },
+    section: {
+        paddingHorizontal: SPACING.l,
+        marginBottom: SPACING.xl,
+    },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.m,
+        gap: SPACING.s,
+    },
+    sectionHeader: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.primaryBlue,
+        marginBottom: SPACING.m,
+    },
+    quickAccessContainer: {
+        backgroundColor: PALETTE.white,
+        marginHorizontal: SPACING.l,
+        padding: SPACING.l,
+        borderRadius: RADIUS.l,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 5,
+        marginBottom: SPACING.xl,
+    },
+    actionGrid: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    actionItem: {
+        alignItems: 'center',
+        gap: SPACING.xs,
+    },
+    actionIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionLabel: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.darkGray,
+        fontWeight: '500',
+    },
+    horizontalScroll: {
+        paddingRight: SPACING.l,
+    },
+    liveCard: {
+        width: 160,
+        height: 100,
+        borderRadius: RADIUS.l,
+        padding: SPACING.m,
+        marginRight: SPACING.m,
+        justifyContent: 'flex-end',
+        shadowColor: PALETTE.primaryOrange,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    liveCardTitle: {
+        ...TYPOGRAPHY.h4,
+        color: PALETTE.white,
+        fontSize: 16,
+        marginBottom: 4,
+    },
+    liveCardLocationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    liveCardLocation: {
+        ...TYPOGRAPHY.caption,
+        color: 'rgba(255,255,255,0.9)',
+    },
+    liveLabel: {
+        position: 'absolute',
+        top: SPACING.m,
+        right: SPACING.m,
+        backgroundColor: PALETTE.white,
+        paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: RADIUS.s,
     },
-    xpBadgeText: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.navyDark,
+    liveLabelText: {
+        fontSize: 10,
         fontWeight: 'bold',
+        color: PALETTE.primaryOrange,
     },
-    xpText: {
-        ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
-        fontWeight: 'bold',
+    liveIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: PALETTE.alertRed,
     },
-    viewProfileText: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+    timeline: {
+        paddingLeft: SPACING.m,
     },
-    serviceCard: {
+    timelineItem: {
         flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: PALETTE.purpleDeep,
-        padding: SPACING.m,
-        borderRadius: RADIUS.m,
-        marginBottom: SPACING.l,
-        borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
+        marginBottom: 0,
     },
-    serviceIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: PALETTE.creamLight,
-        justifyContent: 'center',
+    timelineLeft: {
         alignItems: 'center',
+        width: 60,
         marginRight: SPACING.m,
     },
-    serviceTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
-        fontSize: 16,
-    },
-    serviceSubtitle: {
+    timelineTime: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
+        fontWeight: 'bold',
+        marginBottom: SPACING.s,
+    },
+    timelineDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: PALETTE.white,
+        borderWidth: 2,
+        borderColor: PALETTE.primaryBlue,
+        position: 'absolute',
+        top: 20,
+        right: -5,
+        zIndex: 1,
+    },
+    timelineLine: {
+        width: 2,
+        backgroundColor: PALETTE.blueLight,
+        flex: 1,
+        marginTop: SPACING.s,
+        position: 'absolute',
+        top: 24,
+        right: -1,
+        height: '100%',
+    },
+    timelineContent: {
+        flex: 1,
+        paddingBottom: SPACING.l,
+    },
+    timelineCard: {
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.m,
+        padding: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    timelineTitle: {
+        ...TYPOGRAPHY.h4,
+        color: PALETTE.darkGray,
+        fontSize: 16,
+        marginBottom: 4,
+    },
+    timelineLocationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    timelineLocation: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.primaryBlue,
+    },
+    timelineStatus: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.primaryOrange,
+        fontWeight: 'bold',
+        marginTop: SPACING.s,
+    },
+    emptyState: {
+        alignItems: 'center',
+        padding: SPACING.xl,
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.m,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
+        borderStyle: 'dashed',
+    },
+    emptyText: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.mediumGray,
+        marginTop: SPACING.m,
     },
 });

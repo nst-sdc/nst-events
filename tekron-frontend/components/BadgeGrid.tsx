@@ -28,7 +28,7 @@ export const BadgeGrid = ({ badges }: BadgeGridProps) => {
                 {item.badge.iconUrl ? (
                     <Image source={{ uri: item.badge.iconUrl }} style={styles.icon} />
                 ) : (
-                    <Ionicons name="trophy" size={24} color={PALETTE.yellowLight} />
+                    <Ionicons name="trophy" size={24} color={PALETTE.primaryOrange} />
                 )}
             </View>
             <Text style={styles.badgeName} numberOfLines={1}>{item.badge.name}</Text>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     },
     title: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.m,
     },
     row: {
@@ -73,19 +73,24 @@ const styles = StyleSheet.create({
     },
     badgeCard: {
         flex: 1,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         padding: SPACING.s,
         borderRadius: RADIUS.m,
         alignItems: 'center',
         marginBottom: SPACING.s,
         borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
+        borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     iconContainer: {
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueLight,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: SPACING.xs,
@@ -96,23 +101,25 @@ const styles = StyleSheet.create({
     },
     badgeName: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 2,
     },
     badgeDate: {
         fontSize: 10,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     emptyContainer: {
         padding: SPACING.l,
         alignItems: 'center',
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.bgLight,
         borderRadius: RADIUS.m,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
     },
     emptyText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleLight,
+        color: PALETTE.darkGray,
     },
 });

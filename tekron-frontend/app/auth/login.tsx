@@ -60,7 +60,7 @@ export default function Login() {
 
     return (
         <LinearGradient
-            colors={[PALETTE.purpleDeep, PALETTE.purpleDark]}
+            colors={[...GRADIENTS.header]}
             style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
         >
             <KeyboardAvoidingView
@@ -75,11 +75,11 @@ export default function Login() {
 
                     <View style={styles.formContainer}>
                         <View style={styles.inputContainer}>
-                            <Ionicons name="mail-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
+                            <Ionicons name="mail-outline" size={20} color={PALETTE.white} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Codename (Email)"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor="rgba(255,255,255,0.7)"
                                 value={email}
                                 onChangeText={setEmail}
                                 autoCapitalize="none"
@@ -88,11 +88,11 @@ export default function Login() {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Ionicons name="lock-closed-outline" size={20} color={PALETTE.purpleLight} style={styles.inputIcon} />
+                            <Ionicons name="lock-closed-outline" size={20} color={PALETTE.white} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Secret Key (Password)"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor="rgba(255,255,255,0.7)"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry={!showPassword}
@@ -101,20 +101,20 @@ export default function Login() {
                                 <Ionicons
                                     name={showPassword ? "eye-outline" : "eye-off-outline"}
                                     size={20}
-                                    color={PALETTE.purpleLight}
+                                    color={PALETTE.white}
                                 />
                             </TouchableOpacity>
                         </View>
 
                         <TouchableOpacity onPress={handleLogin} activeOpacity={0.8} disabled={isLoading}>
                             <LinearGradient
-                                colors={GRADIENTS.secondary}
+                                colors={[...GRADIENTS.warning]}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={styles.button}
                             >
                                 {isLoading ? (
-                                    <ActivityIndicator color={PALETTE.creamLight} />
+                                    <ActivityIndicator color={PALETTE.white} />
                                 ) : (
                                     <Text style={styles.buttonText}>Jack In</Text>
                                 )}
@@ -153,21 +153,22 @@ const styles = StyleSheet.create({
     },
     title: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontSize: 40,
         marginBottom: SPACING.xs,
     },
     subtitle: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.pinkLight,
+        color: PALETTE.primaryOrange,
         letterSpacing: 1,
+        fontWeight: 'bold',
     },
     formContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: RADIUS.l,
         padding: SPACING.l,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -178,14 +179,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.m,
         height: 50,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     inputIcon: {
         marginRight: SPACING.s,
     },
     input: {
         flex: 1,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         height: '100%',
     },
     button: {
@@ -194,14 +195,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: SPACING.s,
-        shadowColor: PALETTE.pinkDark,
+        shadowColor: PALETTE.primaryOrange,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 5,
     },
     buttonText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontSize: 18,
         fontWeight: 'bold',
     },

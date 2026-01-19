@@ -1,8 +1,10 @@
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { PALETTE, SPACING, TYPOGRAPHY } from '../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { PALETTE, SPACING, TYPOGRAPHY, GRADIENTS } from '../constants/theme';
+import { router } from 'expo-router';
 
 interface AppHeaderProps {
     title: string;
@@ -12,15 +14,19 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: AppHeaderProps) {
-    const router = useRouter();
     const insets = useSafeAreaInsets();
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top + SPACING.m }]}>
+        <LinearGradient
+            colors={[...GRADIENTS.header]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[styles.container, { paddingTop: insets.top }]}
+        >
             <View style={styles.leftContainer}>
                 {showBack && (
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={PALETTE.creamLight} />
+                        <Ionicons name="arrow-back" size={24} color={PALETTE.white} />
                     </TouchableOpacity>
                 )}
                 <Text style={styles.title}>{title}</Text>
@@ -28,10 +34,10 @@ export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: 
 
             {rightIcon && (
                 <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
-                    <Ionicons name={rightIcon} size={24} color={PALETTE.creamLight} />
+                    <Ionicons name={rightIcon} size={24} color={PALETTE.white} />
                 </TouchableOpacity>
             )}
-        </View>
+        </LinearGradient>
     );
 }
 
@@ -42,8 +48,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.l,
         paddingBottom: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
-        // paddingTop is handled dynamically via insets
     },
     leftContainer: {
         flexDirection: 'row',
@@ -54,10 +58,10 @@ const styles = StyleSheet.create({
     },
     title: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontSize: 20,
     },
     rightButton: {
-        padding: SPACING.xs,
+        padding: SPACING.s,
     },
 });

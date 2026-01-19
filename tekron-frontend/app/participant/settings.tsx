@@ -28,7 +28,7 @@ export default function Settings() {
                 <Card style={styles.card}>
                     <View style={styles.row}>
                         <View style={styles.rowLeft}>
-                            <Ionicons name="notifications-outline" size={24} color={PALETTE.creamLight} />
+                            <Ionicons name="notifications-outline" size={24} color={PALETTE.primaryBlue} />
                             <View>
                                 <Text style={styles.rowTitle}>Push Notifications</Text>
                                 <Text style={styles.rowSubtitle}>
@@ -39,8 +39,8 @@ export default function Settings() {
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={toggleNotifications}
-                            trackColor={{ false: PALETTE.purpleLight, true: PALETTE.pinkLight }}
-                            thumbColor={PALETTE.creamLight}
+                            trackColor={{ false: PALETTE.mediumGray, true: PALETTE.primaryBlue }}
+                            thumbColor={PALETTE.white}
                         />
                     </View>
 
@@ -56,20 +56,28 @@ export default function Settings() {
                 <Card style={styles.card}>
                     <TouchableOpacity style={styles.row}>
                         <View style={styles.rowLeft}>
-                            <Ionicons name="information-circle-outline" size={24} color={PALETTE.creamLight} />
+                            <Ionicons name="information-circle-outline" size={24} color={PALETTE.primaryBlue} />
                             <Text style={styles.rowTitle}>Version</Text>
                         </View>
                         <Text style={styles.rowValue}>2.0.0</Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity style={styles.row} onPress={() => router.push('/participant/privacy')}>
+                        <View style={styles.rowLeft}>
+                            <Ionicons name="shield-checkmark-outline" size={24} color={PALETTE.primaryBlue} />
+                            <Text style={styles.rowTitle}>Privacy Policy</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color={PALETTE.mediumGray} />
+                    </TouchableOpacity>
+
                     <View style={styles.divider} />
 
-                    <TouchableOpacity style={styles.row}>
+                    <TouchableOpacity style={styles.row} onPress={() => router.push('/participant/terms')}>
                         <View style={styles.rowLeft}>
-                            <Ionicons name="document-text-outline" size={24} color={PALETTE.creamLight} />
+                            <Ionicons name="document-text-outline" size={24} color={PALETTE.primaryBlue} />
                             <Text style={styles.rowTitle}>Terms of Service</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                        <Ionicons name="chevron-forward" size={24} color={PALETTE.mediumGray} />
                     </TouchableOpacity>
                 </Card>
             </View>
@@ -80,20 +88,22 @@ export default function Settings() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.m,
         marginTop: SPACING.m,
     },
     card: {
-        backgroundColor: PALETTE.purpleDeep,
-        padding: 0,
+        marginBottom: SPACING.l,
+        shadowColor: 'transparent',
+        shadowOpacity: 0,
+        elevation: 0,
     },
     row: {
         flexDirection: 'row',
@@ -108,29 +118,34 @@ const styles = StyleSheet.create({
     },
     rowTitle: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.pinkLight,
+        color: PALETTE.darkGray,
+        fontWeight: '500',
     },
     rowSubtitle: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     rowValue: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
+        fontWeight: '600',
     },
     divider: {
         height: 1,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: PALETTE.blueLight,
         marginLeft: SPACING.xl + SPACING.m,
     },
     debugInfo: {
         padding: SPACING.s,
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: PALETTE.blueLight,
         alignItems: 'center',
+        borderBottomLeftRadius: RADIUS.m,
+        borderBottomRightRadius: RADIUS.m,
     },
     debugText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.pinkLight,
+        color: PALETTE.primaryBlue,
         fontSize: 10,
+        fontWeight: 'bold',
     },
 });

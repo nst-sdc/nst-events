@@ -29,7 +29,7 @@ export default function AdminDashboard() {
         <Card style={styles.statCard}>
             <View style={styles.statHeader}>
                 <View style={[styles.iconContainer, { backgroundColor: color }]}>
-                    <Ionicons name={icon} size={24} color={PALETTE.creamLight} />
+                    <Ionicons name={icon} size={24} color={PALETTE.white} />
                 </View>
                 <Text style={styles.statValue}>{value}</Text>
             </View>
@@ -40,12 +40,12 @@ export default function AdminDashboard() {
     const ActionButton = ({ title, icon, onPress, colors }: { title: string, icon: keyof typeof Ionicons.glyphMap, onPress: () => void, colors: readonly [string, string, ...string[]] }) => (
         <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.actionButtonContainer}>
             <LinearGradient
-                colors={colors}
+                colors={[...colors]}
                 style={styles.actionButton}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             >
-                <Ionicons name={icon} size={32} color={PALETTE.creamLight} />
+                <Ionicons name={icon} size={32} color={PALETTE.white} />
                 <Text style={styles.actionText}>{title}</Text>
             </LinearGradient>
         </TouchableOpacity>
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
             <ScrollView
                 contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.l }]}
                 refreshControl={
-                    <RefreshControl refreshing={isLoading} onRefresh={fetchStats} tintColor={PALETTE.creamLight} />
+                    <RefreshControl refreshing={isLoading} onRefresh={fetchStats} tintColor={PALETTE.primaryBlue} />
                 }
             >
                 <Text style={styles.sectionTitle}>Live Metrics</Text>
@@ -71,25 +71,25 @@ export default function AdminDashboard() {
                         title="Total Participants"
                         value={stats.totalParticipants}
                         icon="people"
-                        color={PALETTE.purpleMedium}
+                        color={PALETTE.primaryBlue}
                     />
                     <StatCard
                         title="Pending Approvals"
                         value={stats.pendingApprovals}
                         icon="time"
-                        color={PALETTE.pinkDark}
+                        color={PALETTE.alertRed}
                     />
                     <StatCard
                         title="Approved Users"
                         value={stats.approvedUsers}
                         icon="checkmark-circle"
-                        color={PALETTE.purpleDeep}
+                        color={PALETTE.successGreen}
                     />
                     <StatCard
                         title="Today's Check-ins"
                         value={stats.todayCheckIns}
                         icon="enter"
-                        color={PALETTE.navyLight}
+                        color={PALETTE.primaryMint}
                     />
                 </View>
 
@@ -97,11 +97,11 @@ export default function AdminDashboard() {
                     style={styles.menuItem}
                     onPress={() => router.push('/admin/photos')}
                 >
-                    <View style={[styles.iconContainer, { backgroundColor: PALETTE.purpleMedium }]}>
-                        <Ionicons name="images" size={24} color={PALETTE.creamLight} />
+                    <View style={[styles.iconContainer, { backgroundColor: PALETTE.primaryBlue }]}>
+                        <Ionicons name="images" size={24} color={PALETTE.white} />
                     </View>
                     <Text style={styles.menuText}>Content Moderation</Text>
-                    <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                    <Ionicons name="chevron-forward" size={24} color={PALETTE.primaryBlue} />
                 </TouchableOpacity>
 
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                         title="Send Alert"
                         icon="megaphone-outline"
                         onPress={() => router.push('/admin/alerts')}
-                        colors={GRADIENTS.secondary}
+                        colors={GRADIENTS.success}
                     />
                 </View>
                 <View style={[styles.actionsGrid, { marginTop: SPACING.m }]}>
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
                         title="Manage Events"
                         icon="calendar-outline"
                         onPress={() => router.push('/admin/events')}
-                        colors={GRADIENTS.accent}
+                        colors={GRADIENTS.warning}
                     />
                     <ActionButton
                         title="Lost & Found"
@@ -141,14 +141,14 @@ export default function AdminDashboard() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.m,
         marginTop: SPACING.s,
     },
@@ -159,9 +159,16 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.xl,
     },
     statCard: {
-        width: '47%', // Slightly less than 50% to account for gap
-        backgroundColor: PALETTE.purpleDeep,
+        width: '47%',
+        backgroundColor: PALETTE.white,
         padding: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        borderRadius: RADIUS.m,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
     },
     statHeader: {
         flexDirection: 'row',
@@ -175,12 +182,12 @@ const styles = StyleSheet.create({
     },
     statValue: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontSize: 28,
     },
     statTitle: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
     },
     actionsGrid: {
@@ -192,6 +199,11 @@ const styles = StyleSheet.create({
         height: 120,
         borderRadius: RADIUS.l,
         overflow: 'hidden',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     actionButton: {
         flex: 1,
@@ -201,21 +213,25 @@ const styles = StyleSheet.create({
     },
     actionText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         marginTop: SPACING.s,
+        textAlign: 'center',
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        elevation: 2,
     },
     menuText: {
         flex: 1,
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontSize: 18,
         fontWeight: 'bold',
         marginLeft: SPACING.m,

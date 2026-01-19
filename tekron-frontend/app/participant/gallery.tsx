@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { BACKEND_URL } from '../../constants/config';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
+
+const { width } = Dimensions.get('window');
+const COLUMN_COUNT = 2;
+const ITEM_WIDTH = (width - (SPACING.l * 2) - SPACING.m) / COLUMN_COUNT;
 
 interface Photo {
     id: string;
@@ -22,6 +28,7 @@ export default function PhotoGallery() {
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         fetchPhotos();
@@ -54,8 +61,6 @@ export default function PhotoGallery() {
             setIsUploading(true);
             try {
                 const token = await SecureStore.getItemAsync('token');
-                // In a real app, upload to S3/Cloudinary and get URL. 
-                // Here we simulate by sending base64 (not recommended for production but works for demo)
                 const base64Img = `data:image/jpeg;base64,${result.assets[0].base64}`;
 
                 const res = await fetch(`${BACKEND_URL}/photos`, {
@@ -65,13 +70,13 @@ export default function PhotoGallery() {
                         Authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        url: base64Img, // Storing base64 directly for simplicity in this demo
+                        url: base64Img,
                         caption: 'Tekron Moment'
                     })
                 });
 
                 if (res.ok) {
-                    Alert.alert('Submitted!', 'Your photo has been sent for approval. It will appear on the wall once approved.');
+                    Alert.alert('Success', 'Your photo has been submitted for approval.');
                 } else {
                     Alert.alert('Error', 'Failed to upload photo');
                 }
@@ -88,8 +93,8 @@ export default function PhotoGallery() {
         <View style={styles.photoCard}>
             <Image source={{ uri: item.url }} style={styles.photo} resizeMode="cover" />
             <View style={styles.captionContainer}>
-                <Text style={styles.uploaderName}>By {item.uploader.name}</Text>
-                {item.caption && <Text style={styles.caption}>{item.caption}</Text>}
+                <Text style={styles.uploaderName} numberOfLines={1}>By {item.uploader.name}</Text>
+                {item.caption && <Text style={styles.caption} numberOfLines={1}>{item.caption}</Text>}
             </View>
         </View>
     );
@@ -97,35 +102,54 @@ export default function PhotoGallery() {
     return (
         <View style={styles.container}>
             <AppHeader
-                title="Photo Wall"
+                title="Gallery"
+                showBack
                 rightIcon="log-out-outline"
                 onRightPress={logout}
             />
 
-            <FlatList
-                data={photos}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                numColumns={2}
-                contentContainerStyle={styles.listContent}
-                refreshing={isLoading}
-                onRefresh={fetchPhotos}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No photos yet. Be the first!</Text>
-                    </View>
-                }
-            />
+            <LinearGradient
+                colors={[PALETTE.bgLight, PALETTE.blueLight]}
+                style={styles.contentGradient}
+            >
+                <FlatList
+                    data={photos}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    numColumns={COLUMN_COUNT}
+                    contentContainerStyle={[
+                        styles.listContent,
+                        { paddingBottom: insets.bottom + SPACING.xxl }
+                    ]}
+                    columnWrapperStyle={styles.columnWrapper}
+                    refreshing={isLoading}
+                    onRefresh={fetchPhotos}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="images-outline" size={48} color={PALETTE.blueMedium} />
+                            <Text style={styles.emptyText}>No photos yet. Be the first to share a moment!</Text>
+                        </View>
+                    }
+                />
+            </LinearGradient>
 
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { bottom: insets.bottom + SPACING.l }]}
                 onPress={handleUpload}
                 disabled={isUploading}
             >
                 {isUploading ? (
-                    <ActivityIndicator color={PALETTE.purpleDeep} />
+                    <ActivityIndicator color={PALETTE.white} />
                 ) : (
-                    <Ionicons name="camera" size={28} color={PALETTE.purpleDeep} />
+                    <LinearGradient
+                        colors={[...GRADIENTS.primary]}
+                        style={styles.fabGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        <Ionicons name="camera" size={28} color={PALETTE.white} />
+                    </LinearGradient>
                 )}
             </TouchableOpacity>
         </View>
@@ -135,58 +159,79 @@ export default function PhotoGallery() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: PALETTE.bgLight,
+    },
+    contentGradient: {
+        flex: 1,
     },
     listContent: {
-        padding: SPACING.s,
+        padding: SPACING.l,
+    },
+    columnWrapper: {
+        justifyContent: 'space-between',
     },
     photoCard: {
-        flex: 1,
-        margin: SPACING.s,
-        backgroundColor: '#1a1a2e',
+        width: ITEM_WIDTH,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         overflow: 'hidden',
-        height: 200,
+        marginBottom: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 3,
     },
     photo: {
         width: '100%',
-        height: 150,
+        height: 140,
+        backgroundColor: PALETTE.lightGray,
     },
     captionContainer: {
         padding: SPACING.s,
+        borderTopWidth: 1,
+        borderTopColor: PALETTE.blueLight,
     },
     uploaderName: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
         fontWeight: 'bold',
+        marginBottom: 2,
     },
     caption: {
-        ...TYPOGRAPHY.caption,
-        color: 'white',
         fontSize: 10,
+        color: PALETTE.darkGray,
     },
     fab: {
         position: 'absolute',
-        bottom: SPACING.xl,
-        right: SPACING.xl,
-        backgroundColor: PALETTE.creamLight,
+        right: SPACING.l,
         width: 56,
         height: 56,
         borderRadius: 28,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    fabGradient: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
     },
     emptyContainer: {
         padding: SPACING.xl,
         alignItems: 'center',
+        marginTop: SPACING.xl,
     },
     emptyText: {
-        color: 'white',
         ...TYPOGRAPHY.body,
+        color: PALETTE.mediumGray,
+        textAlign: 'center',
+        marginTop: SPACING.m,
     },
 });

@@ -1,64 +1,80 @@
 import { TextStyle } from 'react-native';
 
 export const PALETTE = {
-  creamLight: '#F7E8A4',
-  yellowLight: '#F7E8A4',
-  creamDark: '#EBD0AA',
-  pinkLight: '#D9A8BD',
-  pinkMedium: '#CF96B5',
-  pinkDark: '#C68AC8',
-  purpleLight: '#B572D0',
-  purpleMedium: '#8A5CC2',
-  purpleDark: '#5B47A4',
-  purpleDeep: '#3E3A7E',
-  navyLight: '#2F345C',
-  navyDark: '#1C2044',
+  // Primary Colors
+  primaryBlue: "#0052FF",           // Bright Newton Blue - Primary CTA
+  primaryOrange: "#FFA500",         // Newton's Gold/Orange - Highlights
+  primaryMint: "#4FD1C5",           // Newton's Mint Green - Success/Active
 
-  // New Design System
-  primaryPurple: '#A06BFF',
-  primaryPurpleDeep: '#8B4DFF',
-  primaryDarkBase: '#0C0E23',
-  accentCyan: '#6BAAB3',
-  accentOrange: '#DC7C69',
-  bgDeepNight: '#151A3A',
-  bgLavenderCloud: '#8D7ADB',
-  uiWhite: '#F0E4FF',
-  textSoftLavender: '#DCD8FF',
-  textMuted: '#9A8ACF',
-  borderDefault: '#1A112B',
-  bgPanel: '#151A3A',
+  // Blue Palette
+  blueLight: "#E3F2FD",
+  blueSuperLight: "#BBDEFB",
+  blueMedium: "#90CAF9",
+  blueDark: "#003D99",
+
+  // Orange Palette
+  orangeLight: "#FFE4CC",
+  orangeMedium: "#FF9933",
+  orangeDark: "#FF7F50",
+
+  // Mint Palette
+  mintLight: "#E0F7F4",
+  mintMedium: "#4FD1C5",
+  mintDark: "#2DB5A0",
+
+  // Neutrals
+  white: "#FFFFFF",
+  lightGray: "#F5F5F5",
+  mediumGray: "#CCCCCC",
+  darkGray: "#333333",
+  black: "#000000",
+
+  // Status
+  alertRed: "#D32F2F",
+  redDark: "#B71C1C",
+  successGreen: "#4FD1C5",
+  warningOrange: "#FFA500",
+
+  // Backgrounds
+  bgSuperLight: "#F9FAFB",
+  bgLight: "#FFFFFF",
+};
+
+export const GRADIENTS = {
+  primary: [PALETTE.primaryBlue, PALETTE.blueDark] as const,
+  success: [PALETTE.mintMedium, PALETTE.mintDark] as const,
+  warning: [PALETTE.primaryOrange, PALETTE.orangeDark] as const,
+  error: [PALETTE.alertRed, PALETTE.redDark] as const,
+
+  // Component specific
+  header: [PALETTE.primaryBlue, PALETTE.blueDark] as const,
+  lightBlue: [PALETTE.blueLight, PALETTE.blueSuperLight] as const,
+  bgSoft: [PALETTE.white, PALETTE.lightGray] as const,
 };
 
 export const THEME = {
   light: {
-    background: PALETTE.creamLight,
-    text: PALETTE.navyDark,
-    card: PALETTE.creamDark,
-    primary: PALETTE.primaryPurple, // Updated to match brand
-    secondary: PALETTE.primaryPurpleDeep, // Updated to match brand
-    accent: PALETTE.accentOrange, // Updated
-    tabBar: PALETTE.creamDark,
-    tabIcon: PALETTE.purpleDeep,
-    tabIconSelected: PALETTE.primaryPurple,
+    background: PALETTE.bgLight,
+    text: PALETTE.darkGray,
+    card: PALETTE.white,
+    primary: PALETTE.primaryBlue,
+    secondary: PALETTE.primaryMint,
+    accent: PALETTE.primaryOrange,
+    tabBar: PALETTE.white,
+    tabIcon: PALETTE.darkGray,
+    tabIconSelected: PALETTE.primaryBlue,
   },
   dark: {
-    background: PALETTE.primaryDarkBase,
-    text: PALETTE.uiWhite,
-    card: PALETTE.bgPanel,
-    primary: PALETTE.primaryPurple,
-    secondary: PALETTE.primaryPurpleDeep,
-    accent: PALETTE.accentCyan,
-    tabBar: PALETTE.bgDeepNight,
-    tabIcon: PALETTE.textMuted,
-    tabIconSelected: PALETTE.primaryPurple,
+    background: PALETTE.bgLight, // Force light theme for consistency with Newton brand
+    text: PALETTE.darkGray,
+    card: PALETTE.white,
+    primary: PALETTE.primaryBlue,
+    secondary: PALETTE.primaryMint,
+    accent: PALETTE.primaryOrange,
+    tabBar: PALETTE.white,
+    tabIcon: PALETTE.darkGray,
+    tabIconSelected: PALETTE.primaryBlue,
   },
-};
-
-export const GRADIENTS = {
-  primary: [PALETTE.primaryPurple, PALETTE.primaryPurpleDeep] as const,
-  secondary: [PALETTE.accentCyan, PALETTE.primaryPurple] as const,
-  accent: [PALETTE.accentOrange, PALETTE.pinkLight] as const,
-  dark: [PALETTE.primaryDarkBase, PALETTE.bgDeepNight] as const,
 };
 
 export const SPACING = {

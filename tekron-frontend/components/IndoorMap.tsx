@@ -58,7 +58,7 @@ export const IndoorMap = ({ imageUrl, markers = [] }: IndoorMapProps) => {
                         />
                     ) : (
                         <View style={styles.placeholderMap}>
-                            <Ionicons name="map" size={64} color={PALETTE.purpleLight} />
+                            <Ionicons name="map" size={64} color={PALETTE.primaryBlue} />
                             <Text style={styles.placeholderText}>No Map Available</Text>
                         </View>
                     )}
@@ -71,7 +71,7 @@ export const IndoorMap = ({ imageUrl, markers = [] }: IndoorMapProps) => {
                                 { left: `${marker.x}%`, top: `${marker.y}%` }
                             ]}
                         >
-                            <Ionicons name="location" size={24} color={PALETTE.pinkLight} />
+                            <Ionicons name="location" size={24} color={PALETTE.primaryMint} />
                             <View style={styles.markerLabel}>
                                 <Text style={styles.markerText}>{marker.label}</Text>
                             </View>
@@ -105,41 +105,40 @@ const styles = StyleSheet.create({
     placeholderMap: {
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height * 0.6,
-        backgroundColor: '#1a1a2e', // Darker background
+        backgroundColor: PALETTE.bgLight,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
-        // Add a simple grid pattern effect using repeated gradients if possible, or just keep it clean
+        borderColor: PALETTE.blueLight,
     },
     placeholderText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
         marginTop: SPACING.m,
     },
     marker: {
         position: 'absolute',
         alignItems: 'center',
-        width: 100, // Increased width to contain label
-        marginLeft: -50, // Center horizontally
-        marginTop: -30, // Position above the point
+        width: 100,
+        marginLeft: -50,
+        marginTop: -30,
     },
     markerLabel: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         paddingHorizontal: SPACING.s,
         paddingVertical: 4,
         borderRadius: RADIUS.s,
-        marginBottom: 4, // Space between label and icon
+        marginBottom: 4,
         borderWidth: 1,
-        borderColor: PALETTE.purpleLight,
-        shadowColor: '#000',
+        borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 2,
         elevation: 3,
     },
     markerText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontSize: 10,
         fontWeight: 'bold',
         textAlign: 'center',
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255,255,255,0.1)',
     },
     hintText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontSize: 12,
         fontWeight: '500',
     },

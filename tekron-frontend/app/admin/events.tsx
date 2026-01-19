@@ -45,8 +45,6 @@ export default function AdminEvents() {
                 const data = await response.json();
                 setEvents(data);
             } else {
-                // Fallback if not superadmin (though auth check should handle it)
-
                 const res2 = await fetch(`${BACKEND_URL}/participant/events`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -101,14 +99,6 @@ export default function AdminEvents() {
     const updateStatus = async (id: string, status: string, round?: number) => {
         try {
             const token = await SecureStore.getItemAsync('token');
-            // Try updating via superadmin route if strictly superadmin, or admin route?
-            // superAdminRoutes has router.put('/events/:id', updateEvent);
-            // adminRoutes has router.patch('/events/:id/status', updateEventStatus);
-            // I'll try the admin route first as it's for status. 
-            // Actually, let's use the one that works for the user role.
-            // If superadmin, I can use the superadmin update endpoint which does full update.
-            // But for status update, the PATCH is cleaner.
-
             const response = await fetch(`${BACKEND_URL}/admin/events/${id}/status`, {
                 method: 'PATCH',
                 headers: {
@@ -138,13 +128,21 @@ export default function AdminEvents() {
     };
 
     const StatusBadge = ({ status }: { status: string }) => {
-        let color = PALETTE.purpleLight;
-        if (status === 'LIVE') color = PALETTE.pinkLight;
-        if (status === 'COMPLETED') color = PALETTE.creamDark;
+        let color = PALETTE.blueLight;
+        let textColor = PALETTE.primaryBlue;
+
+        if (status === 'LIVE') {
+            color = PALETTE.primaryOrange;
+            textColor = PALETTE.white;
+        }
+        if (status === 'COMPLETED') {
+            color = PALETTE.lightGray;
+            textColor = PALETTE.mediumGray;
+        }
 
         return (
             <View style={[styles.badge, { backgroundColor: color }]}>
-                <Text style={styles.badgeText}>{status}</Text>
+                <Text style={[styles.badgeText, { color: textColor }]}>{status}</Text>
             </View>
         );
     };
@@ -161,7 +159,7 @@ export default function AdminEvents() {
 
             <ScrollView contentContainerStyle={styles.content}>
                 {events.length === 0 && !loading && (
-                    <Text style={{ color: PALETTE.purpleLight, textAlign: 'center', marginTop: 20 }}>
+                    <Text style={{ color: PALETTE.darkGray, textAlign: 'center', marginTop: 20 }}>
                         No events found. Create one!
                     </Text>
                 )}
@@ -174,17 +172,17 @@ export default function AdminEvents() {
 
                         <View style={styles.actionRow}>
                             <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: PALETTE.purpleMedium }]}
+                                style={[styles.actionButton, { backgroundColor: PALETTE.primaryBlue }]}
                                 onPress={() => openModal(event)}
                             >
                                 <Text style={styles.actionButtonText}>Update Status</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: PALETTE.navyLight }]}
+                                style={[styles.actionButton, { backgroundColor: PALETTE.blueLight }]}
                                 onPress={() => router.push({ pathname: '/admin/leaderboard', params: { eventId: event.id } })}
                             >
-                                <Text style={styles.actionButtonText}>Leaderboard</Text>
+                                <Text style={[styles.actionButtonText, { color: PALETTE.primaryBlue }]}>Leaderboard</Text>
                             </TouchableOpacity>
                         </View>
                     </Card>
@@ -227,7 +225,7 @@ export default function AdminEvents() {
                             value={currentRound}
                             onChangeText={setCurrentRound}
                             placeholder="Round Number"
-                            placeholderTextColor={PALETTE.purpleLight}
+                            placeholderTextColor={PALETTE.mediumGray}
                             keyboardType="numeric"
                         />
 
@@ -259,7 +257,7 @@ export default function AdminEvents() {
                                 value={newEvent.title}
                                 onChangeText={(t) => setNewEvent({ ...newEvent, title: t })}
                                 placeholder="Event Title"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor={PALETTE.mediumGray}
                             />
 
                             <Text style={styles.label}>Location</Text>
@@ -268,7 +266,7 @@ export default function AdminEvents() {
                                 value={newEvent.location}
                                 onChangeText={(t) => setNewEvent({ ...newEvent, location: t })}
                                 placeholder="Venue"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor={PALETTE.mediumGray}
                             />
 
                             <Text style={styles.label}>Description</Text>
@@ -277,7 +275,7 @@ export default function AdminEvents() {
                                 value={newEvent.description}
                                 onChangeText={(t) => setNewEvent({ ...newEvent, description: t })}
                                 placeholder="Event details..."
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor={PALETTE.mediumGray}
                                 multiline
                             />
 
@@ -287,7 +285,7 @@ export default function AdminEvents() {
                                 value={newEvent.startTime}
                                 onChangeText={(t) => setNewEvent({ ...newEvent, startTime: t })}
                                 placeholder="2024-12-31 10:00"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor={PALETTE.mediumGray}
                             />
 
                             <Text style={styles.label}>End Time (YYYY-MM-DD HH:mm)</Text>
@@ -296,22 +294,22 @@ export default function AdminEvents() {
                                 value={newEvent.endTime}
                                 onChangeText={(t) => setNewEvent({ ...newEvent, endTime: t })}
                                 placeholder="2024-12-31 12:00"
-                                placeholderTextColor={PALETTE.purpleLight}
+                                placeholderTextColor={PALETTE.mediumGray}
                             />
                         </ScrollView>
 
                         <View style={styles.actionRow}>
                             <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: PALETTE.purpleMedium, marginRight: 8 }]}
+                                style={[styles.actionButton, { backgroundColor: PALETTE.primaryBlue, marginRight: 8 }]}
                                 onPress={handleCreateEvent}
                             >
                                 <Text style={styles.actionButtonText}>Create</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: PALETTE.navyLight, marginLeft: 8 }]}
+                                style={[styles.actionButton, { backgroundColor: PALETTE.lightGray, marginLeft: 8 }]}
                                 onPress={() => setCreateModalVisible(false)}
                             >
-                                <Text style={styles.actionButtonText}>Cancel</Text>
+                                <Text style={[styles.actionButtonText, { color: PALETTE.darkGray }]}>Cancel</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -324,14 +322,17 @@ export default function AdminEvents() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
     },
     card: {
         marginBottom: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        borderRadius: RADIUS.m,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
     },
     eventTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         flex: 1,
     },
     badge: {
@@ -351,7 +352,6 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.navyDark,
         fontWeight: 'bold',
     },
     actionRow: {
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     actionButtonText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontWeight: 'bold',
     },
     modalOverlay: {
@@ -375,22 +375,22 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.l,
         padding: SPACING.l,
         borderWidth: 1,
-        borderColor: PALETTE.purpleLight,
+        borderColor: PALETTE.blueLight,
         maxHeight: '80%',
     },
     modalTitle: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.l,
         textAlign: 'center',
     },
     label: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleLight,
+        color: PALETTE.darkGray,
         marginBottom: SPACING.s,
     },
     statusOptions: {
@@ -404,31 +404,34 @@ const styles = StyleSheet.create({
         paddingVertical: SPACING.s,
         borderRadius: RADIUS.m,
         borderWidth: 1,
-        borderColor: PALETTE.purpleLight,
+        borderColor: PALETTE.blueLight,
+        backgroundColor: PALETTE.bgLight,
     },
     statusOptionSelected: {
-        backgroundColor: PALETTE.pinkMedium,
-        borderColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryOrange,
+        borderColor: PALETTE.primaryOrange,
     },
     statusOptionText: {
-        color: PALETTE.purpleLight,
+        color: PALETTE.primaryBlue,
     },
     statusOptionTextSelected: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontWeight: 'bold',
     },
     input: {
-        backgroundColor: PALETTE.purpleDeep,
-        color: PALETTE.creamLight,
+        backgroundColor: PALETTE.bgLight,
+        color: PALETTE.primaryBlue,
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.l,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
     },
     closeButton: {
         padding: SPACING.m,
         alignItems: 'center',
     },
     closeButtonText: {
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
     },
 });

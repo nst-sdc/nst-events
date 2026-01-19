@@ -17,7 +17,6 @@ import { BACKEND_URL } from '../../constants/config';
 export default function Profile() {
     const { user, logout } = useAuthStore();
     const router = useRouter();
-    const [isDarkMode, setIsDarkMode] = useState(true);
     const [qrCodeData, setQrCodeData] = useState<string | null>(null);
     const [xpData, setXpData] = useState({ xp: 0, level: 1, progress: 0, nextLevelXp: 100 });
     const [badges, setBadges] = useState([]);
@@ -77,7 +76,7 @@ export default function Profile() {
 
             <ScrollView
                 contentContainerStyle={styles.content}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PALETTE.creamLight} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PALETTE.primaryBlue} />}
             >
                 <Card style={styles.profileCard}>
                     <View style={styles.avatarContainer}>
@@ -122,32 +121,17 @@ export default function Profile() {
                 <Text style={styles.sectionTitle}>Settings</Text>
 
                 <Card style={styles.settingsCard}>
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="moon-outline" size={24} color={PALETTE.creamLight} />
-                            <Text style={styles.settingText}>Dark Mode</Text>
-                        </View>
-                        <Switch
-                            value={isDarkMode}
-                            onValueChange={setIsDarkMode}
-                            trackColor={{ false: PALETTE.purpleLight, true: PALETTE.purpleMedium }}
-                            thumbColor={PALETTE.creamLight}
-                        />
-                    </View>
-
-                    <View style={styles.divider} />
-
                     <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/participant/settings')}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="settings-outline" size={24} color={PALETTE.creamLight} />
+                            <Ionicons name="settings-outline" size={24} color={PALETTE.primaryBlue} />
                             <Text style={styles.settingText}>App Settings</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                        <Ionicons name="chevron-forward" size={24} color={PALETTE.primaryBlue} />
                     </TouchableOpacity>
                 </Card>
 
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={24} color={PALETTE.pinkLight} />
+                    <Ionicons name="log-out-outline" size={24} color={PALETTE.primaryOrange} />
                     <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -158,7 +142,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
@@ -167,7 +151,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: SPACING.xl,
         marginBottom: SPACING.xl,
-        backgroundColor: PALETTE.creamDark,
+        backgroundColor: PALETTE.white,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
     },
     avatarContainer: {
         marginBottom: SPACING.m,
@@ -176,24 +162,24 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueLight,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: PALETTE.purpleDeep,
+        borderColor: PALETTE.primaryBlue,
     },
     avatarText: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
     },
     name: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.navyDark,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.xs,
     },
     email: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleDeep,
+        color: PALETTE.darkGray,
         marginBottom: SPACING.l,
     },
     qrContainer: {
@@ -201,11 +187,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: RADIUS.m,
         marginBottom: SPACING.s,
-        shadowColor: '#000',
+        shadowColor: PALETTE.primaryBlue,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
     },
     qrPlaceholder: {
         width: 180,
@@ -214,22 +202,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     qrPlaceholderText: {
-        color: PALETTE.navyDark,
+        color: PALETTE.primaryBlue,
     },
     qrLabel: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleDeep,
+        color: PALETTE.darkGray,
         opacity: 0.7,
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         marginBottom: SPACING.m,
     },
     settingsCard: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         marginBottom: SPACING.xl,
         padding: 0,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
     },
     settingRow: {
         flexDirection: 'row',
@@ -244,11 +234,11 @@ const styles = StyleSheet.create({
     },
     settingText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
     },
     divider: {
         height: 1,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: PALETTE.blueLight,
         marginLeft: SPACING.xl + SPACING.m,
     },
     logoutButton: {
@@ -259,12 +249,12 @@ const styles = StyleSheet.create({
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         borderWidth: 1,
-        borderColor: PALETTE.pinkLight,
+        borderColor: PALETTE.primaryOrange,
         marginBottom: SPACING.xl,
     },
     logoutText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.pinkLight,
+        color: PALETTE.primaryOrange,
         fontWeight: 'bold',
     },
 });

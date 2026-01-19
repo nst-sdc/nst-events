@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
-import { PALETTE } from '../constants/theme';
+import { PALETTE, GRADIENTS } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Index() {
@@ -40,10 +40,10 @@ export default function Index() {
 
     return (
         <LinearGradient
-            colors={[PALETTE.purpleDeep, PALETTE.purpleDark]}
+            colors={[...GRADIENTS.header]}
             style={styles.container}
         >
-            <ActivityIndicator size="large" color={PALETTE.creamLight} />
+            <ActivityIndicator size="large" color={PALETTE.white} />
         </LinearGradient>
     );
 }
