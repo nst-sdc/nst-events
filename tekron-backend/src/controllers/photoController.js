@@ -11,7 +11,7 @@ const uploadPhoto = async (req, res) => {
                 uploaderId,
                 url,
                 caption,
-                approved: false // Requires moderation
+                status: 'PENDING'
             }
         });
         res.status(201).json(photo);
@@ -23,7 +23,7 @@ const uploadPhoto = async (req, res) => {
 const getPublicPhotos = async (req, res) => {
     try {
         const photos = await prisma.photo.findMany({
-            where: { approved: true },
+            where: { status: 'APPROVED' },
             include: { uploader: { select: { name: true } } },
             orderBy: { createdAt: 'desc' }
         });
@@ -33,16 +33,38 @@ const getPublicPhotos = async (req, res) => {
     }
 };
 
-const getPendingPhotos = async (req, res) => {
+const getAdminPhotos = async (req, res) => {
     try {
+        const { status } = req.query;
+        const where = status ? { status } : {};
+
         const photos = await prisma.photo.findMany({
-            where: { approved: false },
+            where,
             include: { uploader: { select: { name: true } } },
             orderBy: { createdAt: 'desc' }
         });
         res.json(photos);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching pending photos', error: error.message });
+        res.status(500).json({ message: 'Error fetching admin photos', error: error.message });
+    }
+};
+
+const updatePhotoStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    try {
+        const photo = await prisma.photo.update({
+            where: { id },
+            data: { status }
+        });
+        res.json(photo);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating photo status', error: error.message });
     }
 };
 
@@ -59,4 +81,4 @@ const approvePhoto = async (req, res) => {
     }
 };
 
-module.exports = { uploadPhoto, getPublicPhotos, getPendingPhotos, approvePhoto };
+module.exports = { uploadPhoto, getPublicPhotos, getAdminPhotos, updatePhotoStatus };

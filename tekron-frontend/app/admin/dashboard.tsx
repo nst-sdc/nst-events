@@ -93,6 +93,17 @@ export default function AdminDashboard() {
                     />
                 </View>
 
+                <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/admin/photos')}
+                >
+                    <View style={[styles.iconContainer, { backgroundColor: PALETTE.purpleMedium }]}>
+                        <Ionicons name="images" size={24} color={PALETTE.creamLight} />
+                    </View>
+                    <Text style={styles.menuText}>Content Moderation</Text>
+                    <Ionicons name="chevron-forward" size={24} color={PALETTE.purpleLight} />
+                </TouchableOpacity>
+
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
                 <View style={styles.actionsGrid}>
                     <ActionButton
@@ -192,5 +203,21 @@ const styles = StyleSheet.create({
         ...TYPOGRAPHY.h3,
         color: PALETTE.creamLight,
         marginTop: SPACING.s,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.m,
+        backgroundColor: PALETTE.purpleDeep,
+        borderRadius: RADIUS.m,
+        marginBottom: SPACING.m,
+    },
+    menuText: {
+        flex: 1,
+        ...TYPOGRAPHY.body,
+        color: PALETTE.creamLight,
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: SPACING.m,
     },
 });

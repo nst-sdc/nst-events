@@ -183,7 +183,7 @@ model Photo {
     uploaderId String
     url        String
     caption    String?
-    approved   Boolean  @default(false)
+    status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
     createdAt  DateTime @default(now())
 
     uploader Participant @relation(fields: [uploaderId], references: [id])

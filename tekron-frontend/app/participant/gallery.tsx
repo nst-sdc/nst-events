@@ -71,7 +71,7 @@ export default function PhotoGallery() {
                 });
 
                 if (res.ok) {
-                    Alert.alert('Success', 'Photo uploaded for moderation!');
+                    Alert.alert('Submitted!', 'Your photo has been sent for approval. It will appear on the wall once approved.');
                 } else {
                     Alert.alert('Error', 'Failed to upload photo');
                 }
