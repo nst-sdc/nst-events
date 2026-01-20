@@ -159,6 +159,20 @@ export default function AdminDashboard() {
                                 <Text style={styles.actionLabel}>Scanner</Text>
                             </TouchableOpacity>
 
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/events')}>
+                                <View style={[styles.actionIcon, { backgroundColor: '#E8F5E9' }]}>
+                                    <Ionicons name="calendar" size={26} color={PALETTE.successGreen} />
+                                </View>
+                                <Text style={styles.actionLabel}>Event Manager</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/photos')}>
+                                <View style={[styles.actionIcon, { backgroundColor: '#FCE4EC' }]}>
+                                    <Ionicons name="images" size={26} color={PALETTE.pinkDark} />
+                                </View>
+                                <Text style={styles.actionLabel}>Content Upload</Text>
+                            </TouchableOpacity>
+
                             <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/lost-found')}>
                                 <View style={[styles.actionIcon, { backgroundColor: PALETTE.mintLight }]}>
                                     <Ionicons name="search" size={26} color={PALETTE.primaryMint} />
