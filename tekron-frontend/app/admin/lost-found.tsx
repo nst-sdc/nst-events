@@ -70,10 +70,10 @@ export default function AdminLostFound() {
     };
 
     const StatusBadge = ({ status }: { status: string }) => {
-        let color = PALETTE.purpleLight;
-        if (status === 'OPEN') color = PALETTE.pinkLight;
-        if (status === 'CLOSED') color = PALETTE.creamDark;
-        if (status === 'CLAIMED') color = PALETTE.navyLight;
+        let color = PALETTE.mediumGray;
+        if (status === 'OPEN') color = PALETTE.primaryMint;
+        if (status === 'CLOSED') color = PALETTE.darkGray;
+        if (status === 'CLAIMED') color = PALETTE.blueMedium;
 
         return (
             <View style={[styles.badge, { backgroundColor: color }]}>
@@ -88,7 +88,7 @@ export default function AdminLostFound() {
 
             {loading ? (
                 <View style={styles.loader}>
-                    <ActivityIndicator size="large" color={PALETTE.creamLight} />
+                    <ActivityIndicator size="large" color={PALETTE.white} />
                 </View>
             ) : (
                 <ScrollView contentContainerStyle={styles.content}>
@@ -130,7 +130,7 @@ export default function AdminLostFound() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueDark,
     },
     content: {
         padding: SPACING.l,
@@ -142,13 +142,13 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         textAlign: 'center',
         marginTop: SPACING.xl,
     },
     card: {
         marginBottom: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
     },
     header: {
         flexDirection: 'row',
@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.s,
     },
     typeTag: {
-        backgroundColor: PALETTE.purpleMedium,
+        backgroundColor: PALETTE.blueLight,
         paddingHorizontal: SPACING.s,
         paddingVertical: 2,
         borderRadius: RADIUS.s,
     },
     typeText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontWeight: 'bold',
     },
     badge: {
@@ -173,34 +173,34 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.navyDark,
+        color: PALETTE.blueDark,
         fontWeight: 'bold',
     },
     title: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         marginBottom: SPACING.xs,
     },
     info: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         marginBottom: 2,
     },
     date: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         fontStyle: 'italic',
         marginTop: SPACING.s,
     },
     actionButton: {
         marginTop: SPACING.m,
-        backgroundColor: PALETTE.pinkDark,
+        backgroundColor: PALETTE.alertRed,
         padding: SPACING.s,
         borderRadius: RADIUS.m,
         alignItems: 'center',
     },
     actionButtonText: {
         ...TYPOGRAPHY.h4,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
     },
 });

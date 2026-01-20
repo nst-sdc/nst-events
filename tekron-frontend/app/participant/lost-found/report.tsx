@@ -106,7 +106,7 @@ export default function ReportItemScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="e.g. Blue Water Bottle"
-                    placeholderTextColor={PALETTE.purpleLight}
+                    placeholderTextColor={PALETTE.mediumGray}
                     value={title}
                     onChangeText={setTitle}
                 />
@@ -115,7 +115,7 @@ export default function ReportItemScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="e.g. Room 304, Cafeteria"
-                    placeholderTextColor={PALETTE.purpleLight}
+                    placeholderTextColor={PALETTE.mediumGray}
                     value={location}
                     onChangeText={setLocation}
                 />
@@ -124,7 +124,7 @@ export default function ReportItemScreen() {
                 <TextInput
                     style={[styles.input, styles.textArea]}
                     placeholder="Any distinctive features..."
-                    placeholderTextColor={PALETTE.purpleLight}
+                    placeholderTextColor={PALETTE.mediumGray}
                     value={description}
                     onChangeText={setDescription}
                     multiline
@@ -137,7 +137,7 @@ export default function ReportItemScreen() {
                     disabled={submitting}
                 >
                     {submitting ? (
-                        <ActivityIndicator color={PALETTE.navyDark} />
+                        <ActivityIndicator color={PALETTE.blueDark} />
                     ) : (
                         <Text style={styles.submitButtonText}>SUBMIT REPORT</Text>
                     )}
@@ -150,14 +150,14 @@ export default function ReportItemScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueDark,
     },
     content: {
         padding: SPACING.l,
     },
     label: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         marginBottom: SPACING.s,
         marginTop: SPACING.m,
     },
@@ -171,28 +171,28 @@ const styles = StyleSheet.create({
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         borderWidth: 1,
-        borderColor: PALETTE.purpleLight,
+        borderColor: PALETTE.blueLight,
         alignItems: 'center',
     },
     activeTypeButton: {
-        backgroundColor: PALETTE.pinkLight,
-        borderColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryMint,
+        borderColor: PALETTE.primaryMint,
     },
     typeText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         fontSize: 14,
     },
     activeTypeText: {
-        color: PALETTE.navyDark,
+        color: PALETTE.blueDark,
     },
     input: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         padding: SPACING.m,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
+        borderColor: PALETTE.blueLight,
         marginBottom: SPACING.s,
     },
     textArea: {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     submitButton: {
-        backgroundColor: PALETTE.creamLight,
+        backgroundColor: PALETTE.white,
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         alignItems: 'center',
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     },
     submitButtonText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.navyDark,
+        color: PALETTE.blueDark,
     },
     categoryScroll: {
         marginBottom: SPACING.l,
@@ -218,20 +218,20 @@ const styles = StyleSheet.create({
         paddingVertical: SPACING.s,
         borderRadius: RADIUS.m,
         borderWidth: 1,
-        borderColor: PALETTE.purpleLight,
+        borderColor: PALETTE.blueLight,
         marginRight: SPACING.s,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
     },
     activeCategoryChip: {
-        backgroundColor: PALETTE.pinkLight,
-        borderColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryMint,
+        borderColor: PALETTE.primaryMint,
     },
     categoryText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     activeCategoryText: {
-        color: PALETTE.navyDark,
+        color: PALETTE.blueDark,
         fontWeight: 'bold',
     },
 });

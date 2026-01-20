@@ -66,7 +66,7 @@ export default function LostFoundScreen() {
             <View style={styles.cardHeader}>
                 <View style={styles.titleRow}>
                     <View style={styles.iconContainer}>
-                        <Ionicons name={getCategoryIcon(item.category)} size={20} color={PALETTE.navyDark} />
+                        <Ionicons name={getCategoryIcon(item.category)} size={20} color={PALETTE.darkGray} />
                     </View>
                     <Text style={styles.cardTitle}>{item.title}</Text>
                 </View>
@@ -76,7 +76,7 @@ export default function LostFoundScreen() {
             </View>
 
             <Text style={styles.cardLocation}>
-                <Ionicons name="location-outline" size={14} color={PALETTE.purpleLight} /> {item.location}
+                <Ionicons name="location-outline" size={14} color={PALETTE.mediumGray} /> {item.location}
             </Text>
 
             {item.description && <Text style={styles.cardDescription}>{item.description}</Text>}
@@ -100,7 +100,7 @@ export default function LostFoundScreen() {
                     <Ionicons
                         name="search-outline"
                         size={20}
-                        color={activeTab === 'LOST' ? PALETTE.pinkLight : PALETTE.purpleLight}
+                        color={activeTab === 'LOST' ? PALETTE.primaryMint : PALETTE.mediumGray}
                         style={{ marginBottom: 4 }}
                     />
                     <Text style={[styles.tabText, activeTab === 'LOST' && styles.activeTabText]}>LOST ITEMS</Text>
@@ -112,7 +112,7 @@ export default function LostFoundScreen() {
                     <Ionicons
                         name="gift-outline"
                         size={20}
-                        color={activeTab === 'FOUND' ? PALETTE.pinkLight : PALETTE.purpleLight}
+                        color={activeTab === 'FOUND' ? PALETTE.primaryMint : PALETTE.mediumGray}
                         style={{ marginBottom: 4 }}
                     />
                     <Text style={[styles.tabText, activeTab === 'FOUND' && styles.activeTabText]}>FOUND ITEMS</Text>
@@ -120,7 +120,7 @@ export default function LostFoundScreen() {
             </View>
 
             {loading ? (
-                <ActivityIndicator size="large" color={PALETTE.purpleLight} style={{ marginTop: 20 }} />
+                <ActivityIndicator size="large" color={PALETTE.primaryBlue} style={{ marginTop: 20 }} />
             ) : (
                 <FlatList
                     data={items}
@@ -139,7 +139,7 @@ export default function LostFoundScreen() {
                 style={styles.fab}
                 onPress={() => router.push('/participant/lost-found/report')}
             >
-                <Ionicons name="add" size={30} color={PALETTE.navyDark} />
+                <Ionicons name="add" size={30} color={PALETTE.white} />
             </TouchableOpacity>
         </View>
     );
@@ -148,7 +148,7 @@ export default function LostFoundScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueDark,
     },
     tabs: {
         flexDirection: 'row',
@@ -163,26 +163,26 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: PALETTE.pinkLight,
+        borderBottomColor: PALETTE.primaryMint,
     },
     tabText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         fontSize: 14,
     },
     activeTabText: {
-        color: PALETTE.pinkLight,
+        color: PALETTE.primaryMint,
     },
     listContent: {
         padding: SPACING.m,
     },
     card: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         padding: SPACING.m,
         marginBottom: SPACING.m,
         borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
+        borderColor: PALETTE.blueLight,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -199,18 +199,18 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryMint,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: SPACING.s,
     },
     cardTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         flex: 1,
     },
     statusBadge: {
-        backgroundColor: PALETTE.purpleLight,
+        backgroundColor: PALETTE.blueMedium,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: RADIUS.s,
@@ -220,18 +220,18 @@ const styles = StyleSheet.create({
     },
     statusText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.navyDark,
+        color: PALETTE.blueDark,
         fontSize: 10,
         fontWeight: 'bold',
     },
     cardLocation: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         marginBottom: SPACING.s,
     },
     cardDescription: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
         marginBottom: SPACING.m,
     },
     cardFooter: {
@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
     },
     reporterName: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     date: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     emptyText: {
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
         textAlign: 'center',
         marginTop: SPACING.xl,
     },
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryMint,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,

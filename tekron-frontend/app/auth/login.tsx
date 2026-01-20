@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, GRADIENTS, SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
+import { PALETTE, SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
 import { useAuthStore } from '../../context/authStore';
 import { Popup } from '../../components/Popup';
 
@@ -17,6 +16,9 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading } = useAuthStore();
     const insets = useSafeAreaInsets();
+
+    const [emailFocused, setEmailFocused] = useState(false);
+    const [passwordFocused, setPasswordFocused] = useState(false);
 
     // Popup State
     const [popupVisible, setPopupVisible] = useState(false);
@@ -62,76 +64,82 @@ export default function Login() {
     };
 
     return (
-        <LinearGradient
-            colors={[...GRADIENTS.header]}
+        <View
             style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Tekron @ NST</Text>
-                        <Text style={styles.subtitle}>The Ultimate Tech Showdown</Text>
-                    </View>
-
-                    <View style={styles.formContainer}>
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="mail-outline" size={20} color={PALETTE.white} style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Codename (Email)"
-                                placeholderTextColor="rgba(255,255,255,0.7)"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                                keyboardType="email-address"
-                            />
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                    <View style={styles.card}>
+                        <View style={styles.header}>
+                            <Text style={styles.title}>Tekron ~ NST</Text>
+                            <Text style={styles.subtitle}>The Ultimate Tech Showdown</Text>
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="lock-closed-outline" size={20} color={PALETTE.white} style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Secret Key (Password)"
-                                placeholderTextColor="rgba(255,255,255,0.7)"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={!showPassword}
-                            />
-                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <View style={styles.formContainer}>
+                            <View style={[styles.inputContainer, emailFocused && styles.inputContainerFocused]}>
                                 <Ionicons
-                                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                    name="mail-outline"
                                     size={20}
-                                    color={PALETTE.white}
+                                    color={emailFocused ? PALETTE.primaryBlue : PALETTE.mediumGray}
+                                    style={styles.inputIcon}
                                 />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Codename (Email)"
+                                    placeholderTextColor={PALETTE.mediumGray}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    onFocus={() => setEmailFocused(true)}
+                                    onBlur={() => setEmailFocused(false)}
+                                />
+                            </View>
+
+                            <View style={[styles.inputContainer, passwordFocused && styles.inputContainerFocused]}>
+                                <Ionicons
+                                    name="lock-closed-outline"
+                                    size={20}
+                                    color={passwordFocused ? PALETTE.primaryBlue : PALETTE.mediumGray}
+                                    style={styles.inputIcon}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Secret Key (Password)"
+                                    placeholderTextColor={PALETTE.mediumGray}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!showPassword}
+                                    onFocus={() => setPasswordFocused(true)}
+                                    onBlur={() => setPasswordFocused(false)}
+                                />
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                    <Ionicons
+                                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                        size={20}
+                                        color={PALETTE.mediumGray}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={handleLogin}
+                                activeOpacity={0.8}
+                                disabled={isLoading}
+                                style={styles.buttonWrapper}
+                            >
+                                <View style={styles.button}>
+                                    {isLoading ? (
+                                        <ActivityIndicator color={PALETTE.white} />
+                                    ) : (
+                                        <Text style={styles.buttonText}>Jack In</Text>
+                                    )}
+                                </View>
                             </TouchableOpacity>
                         </View>
-
-                        <TouchableOpacity onPress={handleLogin} activeOpacity={0.8} disabled={isLoading}>
-                            <LinearGradient
-                                colors={[...GRADIENTS.warning]}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.button}
-                            >
-                                {isLoading ? (
-                                    <ActivityIndicator color={PALETTE.white} />
-                                ) : (
-                                    <Text style={styles.buttonText}>Jack In</Text>
-                                )}
-                            </LinearGradient>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={() => router.push('/auth/register')}
-                            style={styles.linkButton}
-                        >
-                            <Text style={styles.linkText}>
-                                Don't have an account? <Text style={styles.linkHighlight}>Sign Up</Text>
-                            </Text>
-                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -143,13 +151,14 @@ export default function Login() {
                 onClose={hidePopup}
                 type={popupType}
             />
-        </LinearGradient >
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: PALETTE.bgSuperLight,
     },
     keyboardView: {
         flex: 1,
@@ -159,75 +168,96 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: SPACING.l,
     },
+    card: {
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.l,
+        padding: SPACING.xl,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+        elevation: 10,
+        width: '100%',
+        maxWidth: 500,
+        alignSelf: 'center',
+    },
     header: {
         alignItems: 'center',
-        marginBottom: SPACING.xxl,
+        marginBottom: SPACING.xl,
     },
     title: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.white,
-        fontSize: 40,
+        color: PALETTE.primaryBlue,
+        fontSize: 32,
         marginBottom: SPACING.xs,
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.15)',
+        textShadowOffset: { width: 0, height: 4 },
+        textShadowRadius: 8,
     },
     subtitle: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.primaryOrange,
-        letterSpacing: 1,
-        fontWeight: 'bold',
+        color: PALETTE.darkGray,
+        letterSpacing: 0.5,
+        textAlign: 'center',
     },
     formContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: RADIUS.l,
-        padding: SPACING.l,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
+        gap: SPACING.m,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        backgroundColor: PALETTE.bgSuperLight,
         borderRadius: RADIUS.m,
-        marginBottom: SPACING.m,
         paddingHorizontal: SPACING.m,
-        height: 50,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        height: 56,
+        borderWidth: 1.5,
+        borderColor: PALETTE.lightGray,
+    },
+    inputContainerFocused: {
+        borderColor: PALETTE.primaryBlue,
+        backgroundColor: PALETTE.white,
     },
     inputIcon: {
         marginRight: SPACING.s,
     },
     input: {
         flex: 1,
-        color: PALETTE.white,
+        color: PALETTE.darkGray,
         height: '100%',
+        fontSize: 16,
     },
-    button: {
-        height: 50,
-        borderRadius: RADIUS.m,
-        justifyContent: 'center',
-        alignItems: 'center',
+    buttonWrapper: {
         marginTop: SPACING.s,
-        shadowColor: PALETTE.primaryOrange,
+        shadowColor: PALETTE.primaryBlue,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 5,
+        elevation: 6,
+    },
+    button: {
+        height: 56,
+        borderRadius: RADIUS.m,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: PALETTE.primaryBlue,
     },
     buttonText: {
         color: PALETTE.white,
         fontSize: 18,
         fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
     linkButton: {
-        marginTop: SPACING.l,
+        marginTop: SPACING.m,
         alignItems: 'center',
     },
     linkText: {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: PALETTE.darkGray,
         fontSize: 14,
     },
     linkHighlight: {
-        color: PALETTE.primaryOrange,
+        color: PALETTE.primaryBlue,
         fontWeight: 'bold',
     },
 });

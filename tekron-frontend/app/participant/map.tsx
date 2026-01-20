@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -21,48 +21,50 @@ export default function MapScreen() {
     const [qrCodeData, setQrCodeData] = useState<string | null>(null);
     const [unapprovedMapData, setUnapprovedMapData] = useState<any>(null);
 
-    const fetchLocations = async () => {
-        try {
-            const token = await SecureStore.getItemAsync('token');
-
-            if (user?.approved) {
-                const res = await fetch(`${BACKEND_URL}/locations`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setLocations(data);
-                }
-
-                // Also fetch QR for the modal
-                const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (qrRes.ok) {
-                    const qrData = await qrRes.json();
-                    setQrCodeData(qrData.qrCode);
-                }
-            } else {
-                // Fetch unapproved map data
-                const res = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setUnapprovedMapData(data);
-                    setQrCodeData(data.qrCode);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching locations:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token');
+
+                if (user?.approved) {
+                    const res = await fetch(`${BACKEND_URL}/locations`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setLocations(data);
+                    }
+
+                    // Also fetch QR for the modal
+                    const qrRes = await fetch(`${BACKEND_URL}/participant/qr`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (qrRes.ok) {
+                        const qrData = await qrRes.json();
+                        setQrCodeData(qrData.qrCode);
+                    }
+                } else {
+                    // Fetch unapproved map data
+                    const res = await fetch(`${BACKEND_URL}/participant/unapproved-map`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setUnapprovedMapData(data);
+                        setQrCodeData(data.qrCode);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching locations:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         fetchLocations();
     }, [user]);
+
+
 
     const openGoogleMaps = () => {
         Linking.openURL('https://maps.app.goo.gl/m1h5Hkgu3LsUrnLd9');
@@ -81,7 +83,7 @@ export default function MapScreen() {
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <style>
-            body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+            body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #FFFFFF; }
             iframe { width: 100%; height: 100%; border: 0; }
         </style>
     </head>
@@ -99,6 +101,7 @@ export default function MapScreen() {
                 title="Venue Map"
                 rightIcon="log-out-outline"
                 onRightPress={logout}
+                showBack={false}
             />
 
             {user?.approved && (
@@ -120,7 +123,7 @@ export default function MapScreen() {
 
             <View style={styles.contentContainer}>
                 {isLoading ? (
-                    <ActivityIndicator size="large" color={PALETTE.creamLight} style={{ marginTop: 50 }} />
+                    <ActivityIndicator size="large" color={PALETTE.primaryBlue} style={{ marginTop: 50 }} />
                 ) : !user?.approved ? (
                     <View style={{ flex: 1 }}>
                         <WebView
@@ -150,7 +153,7 @@ export default function MapScreen() {
                     style={styles.primaryButton}
                     onPress={() => setShowQR(true)}
                 >
-                    <Ionicons name="qr-code-outline" size={20} color={PALETTE.purpleDeep} />
+                    <Ionicons name="qr-code-outline" size={20} color={PALETTE.white} />
                     <Text style={styles.primaryButtonText}>Show My Entry Pass</Text>
                 </TouchableOpacity>
 
@@ -159,7 +162,7 @@ export default function MapScreen() {
                         style={styles.secondaryButton}
                         onPress={openGoogleMaps}
                     >
-                        <Ionicons name="map-outline" size={20} color={PALETTE.creamLight} />
+                        <Ionicons name="map-outline" size={20} color={PALETTE.primaryBlue} />
                         <Text style={styles.secondaryButtonText}>Open in Google Maps</Text>
                     </TouchableOpacity>
                 )}
@@ -177,7 +180,7 @@ export default function MapScreen() {
                             style={styles.closeButton}
                             onPress={() => setShowQR(false)}
                         >
-                            <Ionicons name="close" size={24} color={PALETTE.navyDark} />
+                            <Ionicons name="close" size={24} color={PALETTE.darkGray} />
                         </TouchableOpacity>
 
                         <Text style={styles.modalTitle}>Your Entry Pass</Text>
@@ -208,7 +211,7 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgSuperLight,
     },
     toggleContainer: {
         flexDirection: 'row',
@@ -220,64 +223,69 @@ const styles = StyleSheet.create({
         paddingVertical: SPACING.s,
         alignItems: 'center',
         borderRadius: RADIUS.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderWidth: 1,
-        borderColor: PALETTE.purpleMedium,
+        borderColor: PALETTE.blueMedium,
     },
     activeToggle: {
-        backgroundColor: PALETTE.pinkLight,
-        borderColor: PALETTE.pinkLight,
+        backgroundColor: PALETTE.primaryBlue,
+        borderColor: PALETTE.primaryBlue,
     },
     toggleText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
     },
     activeToggleText: {
-        color: PALETTE.navyDark,
+        color: PALETTE.white,
     },
     contentContainer: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: PALETTE.bgSuperLight,
     },
     webview: {
         flex: 1,
     },
     footer: {
         padding: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderTopLeftRadius: RADIUS.l,
         borderTopRightRadius: RADIUS.l,
         gap: SPACING.m,
+        shadowColor: Platform.OS === 'web' ? 'transparent' : '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 10,
     },
     primaryButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: PALETTE.creamLight,
+        backgroundColor: PALETTE.primaryBlue,
         paddingVertical: SPACING.m,
         borderRadius: RADIUS.m,
         gap: SPACING.s,
     },
     primaryButtonText: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.purpleDeep,
+        color: PALETTE.white,
         fontSize: 16,
     },
     secondaryButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: PALETTE.blueLight,
         paddingVertical: SPACING.m,
         borderRadius: RADIUS.m,
         gap: SPACING.s,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: PALETTE.blueMedium,
     },
     secondaryButtonText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontWeight: 'bold',
     },
     modalContainer: {
@@ -288,7 +296,7 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: PALETTE.creamLight,
+        backgroundColor: PALETTE.white,
         width: '100%',
         borderRadius: RADIUS.l,
         padding: SPACING.xl,
@@ -302,7 +310,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.navyDark,
+        color: PALETTE.darkGray,
         marginBottom: SPACING.xl,
     },
     qrWrapper: {
@@ -318,17 +326,17 @@ const styles = StyleSheet.create({
     },
     modalInstruction: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleDeep,
+        color: PALETTE.darkGray,
         textAlign: 'center',
     },
     instructionContainer: {
         padding: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.blueLight,
         alignItems: 'center',
     },
     instructionText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         textAlign: 'center',
     },
 });
