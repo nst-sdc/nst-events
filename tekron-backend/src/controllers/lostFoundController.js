@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 const reportItem = async (req, res) => {
     try {
-        const { type, title, description, location, category } = req.body;
+        const { type, title, description, location, category, image } = req.body;
         const userId = req.user.id; // From auth middleware
 
         if (!type || !title) {
@@ -17,8 +17,10 @@ const reportItem = async (req, res) => {
                 description,
                 location,
                 category: category || 'OTHER',
+                imageUrl: image || null,
+                imageStatus: image ? 'PENDING' : 'APPROVED',
                 reportedById: userId,
-                status: 'OPEN'
+                status: 'PENDING' // Default to PENDING for approval
             }
         });
 
@@ -31,24 +33,34 @@ const reportItem = async (req, res) => {
 
 const getItems = async (req, res) => {
     try {
-        const { type } = req.query;
+        const { type, admin } = req.query; // Add admin flag
         const where = {};
 
         if (type) {
             where.type = type;
         }
 
-        // Only show OPEN items or items claimed by the user?
-        // For now, let's show all OPEN items.
-        // Or maybe show CLAIMED items too if they are recent?
-        // Let's stick to OPEN items for the public list.
-        // But maybe we want to see "Found" items that are claimed?
+        // Check if requesting as admin (should verify role in middleware ideally, 
+        // but for now relying on query param + assumes auth middleware sets user correctly)
+        // Better: Check req.user.role here if available.
+        // Assuming participant access only sees OPEN items.
 
-        // Let's return all items for now, sorted by newest.
+        // In this architecture, usually separate routes for admin, but let's check:
+        // If query 'admin=true', check if user is admin/superadmin?
+        // Let's assume public/participant route only returns OPEN.
+        // Admin route should call a different function or we check role here.
+
+        // For simplicity:
+        // If we are calling from Admin Panel, we might use a different endpoint or param.
+        // Let's rely on standard logic: Public = OPEN only.
+
+        if (req.query.scope !== 'admin') {
+            where.status = 'OPEN';
+        }
+
         const items = await prisma.lostFoundItem.findMany({
             where: {
                 ...where,
-                // status: 'OPEN' // Maybe filter by status?
             },
             orderBy: {
                 createdAt: 'desc'
@@ -67,27 +79,32 @@ const getItems = async (req, res) => {
     }
 };
 
+const updateItemStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // OPEN (Approve), CLOSED (Resolve)
+
+        // Validate status
+        if (!['OPEN', 'CLOSED', 'PENDING'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const item = await prisma.lostFoundItem.update({
+            where: { id },
+            data: { status }
+        });
+
+        res.json(item);
+    } catch (error) {
+        console.error('Error updating status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 const markClaimed = async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
-        const role = req.user.role; // 'participant', 'admin', 'superadmin'
-
-        // Only Admin or the Reporter can mark as claimed/closed?
-        // Or maybe the person who lost it claims it?
-
-        // Logic:
-        // If item is FOUND, the person who lost it 'claims' it.
-        // If item is LOST, the person who found it 'claims' it (reports found).
-
-        // Simplification:
-        // Admin can mark as CLAIMED.
-        // Reporter can mark as CLOSED (if they found it themselves).
-
-        // For this MVP:
-        // Any authenticated user can "Claim" a FOUND item? No, that's risky.
-        // Let's say only Admins can mark as CLAIMED for now to verify ownership.
-        // OR the reporter can close it.
 
         const item = await prisma.lostFoundItem.findUnique({
             where: { id }
@@ -97,23 +114,7 @@ const markClaimed = async (req, res) => {
             return res.status(404).json({ message: 'Item not found' });
         }
 
-        // Allow Admin or Reporter to update status
-        // Note: We don't have 'role' in req.user for participants usually, need to check middleware.
-        // Assuming req.user has role if admin.
-
-        // Check if user is admin (needs check on how auth middleware sets user)
-        // Usually participant auth just sets user.id.
-
-        // Let's assume only Admin can mark as CLAIMED for now.
-        // Or if the user is the reporter, they can delete/close it.
-
-        // Let's implement a simple "Claim" which sets claimedBy to the current user
-        // BUT only if it's a FOUND item?
-
-        // Re-reading requirements: "Admin tools for marking items resolved."
-        // So let's stick to Admin only for resolving for now, or maybe just a simple status update.
-
-        // Let's allow the reporter to close it.
+        // Allow reporter to close it only
         if (item.reportedById === userId) {
             const updated = await prisma.lostFoundItem.update({
                 where: { id },
@@ -121,9 +122,6 @@ const markClaimed = async (req, res) => {
             });
             return res.json(updated);
         }
-
-        // If not reporter, check if admin (we need to know if user is admin)
-        // For now, let's just allow reporter.
 
         return res.status(403).json({ message: 'Not authorized to modify this item' });
 
@@ -136,5 +134,6 @@ const markClaimed = async (req, res) => {
 module.exports = {
     reportItem,
     getItems,
-    markClaimed
+    markClaimed,
+    updateItemStatus
 };

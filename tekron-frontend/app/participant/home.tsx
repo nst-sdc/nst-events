@@ -91,6 +91,26 @@ export default function ParticipantHome() {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const getGreeting = () => {
+        const options = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false } as const;
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+        const hour = parseInt(formatter.format(new Date()));
+
+        if (hour >= 5 && hour < 12) return 'Good Morning,';
+        if (hour >= 12 && hour < 17) return 'Good Afternoon,';
+        if (hour >= 17 && hour < 21) return 'Good Evening,';
+        return 'Good Night,';
+    };
+
+    const [greeting, setGreeting] = useState(getGreeting());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setGreeting(getGreeting());
+        }, 60000); // Check every minute
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <View style={styles.container}>
             <LinearGradient
@@ -99,7 +119,7 @@ export default function ParticipantHome() {
             >
                 <View style={styles.heroHeader}>
                     <View>
-                        <Text style={styles.greeting}>Welcome back,</Text>
+                        <Text style={styles.greeting}>{greeting}</Text>
                         <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Participant'}</Text>
                     </View>
                     <View style={styles.headerActions}>
@@ -112,17 +132,7 @@ export default function ParticipantHome() {
                     </View>
                 </View>
 
-                <View style={styles.statsRow}>
-                    <View style={styles.statPill}>
-                        <View style={styles.statIconContainer}>
-                            <Ionicons name="trophy" size={16} color={PALETTE.primaryOrange} />
-                        </View>
-                        <Text style={styles.statText}>{user?.xp || 0} XP</Text>
-                    </View>
-                    <View style={styles.statPill}>
-                        <Text style={[styles.statText, { color: PALETTE.primaryMint }]}>Level {user?.level || 1}</Text>
-                    </View>
-                </View>
+
             </LinearGradient>
 
             <View style={styles.contentContainer}>
@@ -273,28 +283,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.2)',
         borderRadius: RADIUS.round,
     },
-    statsRow: {
-        flexDirection: 'row',
-        gap: SPACING.m,
-    },
-    statPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.15)',
-        paddingHorizontal: SPACING.m,
-        paddingVertical: 6,
-        borderRadius: RADIUS.l,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
-    },
-    statIconContainer: {
-        marginRight: SPACING.s,
-    },
-    statText: {
-        ...TYPOGRAPHY.body,
-        color: PALETTE.white,
-        fontWeight: '600',
-    },
+
     contentContainer: {
         flex: 1,
         marginTop: -SPACING.xl,

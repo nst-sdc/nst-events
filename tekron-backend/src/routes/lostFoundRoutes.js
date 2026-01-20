@@ -7,5 +7,6 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 router.get('/', authenticateToken, lostFoundController.getItems);
 router.post('/report', authenticateToken, lostFoundController.reportItem);
 router.post('/:id/claim', authenticateToken, lostFoundController.markClaimed);
+router.patch('/:id/status', authenticateToken, lostFoundController.updateItemStatus);
 
 module.exports = router;

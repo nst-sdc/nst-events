@@ -53,7 +53,7 @@ export default function Profile() {
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Profile" />
+            <AppHeader title="Profile" showBack />
 
             <ScrollView
                 contentContainerStyle={styles.content}
@@ -105,7 +105,7 @@ export default function Profile() {
                 </Card>
 
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={24} color={PALETTE.primaryOrange} />
+                    <Ionicons name="log-out-outline" size={24} color={PALETTE.alertRed} />
                     <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         borderWidth: 1,
-        borderColor: PALETTE.primaryOrange,
+        borderColor: PALETTE.alertRed,
         marginBottom: SPACING.xl,
     },
     logoutText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.primaryOrange,
+        color: PALETTE.alertRed,
         fontWeight: 'bold',
     },
 });

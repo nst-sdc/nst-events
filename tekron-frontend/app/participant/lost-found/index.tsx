@@ -66,7 +66,7 @@ export default function LostFoundScreen() {
             <View style={styles.cardHeader}>
                 <View style={styles.titleRow}>
                     <View style={styles.iconContainer}>
-                        <Ionicons name={getCategoryIcon(item.category)} size={20} color={PALETTE.darkGray} />
+                        <Ionicons name={getCategoryIcon(item.category)} size={20} color={PALETTE.primaryBlue} />
                     </View>
                     <Text style={styles.cardTitle}>{item.title}</Text>
                 </View>
@@ -76,7 +76,7 @@ export default function LostFoundScreen() {
             </View>
 
             <Text style={styles.cardLocation}>
-                <Ionicons name="location-outline" size={14} color={PALETTE.mediumGray} /> {item.location}
+                <Ionicons name="location-outline" size={14} color={PALETTE.primaryBlue} /> {item.location}
             </Text>
 
             {item.description && <Text style={styles.cardDescription}>{item.description}</Text>}
@@ -100,7 +100,7 @@ export default function LostFoundScreen() {
                     <Ionicons
                         name="search-outline"
                         size={20}
-                        color={activeTab === 'LOST' ? PALETTE.primaryMint : PALETTE.mediumGray}
+                        color={activeTab === 'LOST' ? PALETTE.primaryBlue : PALETTE.mediumGray}
                         style={{ marginBottom: 4 }}
                     />
                     <Text style={[styles.tabText, activeTab === 'LOST' && styles.activeTabText]}>LOST ITEMS</Text>
@@ -112,7 +112,7 @@ export default function LostFoundScreen() {
                     <Ionicons
                         name="gift-outline"
                         size={20}
-                        color={activeTab === 'FOUND' ? PALETTE.primaryMint : PALETTE.mediumGray}
+                        color={activeTab === 'FOUND' ? PALETTE.primaryBlue : PALETTE.mediumGray}
                         style={{ marginBottom: 4 }}
                     />
                     <Text style={[styles.tabText, activeTab === 'FOUND' && styles.activeTabText]}>FOUND ITEMS</Text>
@@ -148,33 +148,37 @@ export default function LostFoundScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.blueDark,
+        backgroundColor: PALETTE.bgLight,
     },
     tabs: {
         flexDirection: 'row',
         padding: SPACING.m,
         gap: SPACING.m,
+        backgroundColor: PALETTE.white,
+        marginBottom: SPACING.s,
     },
     tab: {
         flex: 1,
         paddingVertical: SPACING.s,
         alignItems: 'center',
-        borderBottomWidth: 2,
+        borderBottomWidth: 3,
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: PALETTE.primaryMint,
+        borderBottomColor: PALETTE.primaryBlue,
     },
     tabText: {
         ...TYPOGRAPHY.h3,
         color: PALETTE.mediumGray,
         fontSize: 14,
+        fontWeight: 'bold',
     },
     activeTabText: {
-        color: PALETTE.primaryMint,
+        color: PALETTE.primaryBlue,
     },
     listContent: {
         padding: SPACING.m,
+        paddingBottom: 80, // Space for FAB
     },
     card: {
         backgroundColor: PALETTE.white,
@@ -183,12 +187,17 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.m,
         borderWidth: 1,
         borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 3,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: SPACING.xs,
+        marginBottom: SPACING.s,
     },
     titleRow: {
         flexDirection: 'row',
@@ -196,63 +205,75 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     iconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: PALETTE.primaryMint,
+        width: 40,
+        height: 40,
+        borderRadius: RADIUS.m,
+        backgroundColor: PALETTE.bgSuperLight,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: SPACING.s,
+        marginRight: SPACING.m,
     },
     cardTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.white,
+        color: PALETTE.primaryBlue,
+        fontSize: 16,
         flex: 1,
     },
     statusBadge: {
-        backgroundColor: PALETTE.blueMedium,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: RADIUS.s,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: RADIUS.round,
+        backgroundColor: PALETTE.blueLight,
+        borderWidth: 1,
+        borderColor: PALETTE.blueSuperLight,
     },
     statusClosed: {
-        backgroundColor: '#555',
+        backgroundColor: PALETTE.lightGray,
+        borderColor: PALETTE.mediumGray,
     },
     statusText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.blueDark,
+        color: PALETTE.primaryBlue,
         fontSize: 10,
-        fontWeight: 'bold',
+        fontWeight: '800',
+        textTransform: 'uppercase',
     },
     cardLocation: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.mediumGray,
-        marginBottom: SPACING.s,
+        ...TYPOGRAPHY.body,
+        fontSize: 14,
+        color: PALETTE.darkGray,
+        marginBottom: SPACING.xs,
+        marginLeft: 56, // Align with title
     },
     cardDescription: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.darkGray,
+        color: PALETTE.mediumGray,
         marginBottom: SPACING.m,
+        marginLeft: 56, // Align with title
+        fontSize: 14,
     },
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopColor: PALETTE.bgSuperLight,
         paddingTop: SPACING.s,
+        marginTop: SPACING.s,
     },
     reporterName: {
         ...TYPOGRAPHY.caption,
         color: PALETTE.mediumGray,
+        fontWeight: '500',
     },
     date: {
         ...TYPOGRAPHY.caption,
         color: PALETTE.mediumGray,
     },
     emptyText: {
-        color: PALETTE.darkGray,
+        color: PALETTE.mediumGray,
         textAlign: 'center',
         marginTop: SPACING.xl,
+        fontSize: 16,
     },
     fab: {
         position: 'absolute',
@@ -261,13 +282,13 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: PALETTE.primaryMint,
+        backgroundColor: PALETTE.primaryBlue,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        elevation: 8,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
-        shadowRadius: 4,
+        shadowRadius: 8,
     }
 });
