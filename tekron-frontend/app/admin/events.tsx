@@ -178,12 +178,7 @@ export default function AdminEvents() {
                                 <Text style={styles.actionButtonText}>Update Status</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: PALETTE.blueLight }]}
-                                onPress={() => router.push({ pathname: '/admin/leaderboard', params: { eventId: event.id } })}
-                            >
-                                <Text style={[styles.actionButtonText, { color: PALETTE.primaryBlue }]}>Leaderboard</Text>
-                            </TouchableOpacity>
+
                         </View>
                     </Card>
                 ))}

@@ -21,8 +21,7 @@ app.use('/participant', participantRoutes);
 app.use('/admin', adminRoutes);
 app.use('/superadmin', superAdminRoutes);
 app.use('/notifications', require('./src/routes/notification.routes'));
-app.use('/badges', require('./src/routes/badge.routes'));
-app.use('/xp', require('./src/routes/xp.routes'));
+
 app.use('/locations', locationRoutes);
 app.use('/volunteer', require('./src/routes/volunteerRoutes'));
 app.use('/feedback', require('./src/routes/feedbackRoutes'));

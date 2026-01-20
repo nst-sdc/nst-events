@@ -7,19 +7,14 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
-import * as SecureStore from 'expo-secure-store';
-import { XPBar } from '../../components/XPBar';
-import { BadgeGrid } from '../../components/BadgeGrid';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
-
 import { BACKEND_URL } from '../../constants/config';
+import * as SecureStore from 'expo-secure-store';
 
 export default function Profile() {
     const { user, logout } = useAuthStore();
     const router = useRouter();
     const [qrCodeData, setQrCodeData] = useState<string | null>(null);
-    const [xpData, setXpData] = useState({ xp: 0, level: 1, progress: 0, nextLevelXp: 100 });
-    const [badges, setBadges] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
     // Initialize push notifications
@@ -35,20 +30,6 @@ export default function Profile() {
             if (qrRes.ok) {
                 const data = await qrRes.json();
                 setQrCodeData(data.qrCode);
-            }
-
-            // Fetch XP
-            const xpRes = await fetch(`${BACKEND_URL}/participant/xp`, { headers });
-            if (xpRes.ok) {
-                const data = await xpRes.json();
-                setXpData(data);
-            }
-
-            // Fetch Badges
-            const badgesRes = await fetch(`${BACKEND_URL}/participant/badges`, { headers });
-            if (badgesRes.ok) {
-                const data = await badgesRes.json();
-                setBadges(data);
             }
         } catch (error) {
             console.error('Error fetching profile data:', error);
@@ -90,14 +71,7 @@ export default function Profile() {
                     <Text style={styles.name}>{user?.name}</Text>
                     <Text style={styles.email}>{user?.email}</Text>
 
-                    <View style={{ width: '100%', marginBottom: SPACING.l }}>
-                        <XPBar
-                            xp={xpData.xp}
-                            level={xpData.level}
-                            progress={xpData.progress}
-                            nextLevelXp={xpData.nextLevelXp}
-                        />
-                    </View>
+
 
                     <View style={styles.qrContainer}>
                         {qrCodeData ? (
@@ -116,7 +90,7 @@ export default function Profile() {
                     <Text style={styles.qrLabel}>Scan at reception</Text>
                 </Card>
 
-                <BadgeGrid badges={badges} />
+
 
                 <Text style={styles.sectionTitle}>Settings</Text>
 
