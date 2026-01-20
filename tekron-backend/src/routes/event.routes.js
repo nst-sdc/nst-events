@@ -13,3 +13,5 @@ router.put('/:id/status', adminAuth, eventController.updateEventStatus);
 router.post('/:id/score', adminAuth, eventController.updateParticipantScore);
 
 module.exports = router;
+
+
