@@ -79,7 +79,7 @@ export default function AuthLinkHandler() {
 
             // Redirect to Dashboard
             if (data.role === 'admin' || data.role === 'superadmin') {
-                router.replace('/admin/dashboard');
+                router.replace('/admin/dashboard' as any);
             } else {
                 if (data.user.approved) {
                     router.replace('/participant/home');

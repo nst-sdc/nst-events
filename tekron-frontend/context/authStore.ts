@@ -64,9 +64,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 // But let's stick to what's available. If superadmin dashboard is not built, maybe admin dashboard?
                 // Wait, user said "superadmin -> SuperAdminDashboard". I don't have that route yet.
                 // I'll redirect to admin dashboard for now as superadmin is likely an admin superset.
-                router.replace('/admin/dashboard');
+                router.replace('/admin/dashboard' as any);
             } else if (role === 'admin') {
-                router.replace('/admin/dashboard');
+                router.replace('/admin/dashboard' as any);
             } else if (role === 'participant') {
                 if (user.approved) router.replace('/participant/home');
                 else router.replace('/participant/map');

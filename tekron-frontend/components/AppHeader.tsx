@@ -23,20 +23,25 @@ export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: 
             end={{ x: 1, y: 0 }}
             style={[styles.container, { paddingTop: insets.top }]}
         >
+            <View style={[styles.titleContainer, { paddingTop: insets.top }]}>
+                <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            </View>
+
             <View style={styles.leftContainer}>
                 {showBack && (
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color={PALETTE.white} />
                     </TouchableOpacity>
                 )}
-                <Text style={styles.title}>{title}</Text>
             </View>
 
-            {rightIcon && (
-                <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
-                    <Ionicons name={rightIcon} size={24} color={PALETTE.white} />
-                </TouchableOpacity>
-            )}
+            <View style={styles.rightContainer}>
+                {rightIcon && (
+                    <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
+                        <Ionicons name={rightIcon} size={24} color={PALETTE.white} />
+                    </TouchableOpacity>
+                )}
+            </View>
         </LinearGradient>
     );
 }
@@ -48,20 +53,38 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.l,
         paddingBottom: SPACING.m,
+        position: 'relative',
+        minHeight: 60, // Ensure minimum touch target area
     },
-    leftContainer: {
-        flexDirection: 'row',
+    titleContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
         alignItems: 'center',
-    },
-    backButton: {
-        marginRight: SPACING.m,
+        paddingHorizontal: 60, // Prevent overlap with buttons (approx 24+24+12)
+        paddingBottom: SPACING.m,
+        pointerEvents: 'none', // Allow clicks to pass through to buttons if they somehow overlap
     },
     title: {
         ...TYPOGRAPHY.h2,
         color: PALETTE.white,
-        fontSize: 20,
+        fontSize: 18, // Slightly smaller to fit longer titles
+        textAlign: 'center',
+    },
+    leftContainer: {
+        zIndex: 1,
+        minWidth: 40,
+    },
+    rightContainer: {
+        zIndex: 1,
+        minWidth: 40,
+        alignItems: 'flex-end',
+    },
+    backButton: {
+        padding: SPACING.xs,
+        marginLeft: -SPACING.xs, // Negative margin to align icon visually with grid
     },
     rightButton: {
-        padding: SPACING.s,
+        padding: SPACING.xs,
+        marginRight: -SPACING.xs,
     },
 });

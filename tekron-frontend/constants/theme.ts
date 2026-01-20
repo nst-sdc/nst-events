@@ -38,6 +38,18 @@ export const PALETTE = {
   // Backgrounds
   bgSuperLight: "#F9FAFB",
   bgLight: "#FFFFFF",
+  // Extended Palette
+  navyDark: "#0B1D38",
+  navyLight: "#1A2E4F",
+  pinkLight: "#FFC2E2",
+  pinkDark: "#C2185B",
+  yellowLight: "#FFF9C4",
+  gray: "#9E9E9E",
+  purpleLight: "#E0E0FF",
+  purpleMedium: "#8A2BE2",
+  purpleDeep: "#4B0082",
+  creamLight: "#FFFDD0",
+  creamDark: "#F0E68C",
 };
 
 export const GRADIENTS = {
@@ -50,6 +62,30 @@ export const GRADIENTS = {
   header: [PALETTE.primaryBlue, PALETTE.blueDark] as const,
   lightBlue: [PALETTE.blueLight, PALETTE.blueSuperLight] as const,
   bgSoft: [PALETTE.white, PALETTE.lightGray] as const,
+};
+
+export const SHADOWS = {
+  small: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  medium: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  large: {
+    shadowColor: "#0066FF", // Blue-tinted shadow for premium feel
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  }
 };
 
 export const THEME = {
@@ -95,10 +131,10 @@ export const RADIUS = {
 };
 
 export const TYPOGRAPHY = {
-  h1: { fontSize: 32, fontWeight: 'bold' as TextStyle['fontWeight'] },
-  h2: { fontSize: 24, fontWeight: 'bold' as TextStyle['fontWeight'] },
-  h3: { fontSize: 20, fontWeight: '600' as TextStyle['fontWeight'] },
-  h4: { fontSize: 18, fontWeight: '600' as TextStyle['fontWeight'] },
-  body: { fontSize: 16, fontWeight: 'normal' as TextStyle['fontWeight'] },
-  caption: { fontSize: 12, fontWeight: 'normal' as TextStyle['fontWeight'] },
+  h1: { fontSize: 32, fontFamily: 'Orbitron_700Bold', fontWeight: 'bold' as TextStyle['fontWeight'] },
+  h2: { fontSize: 24, fontFamily: 'Orbitron_600SemiBold', fontWeight: 'bold' as TextStyle['fontWeight'] },
+  h3: { fontSize: 20, fontFamily: 'Orbitron_500Medium', fontWeight: '600' as TextStyle['fontWeight'] },
+  h4: { fontSize: 18, fontFamily: 'Orbitron_500Medium', fontWeight: '600' as TextStyle['fontWeight'] },
+  body: { fontSize: 16, fontFamily: 'Inter_400Regular', fontWeight: 'normal' as TextStyle['fontWeight'] },
+  caption: { fontSize: 12, fontFamily: 'Inter_400Regular', fontWeight: 'normal' as TextStyle['fontWeight'] },
 };

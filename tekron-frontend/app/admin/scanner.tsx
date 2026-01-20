@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
         marginTop: SPACING.l,
     },
     button: {
-        paddingHorizontal: SPACING.xl,
-        paddingVertical: SPACING.m,
+        backgroundColor: PALETTE.purpleMedium,
+        padding: SPACING.m,
         borderRadius: RADIUS.m,
     },
     buttonText: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         width: 250,
         height: 250,
         borderWidth: 2,
-        borderColor: PALETTE.primaryOrange,
+        borderColor: PALETTE.pinkLight,
         backgroundColor: 'transparent',
         borderRadius: RADIUS.m,
         overflow: 'hidden', // Ensure scan line doesn't go outside

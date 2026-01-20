@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { Loader } from '../../components/Loader';
 import { Popup } from '../../components/Popup';
@@ -172,12 +172,12 @@ export default function PhotoModeration() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     tabs: {
         flexDirection: 'row',
         padding: SPACING.s,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.bgSuperLight,
     },
     tab: {
         flex: 1,
@@ -186,23 +186,24 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.s,
     },
     activeTab: {
-        backgroundColor: PALETTE.purpleMedium,
+        backgroundColor: PALETTE.primaryBlue,
     },
     tabText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
         fontWeight: 'bold',
     },
     activeTabText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
     },
     list: {
         padding: SPACING.m,
     },
     card: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.m, // Ensure spacing between cards
+        ...SHADOWS.medium,
         overflow: 'hidden',
     },
     image: {
@@ -214,19 +215,19 @@ const styles = StyleSheet.create({
     },
     uploader: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
     },
     caption: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
         marginTop: SPACING.xs,
     },
     actions: {
         flexDirection: 'row',
         padding: SPACING.s,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopColor: PALETTE.lightGray,
         justifyContent: 'flex-end',
         gap: SPACING.s,
     },
@@ -238,22 +239,22 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.s,
     },
     approveBtn: {
-        backgroundColor: '#2ecc71',
+        backgroundColor: PALETTE.successGreen,
     },
     rejectBtn: {
-        backgroundColor: PALETTE.pinkDark,
+        backgroundColor: PALETTE.alertRed,
     },
     pendingBtn: {
-        backgroundColor: '#95a5a6', // Hardcoded gray for now
+        backgroundColor: PALETTE.mediumGray,
     },
     btnText: {
-        color: 'white',
+        color: PALETTE.white,
         fontWeight: 'bold',
         marginLeft: SPACING.xs,
         fontSize: 12,
     },
     emptyText: {
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
         textAlign: 'center',
         marginTop: SPACING.xl,
         ...TYPOGRAPHY.body,

@@ -1,139 +1,182 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
-import { Card } from '../../components/Card';
-import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { useAdminStore } from '../../context/adminStore';
 
+const { width } = Dimensions.get('window');
+
 export default function AdminDashboard() {
     const router = useRouter();
-    const { logout } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const { stats, fetchStats, isLoading } = useAdminStore();
     const insets = useSafeAreaInsets();
+
+    // Animation for Live Indicator
+    const [pulseAnim] = useState(new Animated.Value(1));
 
     useEffect(() => {
         fetchStats();
     }, [fetchStats]);
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.2,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, [pulseAnim]);
 
     const handleLogout = async () => {
         await logout();
         router.replace('/auth/login');
     };
 
-    const StatCard = ({ title, value, icon, color }: { title: string, value: number, icon: keyof typeof Ionicons.glyphMap, color: string }) => (
-        <Card style={styles.statCard}>
-            <View style={styles.statHeader}>
-                <View style={[styles.iconContainer, { backgroundColor: color }]}>
-                    <Ionicons name={icon} size={24} color={PALETTE.white} />
-                </View>
-                <Text style={styles.statValue}>{value}</Text>
-            </View>
-            <Text style={styles.statTitle}>{title}</Text>
-        </Card>
-    );
-
-    const ActionButton = ({ title, icon, onPress, colors }: { title: string, icon: keyof typeof Ionicons.glyphMap, onPress: () => void, colors: readonly [string, string, ...string[]] }) => (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.actionButtonContainer}>
-            <LinearGradient
-                colors={[...colors]}
-                style={styles.actionButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-            >
-                <Ionicons name={icon} size={32} color={PALETTE.white} />
-                <Text style={styles.actionText}>{title}</Text>
-            </LinearGradient>
-        </TouchableOpacity>
-    );
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good Morning,';
+        if (hour < 17) return 'Good Afternoon,';
+        return 'Good Evening,';
+    };
 
     return (
         <View style={styles.container}>
-            <AppHeader
-                title="Admin Dashboard"
-                rightIcon="log-out-outline"
-                onRightPress={handleLogout}
-            />
-
-            <ScrollView
-                contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.l }]}
-                refreshControl={
-                    <RefreshControl refreshing={isLoading} onRefresh={fetchStats} tintColor={PALETTE.primaryBlue} />
-                }
+            <LinearGradient
+                colors={[...GRADIENTS.header]}
+                style={[styles.heroSection, { paddingTop: insets.top + SPACING.l }]}
             >
-                <Text style={styles.sectionTitle}>Live Metrics</Text>
-                <View style={styles.statsGrid}>
-                    <StatCard
-                        title="Total Participants"
-                        value={stats.totalParticipants}
-                        icon="people"
-                        color={PALETTE.primaryBlue}
-                    />
-                    <StatCard
-                        title="Pending Approvals"
-                        value={stats.pendingApprovals}
-                        icon="time"
-                        color={PALETTE.alertRed}
-                    />
-                    <StatCard
-                        title="Approved Users"
-                        value={stats.approvedUsers}
-                        icon="checkmark-circle"
-                        color={PALETTE.successGreen}
-                    />
-                    <StatCard
-                        title="Today's Check-ins"
-                        value={stats.todayCheckIns}
-                        icon="enter"
-                        color={PALETTE.primaryMint}
-                    />
-                </View>
-
-                <TouchableOpacity
-                    style={styles.menuItem}
-                    onPress={() => router.push('/admin/photos')}
-                >
-                    <View style={[styles.iconContainer, { backgroundColor: PALETTE.primaryBlue }]}>
-                        <Ionicons name="images" size={24} color={PALETTE.white} />
+                <View style={styles.heroHeader}>
+                    <View>
+                        <Text style={styles.greeting}>{getGreeting()}</Text>
+                        <Text style={styles.userName}>Administrator</Text>
                     </View>
-                    <Text style={styles.menuText}>Content Moderation</Text>
-                    <Ionicons name="chevron-forward" size={24} color={PALETTE.primaryBlue} />
-                </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity onPress={() => router.push('/admin/alerts')} style={styles.iconBtn}>
+                            <Ionicons name="notifications-outline" size={24} color={PALETTE.white} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleLogout} style={styles.iconBtn}>
+                            <Ionicons name="log-out-outline" size={24} color={PALETTE.white} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
-                <Text style={styles.sectionTitle}>Quick Actions</Text>
-                <View style={styles.actionsGrid}>
-                    <ActionButton
-                        title="Scan QR"
-                        icon="qr-code-outline"
-                        onPress={() => router.push('/admin/scanner')}
-                        colors={GRADIENTS.primary}
-                    />
-                    <ActionButton
-                        title="Send Alert"
-                        icon="megaphone-outline"
-                        onPress={() => router.push('/admin/alerts')}
-                        colors={GRADIENTS.success}
-                    />
+                {/* System Overview Header on Gradient */}
+                <View style={styles.sectionHeaderRow}>
+                    <Text style={[styles.sectionHeader, { color: PALETTE.white }]}>System Overview</Text>
+                    <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                        <View style={styles.liveIndicator} />
+                    </Animated.View>
                 </View>
-                <View style={[styles.actionsGrid, { marginTop: SPACING.m }]}>
-                    <ActionButton
-                        title="Manage Events"
-                        icon="calendar-outline"
-                        onPress={() => router.push('/admin/events')}
-                        colors={GRADIENTS.warning}
-                    />
-                    <ActionButton
-                        title="Lost & Found"
-                        icon="search-outline"
-                        onPress={() => router.push('/admin/lost-found')}
-                        colors={GRADIENTS.primary}
-                    />
-                </View>
-            </ScrollView>
+            </LinearGradient>
+
+            <View style={styles.contentContainer}>
+                <ScrollView
+                    contentContainerStyle={{ paddingBottom: 0 }}
+                    refreshControl={
+                        <RefreshControl refreshing={isLoading} onRefresh={fetchStats} tintColor={PALETTE.primaryBlue} />
+                    }
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Live Overview - Professional Stats Cards in 2x2 Grid */}
+                    <View style={styles.statsContainer}>
+                        <View style={styles.statsGrid}>
+                            {/* First Row */}
+                            <View style={styles.statsRow}>
+                                <View style={styles.statCard}>
+                                    <View style={[styles.statIconContainer, { backgroundColor: PALETTE.blueLight }]}>
+                                        <Ionicons name="people" size={24} color={PALETTE.primaryBlue} />
+                                    </View>
+                                    <View style={styles.statContent}>
+                                        <Text style={styles.statValue}>{stats.totalParticipants}</Text>
+                                        <Text style={styles.statTitle}>Participants</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.statCard}>
+                                    <View style={[styles.statIconContainer, { backgroundColor: '#FFF3E0' }]}>
+                                        <Ionicons name="time" size={24} color="#FF9800" />
+                                    </View>
+                                    <View style={styles.statContent}>
+                                        <Text style={styles.statValue}>{stats.pendingApprovals}</Text>
+                                        <Text style={styles.statTitle}>Pending</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Second Row */}
+                            <View style={styles.statsRow}>
+                                <View style={styles.statCard}>
+                                    <View style={[styles.statIconContainer, { backgroundColor: '#E8F5E9' }]}>
+                                        <Ionicons name="checkmark-circle" size={24} color={PALETTE.successGreen} />
+                                    </View>
+                                    <View style={styles.statContent}>
+                                        <Text style={styles.statValue}>{stats.approvedUsers}</Text>
+                                        <Text style={styles.statTitle}>Approved</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.statCard}>
+                                    <View style={[styles.statIconContainer, { backgroundColor: PALETTE.mintLight }]}>
+                                        <Ionicons name="enter" size={24} color={PALETTE.primaryMint} />
+                                    </View>
+                                    <View style={styles.statContent}>
+                                        <Text style={styles.statValue}>{stats.todayCheckIns}</Text>
+                                        <Text style={styles.statTitle}>Check-ins</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Quick Access Grid - White Floating Card Style */}
+                    <View style={styles.quickAccessContainer}>
+                        <Text style={styles.sectionHeader}>Quick Actions</Text>
+                        <View style={styles.actionGrid}>
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/approval')}>
+                                <View style={[styles.actionIcon, { backgroundColor: '#FFF3E0' }]}>
+                                    <Ionicons name="shield-checkmark" size={26} color="#FF9800" />
+                                </View>
+                                <Text style={styles.actionLabel}>Approvals</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/scanner')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.blueLight }]}>
+                                    <Ionicons name="qr-code" size={26} color={PALETTE.primaryBlue} />
+                                </View>
+                                <Text style={styles.actionLabel}>Scanner</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/lost-found')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.mintLight }]}>
+                                    <Ionicons name="search" size={26} color={PALETTE.primaryMint} />
+                                </View>
+                                <Text style={styles.actionLabel}>Lost/Found</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/admin/alerts')}>
+                                <View style={[styles.actionIcon, { backgroundColor: PALETTE.purpleLight }]}>
+                                    <Ionicons name="notifications" size={26} color={PALETTE.purpleMedium} />
+                                </View>
+                                <Text style={styles.actionLabel}>Alerts</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                </ScrollView>
+            </View>
         </View>
     );
 }
@@ -143,97 +186,159 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: PALETTE.bgLight,
     },
-    content: {
-        padding: SPACING.l,
+    heroSection: {
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        paddingHorizontal: SPACING.l,
+        paddingBottom: SPACING.xl + SPACING.m,
+        zIndex: 1,
     },
-    sectionTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.primaryBlue,
-        marginBottom: SPACING.m,
-        marginTop: SPACING.s,
-    },
-    statsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: SPACING.m,
-        marginBottom: SPACING.xl,
-    },
-    statCard: {
-        width: '47%',
-        backgroundColor: PALETTE.white,
-        padding: SPACING.m,
-        borderWidth: 1,
-        borderColor: PALETTE.blueLight,
-        borderRadius: RADIUS.m,
-        shadowColor: PALETTE.primaryBlue,
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    statHeader: {
+    heroHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.s,
+        alignItems: 'flex-start',
+        marginBottom: SPACING.l,
     },
-    iconContainer: {
-        padding: SPACING.s,
-        borderRadius: RADIUS.s,
+    greeting: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.blueLight,
+        fontSize: 16,
     },
-    statValue: {
+    userName: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.primaryBlue,
-        fontSize: 28,
+        color: PALETTE.white,
+        fontSize: 32,
     },
-    statTitle: {
-        ...TYPOGRAPHY.caption,
-        color: PALETTE.darkGray,
-        fontWeight: 'bold',
+    headerActions: {
+        flexDirection: 'row',
+        gap: SPACING.s,
     },
-    actionsGrid: {
+    iconBtn: {
+        padding: SPACING.s,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: RADIUS.round,
+    },
+    contentContainer: {
+        flex: 1,
+        marginTop: -(SPACING.xl + SPACING.l),
+        zIndex: 2,
+    },
+    // Stats Container - Overlapping white card
+    statsContainer: {
+        backgroundColor: PALETTE.white,
+        marginHorizontal: SPACING.l,
+        padding: SPACING.m,
+        borderRadius: RADIUS.l,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 5,
+        marginBottom: SPACING.s,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
+    },
+    section: {
+        paddingHorizontal: SPACING.l,
+        marginBottom: SPACING.xl,
+    },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.m,
+        gap: SPACING.s,
+    },
+    sectionHeader: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.navyDark,
+    },
+    liveIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: PALETTE.successGreen,
+    },
+    // Stats Grid - Perfect 2x2 Layout
+    statsGrid: {
+    },
+    statsRow: {
         flexDirection: 'row',
         gap: SPACING.m,
+        marginBottom: SPACING.xs,
     },
-    actionButtonContainer: {
+    statCard: {
         flex: 1,
-        height: 120,
-        borderRadius: RADIUS.l,
-        overflow: 'hidden',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: PALETTE.bgSuperLight,
+        padding: SPACING.m,
+        borderRadius: RADIUS.m,
+        minHeight: 75,
     },
-    actionButton: {
-        flex: 1,
+    statIconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: RADIUS.m,
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: SPACING.xs,
+    },
+    statContent: {
+        alignItems: 'center',
+    },
+    statValue: {
+        ...TYPOGRAPHY.h2,
+        color: PALETTE.navyDark,
+        fontSize: 26,
+        fontWeight: 'bold',
+        marginBottom: 2,
+    },
+    statTitle: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.gray,
+        fontSize: 11,
+        fontWeight: '500',
+    },
+    quickAccessContainer: {
+        backgroundColor: PALETTE.white,
+        marginHorizontal: SPACING.l,
         padding: SPACING.m,
+        borderRadius: RADIUS.l,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+        marginBottom: 0,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
     },
-    actionText: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.white,
-        marginTop: SPACING.s,
-        textAlign: 'center',
-    },
-    menuItem: {
+    actionGrid: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        rowGap: SPACING.m,
+    },
+    actionItem: {
+        width: '48%',
         alignItems: 'center',
         padding: SPACING.m,
-        backgroundColor: PALETTE.white,
+        backgroundColor: PALETTE.bgSuperLight,
         borderRadius: RADIUS.m,
-        marginBottom: SPACING.m,
-        borderWidth: 1,
-        borderColor: PALETTE.blueLight,
-        elevation: 2,
+        gap: SPACING.s,
     },
-    menuText: {
-        flex: 1,
-        ...TYPOGRAPHY.body,
-        color: PALETTE.primaryBlue,
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginLeft: SPACING.m,
+    actionIcon: {
+        width: 52,
+        height: 52,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionLabel: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.darkGray,
+        fontWeight: '600',
+        fontSize: 12,
     },
 });

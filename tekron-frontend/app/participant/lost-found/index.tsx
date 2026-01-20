@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS, GRADIENTS } from '../../../constants/theme';
 import { AppHeader } from '../../../components/AppHeader';
 import { BACKEND_URL } from '../../../constants/config';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../../context/authStore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface LostFoundItem {
     id: string;
@@ -22,8 +24,11 @@ interface LostFoundItem {
     };
 }
 
+const { width } = Dimensions.get('window');
+
 export default function LostFoundScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { user } = useAuthStore();
     const [activeTab, setActiveTab] = useState<'LOST' | 'FOUND'>('LOST');
     const [items, setItems] = useState<LostFoundItem[]>([]);
@@ -62,85 +67,132 @@ export default function LostFoundScreen() {
     };
 
     const renderItem = ({ item }: { item: LostFoundItem }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <View style={styles.titleRow}>
-                    <View style={styles.iconContainer}>
-                        <Ionicons name={getCategoryIcon(item.category)} size={20} color={PALETTE.primaryBlue} />
+        <TouchableOpacity
+            style={styles.cardContainer}
+            activeOpacity={0.9}
+            onPress={() => {
+                // Future: Navigate to detail view
+            }}
+        >
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                    <View style={styles.iconWrapper}>
+                        <LinearGradient
+                            colors={item.type === 'LOST' ? [PALETTE.orangeLight, PALETTE.white] : [PALETTE.mintLight, PALETTE.white]}
+                            style={styles.iconGradient}
+                        >
+                            <Ionicons
+                                name={getCategoryIcon(item.category)}
+                                size={22}
+                                color={item.type === 'LOST' ? PALETTE.primaryOrange : PALETTE.primaryMint}
+                            />
+                        </LinearGradient>
                     </View>
-                    <Text style={styles.cardTitle}>{item.title}</Text>
+                    <View style={styles.headerContent}>
+                        <View style={styles.titleRow}>
+                            <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+                            <View style={[
+                                styles.statusBadge,
+                                item.status === 'CLOSED' ? styles.statusClosed : styles.statusOpen
+                            ]}>
+                                <Text style={[
+                                    styles.statusText,
+                                    item.status === 'CLOSED' ? styles.statusTextClosed : styles.statusTextOpen
+                                ]}>{item.status}</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.cardLocation} numberOfLines={1}>
+                            <Ionicons name="location-sharp" size={12} color={PALETTE.gray} /> {item.location}
+                        </Text>
+                    </View>
                 </View>
-                <View style={[styles.statusBadge, item.status === 'CLOSED' && styles.statusClosed]}>
-                    <Text style={styles.statusText}>{item.status}</Text>
+
+                {item.description ? (
+                    <Text style={styles.cardDescription} numberOfLines={2}>
+                        {item.description}
+                    </Text>
+                ) : null}
+
+                <View style={styles.cardFooter}>
+                    <View style={styles.reporterInfo}>
+                        <Ionicons name="person-circle-outline" size={16} color={PALETTE.gray} />
+                        <Text style={styles.reporterName}>{item.reportedBy.name}</Text>
+                    </View>
+                    <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                 </View>
             </View>
-
-            <Text style={styles.cardLocation}>
-                <Ionicons name="location-outline" size={14} color={PALETTE.primaryBlue} /> {item.location}
-            </Text>
-
-            {item.description && <Text style={styles.cardDescription}>{item.description}</Text>}
-
-            <View style={styles.cardFooter}>
-                <Text style={styles.reporterName}>Reported by {item.reportedBy.name}</Text>
-                <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-            </View>
-        </View>
+        </TouchableOpacity>
     );
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Lost & Found" showBack />
-
-            <View style={styles.tabs}>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'LOST' && styles.activeTab]}
-                    onPress={() => setActiveTab('LOST')}
-                >
-                    <Ionicons
-                        name="search-outline"
-                        size={20}
-                        color={activeTab === 'LOST' ? PALETTE.primaryBlue : PALETTE.mediumGray}
-                        style={{ marginBottom: 4 }}
-                    />
-                    <Text style={[styles.tabText, activeTab === 'LOST' && styles.activeTabText]}>LOST ITEMS</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'FOUND' && styles.activeTab]}
-                    onPress={() => setActiveTab('FOUND')}
-                >
-                    <Ionicons
-                        name="gift-outline"
-                        size={20}
-                        color={activeTab === 'FOUND' ? PALETTE.primaryBlue : PALETTE.mediumGray}
-                        style={{ marginBottom: 4 }}
-                    />
-                    <Text style={[styles.tabText, activeTab === 'FOUND' && styles.activeTabText]}>FOUND ITEMS</Text>
-                </TouchableOpacity>
-            </View>
-
-            {loading ? (
-                <ActivityIndicator size="large" color={PALETTE.primaryBlue} style={{ marginTop: 20 }} />
-            ) : (
-                <FlatList
-                    data={items}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={styles.listContent}
-                    ListEmptyComponent={
-                        <Text style={styles.emptyText}>No {activeTab.toLowerCase()} items reported yet.</Text>
-                    }
-                    refreshing={loading}
-                    onRefresh={fetchItems}
-                />
-            )}
-
-            <TouchableOpacity
-                style={styles.fab}
-                onPress={() => router.push('/participant/lost-found/report')}
+            <LinearGradient
+                colors={GRADIENTS.header}
+                style={[styles.headerGradient, { paddingTop: insets.top }]}
             >
-                <Ionicons name="add" size={30} color={PALETTE.white} />
-            </TouchableOpacity>
+                <View style={styles.headerContentWrapper}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={PALETTE.white} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Lost & Found</Text>
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => router.push('/participant/lost-found/report')}
+                    >
+                        <Ionicons name="add" size={24} color={PALETTE.primaryBlue} />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.tabContainer}>
+                    <View style={styles.tabWrapper}>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'LOST' && styles.activeTab]}
+                            onPress={() => setActiveTab('LOST')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'LOST' && styles.activeTabText]}>LOST ITEMS</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'FOUND' && styles.activeTab]}
+                            onPress={() => setActiveTab('FOUND')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'FOUND' && styles.activeTabText]}>FOUND ITEMS</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </LinearGradient>
+
+            <View style={styles.contentContainer}>
+                {loading ? (
+                    <View style={styles.loaderContainer}>
+                        <ActivityIndicator size="large" color={PALETTE.primaryBlue} />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={items}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={
+                            <View style={styles.emptyState}>
+                                <Ionicons
+                                    name={activeTab === 'LOST' ? "search" : "gift-outline"}
+                                    size={64}
+                                    color={PALETTE.lightGray}
+                                />
+                                <Text style={styles.emptyTitle}>
+                                    No {activeTab.toLowerCase()} items
+                                </Text>
+                                <Text style={styles.emptySubtitle}>
+                                    {activeTab === 'LOST'
+                                        ? "Great news! Nothing is currently reported missing."
+                                        : "No found items reported yet."}
+                                </Text>
+                            </View>
+                        }
+                    />
+                )}
+            </View>
         </View>
     );
 }
@@ -148,147 +200,196 @@ export default function LostFoundScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.bgLight,
+        backgroundColor: PALETTE.bgSuperLight,
     },
-    tabs: {
+    headerGradient: {
+        paddingBottom: SPACING.xl,
+        borderBottomLeftRadius: RADIUS.xl,
+        borderBottomRightRadius: RADIUS.xl,
+        ...SHADOWS.medium,
+    },
+    headerContentWrapper: {
         flexDirection: 'row',
-        padding: SPACING.m,
-        gap: SPACING.m,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: SPACING.l,
+        paddingVertical: SPACING.m,
+    },
+    headerTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.white,
+        fontWeight: 'bold',
+    },
+    backButton: {
+        padding: SPACING.s,
+    },
+    addButton: {
         backgroundColor: PALETTE.white,
-        marginBottom: SPACING.s,
+        padding: SPACING.s,
+        borderRadius: RADIUS.round,
+        ...SHADOWS.small,
+    },
+    tabContainer: {
+        paddingHorizontal: SPACING.l,
+        marginTop: SPACING.s,
+    },
+    tabWrapper: {
+        flexDirection: 'row',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: RADIUS.l,
+        padding: 4,
     },
     tab: {
         flex: 1,
         paddingVertical: SPACING.s,
         alignItems: 'center',
-        borderBottomWidth: 3,
-        borderBottomColor: 'transparent',
+        borderRadius: RADIUS.m,
     },
     activeTab: {
-        borderBottomColor: PALETTE.primaryBlue,
+        backgroundColor: PALETTE.white,
+        ...SHADOWS.small,
     },
     tabText: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.mediumGray,
-        fontSize: 14,
-        fontWeight: 'bold',
+        ...TYPOGRAPHY.h4,
+        fontSize: 12,
+        color: 'rgba(255,255,255,0.8)',
+        fontWeight: '600',
     },
     activeTabText: {
         color: PALETTE.primaryBlue,
+        fontWeight: 'bold',
+    },
+    contentContainer: {
+        flex: 1,
+        marginTop: -SPACING.l,
     },
     listContent: {
-        padding: SPACING.m,
-        paddingBottom: 80, // Space for FAB
+        paddingHorizontal: SPACING.m,
+        paddingVertical: SPACING.m,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: SPACING.xl,
+    },
+    cardContainer: {
+        marginBottom: SPACING.m,
+        ...SHADOWS.small,
     },
     card: {
         backgroundColor: PALETTE.white,
-        borderRadius: RADIUS.m,
+        borderRadius: RADIUS.l,
         padding: SPACING.m,
-        marginBottom: SPACING.m,
         borderWidth: 1,
-        borderColor: PALETTE.blueLight,
-        shadowColor: PALETTE.primaryBlue,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 3,
+        borderColor: PALETTE.lightGray,
     },
     cardHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
         marginBottom: SPACING.s,
+    },
+    iconWrapper: {
+        marginRight: SPACING.m,
+    },
+    iconGradient: {
+        width: 48,
+        height: 48,
+        borderRadius: RADIUS.m,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerContent: {
+        flex: 1,
+        justifyContent: 'center',
     },
     titleRow: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        flex: 1,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: RADIUS.m,
-        backgroundColor: PALETTE.bgSuperLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: SPACING.m,
+        marginBottom: 4,
     },
     cardTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.primaryBlue,
-        fontSize: 16,
+        ...TYPOGRAPHY.h4,
+        color: PALETTE.darkGray,
         flex: 1,
+        marginRight: SPACING.s,
     },
     statusBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: RADIUS.round,
-        backgroundColor: PALETTE.blueLight,
-        borderWidth: 1,
-        borderColor: PALETTE.blueSuperLight,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: RADIUS.s,
+    },
+    statusOpen: {
+        backgroundColor: PALETTE.mintLight,
     },
     statusClosed: {
         backgroundColor: PALETTE.lightGray,
-        borderColor: PALETTE.mediumGray,
     },
     statusText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.primaryBlue,
         fontSize: 10,
-        fontWeight: '800',
-        textTransform: 'uppercase',
+        fontWeight: 'bold',
+    },
+    statusTextOpen: {
+        color: PALETTE.mintDark,
+    },
+    statusTextClosed: {
+        color: PALETTE.gray,
     },
     cardLocation: {
-        ...TYPOGRAPHY.body,
-        fontSize: 14,
-        color: PALETTE.darkGray,
-        marginBottom: SPACING.xs,
-        marginLeft: 56, // Align with title
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.gray,
     },
     cardDescription: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.mediumGray,
-        marginBottom: SPACING.m,
-        marginLeft: 56, // Align with title
         fontSize: 14,
+        color: PALETTE.gray,
+        marginBottom: SPACING.m,
+        lineHeight: 20,
     },
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: SPACING.s,
         borderTopWidth: 1,
         borderTopColor: PALETTE.bgSuperLight,
-        paddingTop: SPACING.s,
-        marginTop: SPACING.s,
+    },
+    reporterInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     reporterName: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.mediumGray,
-        fontWeight: '500',
+        color: PALETTE.gray,
+        marginLeft: 6,
     },
     date: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.mediumGray,
+        color: PALETTE.gray,
+        fontStyle: 'italic',
     },
-    emptyText: {
-        color: PALETTE.mediumGray,
-        textAlign: 'center',
-        marginTop: SPACING.xl,
-        fontSize: 16,
-    },
-    fab: {
-        position: 'absolute',
-        bottom: SPACING.xl,
-        right: SPACING.xl,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: PALETTE.primaryBlue,
-        justifyContent: 'center',
+    emptyState: {
         alignItems: 'center',
-        elevation: 8,
-        shadowColor: PALETTE.primaryBlue,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-    }
+        justifyContent: 'center',
+        paddingVertical: SPACING.xl * 2,
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.l,
+        marginTop: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
+        borderStyle: 'dashed',
+    },
+    emptyTitle: {
+        ...TYPOGRAPHY.h3,
+        color: PALETTE.darkGray,
+        marginTop: SPACING.m,
+    },
+    emptySubtitle: {
+        ...TYPOGRAPHY.body,
+        color: PALETTE.gray,
+        textAlign: 'center',
+        marginTop: SPACING.s,
+        paddingHorizontal: SPACING.xl,
+    },
 });

@@ -70,8 +70,8 @@ export default function Approval() {
                     <Text style={styles.name}>{participantData.name}</Text>
                     <Text style={styles.email}>{participantData.email}</Text>
 
-                    <View style={[styles.statusBadge, { backgroundColor: participantData.status === 'approved' ? PALETTE.mintMedium : PALETTE.alertRed }]}>
-                        <Text style={styles.statusText}>{participantData.status ? participantData.status.toUpperCase() : 'PENDING'}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: participantData.status === 'approved' ? PALETTE.purpleMedium : PALETTE.pinkDark }]}>
+                        <Text style={styles.statusText}>{participantData.status.toUpperCase()}</Text>
                     </View>
                 </Card>
 
@@ -105,13 +105,13 @@ export default function Approval() {
                     <GradientButton
                         title="Approve"
                         onPress={handleApprove}
-                        colors={[...GRADIENTS.success] as any}
+                        colors={[PALETTE.purpleMedium, PALETTE.purpleDeep]}
                         style={styles.actionButton}
                     />
                     <GradientButton
                         title="Reject"
                         onPress={handleReject}
-                        colors={[...GRADIENTS.error] as any}
+                        colors={[PALETTE.pinkDark, PALETTE.pinkLight]}
                         style={styles.actionButton}
                     />
                 </View>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     errorText: {
-        color: PALETTE.alertRed,
+        color: PALETTE.creamLight,
         textAlign: 'center',
         marginTop: SPACING.xl,
     },
@@ -137,15 +137,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: SPACING.xl,
         marginBottom: SPACING.l,
-        backgroundColor: PALETTE.white,
-        borderRadius: RADIUS.l,
-        borderWidth: 1,
-        borderColor: PALETTE.lightGray,
-        shadowColor: PALETTE.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        backgroundColor: PALETTE.purpleDeep,
     },
     avatarContainer: {
         marginBottom: SPACING.m,
@@ -154,7 +146,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: PALETTE.blueLight,
+        backgroundColor: PALETTE.navyDark,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -186,16 +178,12 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.blueDark,
+        color: PALETTE.creamLight,
         marginBottom: SPACING.m,
     },
     detailsCard: {
         backgroundColor: PALETTE.white,
         marginBottom: SPACING.xl,
-        borderRadius: RADIUS.l,
-        padding: SPACING.m,
-        borderWidth: 1,
-        borderColor: PALETTE.lightGray,
     },
     detailRow: {
         flexDirection: 'row',
