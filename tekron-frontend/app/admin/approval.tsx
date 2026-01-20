@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { Card } from '../../components/Card';
 import { GradientButton } from '../../components/GradientButton';
@@ -70,16 +70,24 @@ export default function Approval() {
                     <Text style={styles.name}>{participantData.name}</Text>
                     <Text style={styles.email}>{participantData.email}</Text>
 
-                    <View style={[styles.statusBadge, { backgroundColor: participantData.status === 'approved' ? PALETTE.purpleMedium : PALETTE.pinkDark }]}>
-                        <Text style={styles.statusText}>{participantData.status.toUpperCase()}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: participantData.status === 'approved' ? PALETTE.mintMedium : PALETTE.alertRed }]}>
+                        <Text style={styles.statusText}>{participantData.status ? participantData.status.toUpperCase() : 'PENDING'}</Text>
                     </View>
                 </Card>
 
                 <Text style={styles.sectionTitle}>Event Details</Text>
                 <Card style={styles.detailsCard}>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Assigned Event</Text>
-                        <Text style={styles.detailValue}>Tekron: The Glitch</Text>
+                        <Text style={styles.detailLabel}>Assigned Events</Text>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            {participantData.events && participantData.events.length > 0 ? (
+                                participantData.events.map((e: any, index: number) => (
+                                    <Text key={index} style={styles.detailValue}>{e.title}</Text>
+                                ))
+                            ) : (
+                                <Text style={styles.detailValue}>No events found</Text>
+                            )}
+                        </View>
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.detailRow}>
@@ -97,13 +105,13 @@ export default function Approval() {
                     <GradientButton
                         title="Approve"
                         onPress={handleApprove}
-                        colors={[PALETTE.purpleMedium, PALETTE.purpleDeep]}
+                        colors={[...GRADIENTS.success] as any}
                         style={styles.actionButton}
                     />
                     <GradientButton
                         title="Reject"
                         onPress={handleReject}
-                        colors={[PALETTE.pinkDark, PALETTE.pinkLight]}
+                        colors={[...GRADIENTS.error] as any}
                         style={styles.actionButton}
                     />
                 </View>
@@ -115,13 +123,13 @@ export default function Approval() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
     },
     errorText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.alertRed,
         textAlign: 'center',
         marginTop: SPACING.xl,
     },
@@ -129,7 +137,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: SPACING.xl,
         marginBottom: SPACING.l,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.l,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
+        shadowColor: PALETTE.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     avatarContainer: {
         marginBottom: SPACING.m,
@@ -138,24 +154,24 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.blueLight,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: PALETTE.pinkLight,
+        borderColor: PALETTE.primaryBlue,
     },
     avatarText: {
         ...TYPOGRAPHY.h1,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
     },
     name: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         marginBottom: SPACING.xs,
     },
     email: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
         marginBottom: SPACING.m,
     },
     statusBadge: {
@@ -164,18 +180,22 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.round,
     },
     statusText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontWeight: 'bold',
         fontSize: 12,
     },
     sectionTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.blueDark,
         marginBottom: SPACING.m,
     },
     detailsCard: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         marginBottom: SPACING.xl,
+        borderRadius: RADIUS.l,
+        padding: SPACING.m,
+        borderWidth: 1,
+        borderColor: PALETTE.lightGray,
     },
     detailRow: {
         flexDirection: 'row',
@@ -184,16 +204,16 @@ const styles = StyleSheet.create({
     },
     detailLabel: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
     },
     detailValue: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
     },
     divider: {
         height: 1,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: PALETTE.lightGray,
         marginVertical: SPACING.s,
     },
     actionsContainer: {

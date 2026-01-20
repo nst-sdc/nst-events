@@ -65,8 +65,63 @@ const login = async (req, res) => {
 };
 
 // Register (Disabled)
+// Register Participant
 const registerParticipant = async (req, res) => {
-    return res.status(403).json({ message: 'User registration is not allowed. Contact Event Management.' });
+    try {
+        const { name, email, password, eventIds } = req.body;
+
+        if (!name || !email || !password || !eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
+            return res.status(400).json({ message: 'Name, email, password, and at least one event are required' });
+        }
+
+        const existingUser = await prisma.participant.findUnique({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Transaction to create user and link events
+        const result = await prisma.$transaction(async (prisma) => {
+            const user = await prisma.participant.create({
+                data: {
+                    name,
+                    email,
+                    password: hashedPassword,
+                    approved: false, // Default pending
+                }
+            });
+
+            // Create Event links
+            const eventLinks = eventIds.map(eventId => ({
+                participantId: user.id,
+                eventId: eventId
+            }));
+
+            await prisma.eventParticipant.createMany({
+                data: eventLinks
+            });
+
+            // Set primary event (legacy field support)
+            if (eventIds.length > 0) {
+                await prisma.participant.update({
+                    where: { id: user.id },
+                    data: { assignedEventId: eventIds[0] }
+                });
+            }
+
+            return user;
+        });
+
+        res.status(201).json({
+            message: 'Registration successful. Waiting for approval.',
+            userId: result.id
+        });
+
+    } catch (error) {
+        console.error('Registration Error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 };
 
 const crypto = require('crypto');

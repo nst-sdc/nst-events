@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
 import { PALETTE, GRADIENTS } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GradientSpinner } from '../components/GradientSpinner';
 
 export default function Index() {
     const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -43,7 +44,7 @@ export default function Index() {
             colors={[...GRADIENTS.header]}
             style={styles.container}
         >
-            <ActivityIndicator size="large" color={PALETTE.white} />
+            <GradientSpinner size={60} colors={[PALETTE.white, PALETTE.blueLight]} />
         </LinearGradient>
     );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet, Modal } from 'react-native';
+import { View, StyleSheet, Modal } from 'react-native';
+import { GradientSpinner } from './GradientSpinner';
 import { PALETTE } from '../constants/theme';
 
 interface LoaderProps {
@@ -11,7 +12,7 @@ export function Loader({ visible }: LoaderProps) {
         <Modal transparent visible={visible} animationType="fade">
             <View style={styles.container}>
                 <View style={styles.loaderBox}>
-                    <ActivityIndicator size="large" color={PALETTE.pinkLight} />
+                    <GradientSpinner size={50} />
                 </View>
             </View>
         </Modal>
@@ -21,18 +22,20 @@ export function Loader({ visible }: LoaderProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'rgba(28, 32, 68, 0.7)', // Navy dark with opacity
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     loaderBox: {
         padding: 24,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 10,
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

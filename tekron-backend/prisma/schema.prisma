@@ -128,6 +128,10 @@ model Alert {
     createdAt   DateTime @default(now())
     senderRole  String // 'admin' or 'superadmin'
     isEmergency Boolean  @default(false)
+
+    // New fields for targeting
+    targetScope    String   @default("all") // 'all', 'event', 'participants'
+    targetEventIds String[] // Array of event IDs if scope is 'event'
 }
 
 model Badge {

@@ -8,7 +8,10 @@ import { PALETTE, GRADIENTS, SPACING, RADIUS, TYPOGRAPHY } from '../../constants
 import { useAuthStore } from '../../context/authStore';
 import { Popup } from '../../components/Popup';
 
+import { useRouter } from 'expo-router';
+
 export default function Login() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -120,6 +123,15 @@ export default function Login() {
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => router.push('/auth/register')}
+                            style={styles.linkButton}
+                        >
+                            <Text style={styles.linkText}>
+                                Don't have an account? <Text style={styles.linkHighlight}>Sign Up</Text>
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -204,6 +216,18 @@ const styles = StyleSheet.create({
     buttonText: {
         color: PALETTE.white,
         fontSize: 18,
+        fontWeight: 'bold',
+    },
+    linkButton: {
+        marginTop: SPACING.l,
+        alignItems: 'center',
+    },
+    linkText: {
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: 14,
+    },
+    linkHighlight: {
+        color: PALETTE.primaryOrange,
         fontWeight: 'bold',
     },
 });

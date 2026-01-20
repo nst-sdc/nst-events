@@ -12,19 +12,21 @@ interface PopupProps {
 }
 
 export function Popup({ visible, title, message, onClose, type = 'info' }: PopupProps) {
-    let gradientColors = GRADIENTS.primary;
-    if (type === 'success') gradientColors = [PALETTE.purpleMedium, PALETTE.purpleDeep];
-    if (type === 'error') gradientColors = [PALETTE.pinkDark, PALETTE.purpleDeep];
+    const gradientColors =
+        type === 'success' ? GRADIENTS.success :
+            type === 'error' ? GRADIENTS.warning :
+                GRADIENTS.primary;
 
     return (
         <Modal transparent visible={visible} animationType="fade">
             <View style={styles.container}>
                 <View style={styles.content}>
                     <LinearGradient
-                        colors={gradientColors}
+                        colors={[...gradientColors] as any}
                         style={styles.header}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
+                        locations={[0, 1]}
                     >
                         <Text style={styles.title}>{title}</Text>
                     </LinearGradient>
@@ -52,10 +54,14 @@ const styles = StyleSheet.create({
     },
     content: {
         width: '100%',
-        backgroundColor: PALETTE.creamLight,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.l,
         overflow: 'hidden',
         elevation: 10,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
     },
     header: {
         padding: SPACING.m,
@@ -63,7 +69,7 @@ const styles = StyleSheet.create({
     },
     title: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
     },
     body: {
         padding: SPACING.l,
@@ -71,18 +77,19 @@ const styles = StyleSheet.create({
     },
     message: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.navyDark,
+        color: PALETTE.darkGray,
         textAlign: 'center',
         marginBottom: SPACING.l,
     },
     button: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.primaryBlue,
         paddingVertical: SPACING.s,
         paddingHorizontal: SPACING.xl,
         borderRadius: RADIUS.m,
+        elevation: 2,
     },
     buttonText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         fontWeight: 'bold',
     },
 });

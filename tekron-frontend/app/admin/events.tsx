@@ -381,6 +381,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: PALETTE.blueLight,
         maxHeight: '80%',
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 10,
     },
     modalTitle: {
         ...TYPOGRAPHY.h2,
@@ -424,8 +429,8 @@ const styles = StyleSheet.create({
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.l,
-        borderWidth: 1,
-        borderColor: PALETTE.blueLight,
+        borderWidth: 1.5,
+        borderColor: PALETTE.primaryBlue,
     },
     closeButton: {
         padding: SPACING.m,

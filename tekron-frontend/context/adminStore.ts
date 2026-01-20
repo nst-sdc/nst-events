@@ -11,6 +11,7 @@ interface Participant {
     checkInTime?: string;
     approved: boolean;
     createdAt: string;
+    events?: { id: string; title: string }[];
 }
 
 interface DashboardStats {
@@ -28,7 +29,7 @@ interface AdminState {
     validateParticipant: (qrData: string) => Promise<Participant | null>;
     approveParticipant: (id: string) => Promise<void>;
     rejectParticipant: (id: string) => Promise<void>;
-    sendAlert: (title: string, message: string) => Promise<void>;
+    sendAlert: (title: string, message: string, options?: { targetScope: 'all' | 'event', targetEventIds?: string[] }) => Promise<void>;
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
@@ -138,7 +139,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         }
     },
 
-    sendAlert: async (title: string, message: string) => {
+    sendAlert: async (title: string, message: string, options?: { targetScope: 'all' | 'event', targetEventIds?: string[] }) => {
         set({ isLoading: true });
         try {
             const token = await SecureStore.getItemAsync('token');
@@ -148,7 +149,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ title, message }),
+                body: JSON.stringify({
+                    title,
+                    message,
+                    targetScope: options?.targetScope || 'all',
+                    targetEventIds: options?.targetEventIds || []
+                }),
             });
             set({ isLoading: false });
         } catch (error) {

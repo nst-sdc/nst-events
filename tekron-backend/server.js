@@ -28,6 +28,7 @@ app.use('/volunteer', require('./src/routes/volunteerRoutes'));
 app.use('/feedback', require('./src/routes/feedbackRoutes'));
 app.use('/photos', require('./src/routes/photoRoutes'));
 app.use('/lost-found', require('./src/routes/lostFoundRoutes'));
+app.use('/events', require('./src/routes/event.routes'));
 
 // Health Check
 app.get('/', (req, res) => {
@@ -70,7 +71,7 @@ io.engine.on("connection_error", (err) => {
 
 // Start Server
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on 0.0.0.0:${PORT}`);
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
 
 // Export io for use in controllers

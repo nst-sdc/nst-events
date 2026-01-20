@@ -7,10 +7,17 @@ import { BACKEND_URL } from '../constants/config';
 import * as SecureStore from 'expo-secure-store';
 
 let Notifications: any;
-try {
-    Notifications = require('expo-notifications');
-} catch (error) {
-    console.warn('expo-notifications could not be loaded', error);
+
+// Only require expo-notifications if we are NOT in Expo Go on Android
+// SDK 53+ removed support for remote notifications in Expo Go on Android
+const isExpoGoAndroid = Platform.OS === 'android' && Constants.appOwnership === 'expo';
+
+if (!isExpoGoAndroid) {
+    try {
+        Notifications = require('expo-notifications');
+    } catch (error) {
+        console.warn('expo-notifications could not be loaded', error);
+    }
 }
 
 export const usePushNotifications = () => {
