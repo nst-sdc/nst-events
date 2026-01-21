@@ -6,7 +6,16 @@ const { generateQRCodeString } = require('../utils/qr');
 const getParticipants = async (req, res) => {
     try {
         const participants = await prisma.participant.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            include: {
+                approvedBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            }
         });
         res.json(participants);
     } catch (error) {

@@ -1,5 +1,17 @@
-import { useFonts, Orbitron_700Bold } from '@expo-google-fonts/orbitron';
-import { Rajdhani_500Medium, Rajdhani_600SemiBold, Rajdhani_700Bold } from '@expo-google-fonts/rajdhani';
+import {
+    useFonts,
+    Orbitron_400Regular,
+    Orbitron_500Medium,
+    Orbitron_600SemiBold,
+    Orbitron_700Bold,
+    Orbitron_800ExtraBold,
+    Orbitron_900Black
+} from '@expo-google-fonts/orbitron';
+import {
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold
+} from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
@@ -8,31 +20,36 @@ import { StatusBar } from 'expo-status-bar';
 import { THEME } from '../constants/theme';
 import Toast from 'react-native-toast-message';
 import AuthLinkHandler from './utils/AuthLinkHandler';
-import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-// Explicitly re-importing all needed weights and ensuring correctness
-import {
-    Orbitron_400Regular,
-    Orbitron_500Medium,
-    Orbitron_600SemiBold,
-    Orbitron_700Bold,
-    Orbitron_800ExtraBold,
-    Orbitron_900Black
-} from '@expo-google-fonts/orbitron';
-import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
 import { toastConfig } from '../components/ToastConfig';
-
-SplashScreen.preventAutoHideAsync();
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+    usePushNotifications();
     const restoreSession = useAuthStore((state) => state.restoreSession);
+    const [fontsLoaded] = useFonts({
+        Orbitron_400Regular,
+        Orbitron_500Medium,
+        Orbitron_600SemiBold,
+        Orbitron_700Bold,
+        Orbitron_800ExtraBold,
+        Orbitron_900Black,
+        Inter_400Regular,
+        Inter_600SemiBold,
+        Inter_700Bold,
+    });
 
     useEffect(() => {
         restoreSession();
     }, [restoreSession]);
 
+    useEffect(() => {
+        if (fontsLoaded) {
+            SplashScreen.hideAsync();
+        }
+    }, [fontsLoaded]);
 
     if (!fontsLoaded) {
         return <View />;

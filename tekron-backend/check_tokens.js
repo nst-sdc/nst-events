@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const count = await prisma.participant.count({ where: { pushToken: { not: null } } }); console.log('Participants with push tokens:', count); } main();

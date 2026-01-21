@@ -61,7 +61,7 @@ export default function AdminDashboard() {
                 <View style={styles.heroHeader}>
                     <View>
                         <Text style={styles.greeting}>{getGreeting()}</Text>
-                        <Text style={styles.userName}>Administrator</Text>
+                        <Text style={styles.userName}>{user?.name || 'Administrator'}</Text>
                     </View>
                     <View style={styles.headerActions}>
                         <TouchableOpacity onPress={() => router.push('/admin/alerts')} style={styles.iconBtn}>

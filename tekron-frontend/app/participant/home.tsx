@@ -30,19 +30,31 @@ export default function ParticipantHome() {
     const [pulseAnim] = useState(new Animated.Value(1));
     const insets = useSafeAreaInsets();
 
+    const [error, setError] = useState<string | null>(null);
+
     const fetchEvents = async () => {
         try {
+            setError(null);
             const token = await SecureStore.getItemAsync('token');
             const response = await fetch(`${BACKEND_URL}/participant/events`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.ok) {
                 const data = await response.json();
-                setEvents(data);
-                setLiveEvents(data.filter((e: Event) => e.status === 'LIVE'));
+                if (Array.isArray(data)) {
+                    setEvents(data);
+                    setLiveEvents(data.filter((e: Event) => e.status === 'LIVE'));
+                } else {
+                    setError('Invalid data received from server');
+                }
+            } else if (response.status === 403) {
+                setError('Your account is waiting for approval. Events will be visible once approved.');
+            } else {
+                setError(`Failed to load events: ${response.status}`);
             }
-        } catch (error) {
-            console.error('Error fetching events:', error);
+        } catch (error: any) {
+            console.error('[Home] Error fetching events:', error);
+            setError(`Network Error: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -111,6 +123,29 @@ export default function ParticipantHome() {
         return () => clearInterval(interval);
     }, []);
 
+    const [activeTab, setActiveTab] = useState<'TODAY' | 'UPCOMING'>('TODAY');
+
+    // Event Filtering Logic
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+
+    const todayEvents = events.filter(event => {
+        const eventDate = new Date(event.startTime);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate.getTime() === today.getTime();
+    }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+    const upcomingEvents = events.filter(event => {
+        const eventDate = new Date(event.startTime);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate.getTime() > today.getTime();
+    }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+    const formatUpcomingDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    };
+
     return (
         <View style={styles.container}>
             <LinearGradient
@@ -132,7 +167,6 @@ export default function ParticipantHome() {
                     </View>
                 </View>
 
-
             </LinearGradient>
 
             <View style={styles.contentContainer}>
@@ -143,6 +177,11 @@ export default function ParticipantHome() {
                     }
                     showsVerticalScrollIndicator={false}
                 >
+                    {error && (
+                        <View style={{ margin: 20, padding: 10, backgroundColor: '#fee2e2', borderRadius: 8, borderWidth: 1, borderColor: '#ef4444' }}>
+                            <Text style={{ color: '#b91c1c', textAlign: 'center' }}>{error}</Text>
+                        </View>
+                    )}
                     {/* Quick Access Grid */}
                     <View style={styles.quickAccessContainer}>
                         <Text style={styles.sectionHeader}>Quick Access</Text>
@@ -206,40 +245,91 @@ export default function ParticipantHome() {
                         </View>
                     )}
 
-                    {/* Timeline */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionHeader}>Today's Schedule</Text>
-                        {events.length === 0 && !loading ? (
-                            <View style={styles.emptyState}>
-                                <Ionicons name="calendar-outline" size={48} color={PALETTE.mediumGray} />
-                                <Text style={styles.emptyText}>No events currently scheduled.</Text>
-                            </View>
-                        ) : (
-                            <View style={styles.timeline}>
-                                {events.map((event, index) => (
-                                    <View key={event.id} style={styles.timelineItem}>
-                                        <View style={styles.timelineLeft}>
-                                            <Text style={styles.timelineTime}>{formatDate(event.startTime)}</Text>
-                                            <View style={[styles.timelineLine, index === events.length - 1 && { height: 0 }]} />
-                                            <View style={styles.timelineDot} />
-                                        </View>
-                                        <TouchableOpacity style={styles.timelineContent} onPress={() => router.push('/participant/map')}>
-                                            <View style={styles.timelineCard}>
-                                                <Text style={styles.timelineTitle}>{event.title}</Text>
-                                                <View style={styles.timelineLocationRow}>
-                                                    <Ionicons name="location-outline" size={14} color={PALETTE.primaryBlue} />
-                                                    <Text style={styles.timelineLocation}>{event.location}</Text>
-                                                </View>
-                                                {event.status === 'LIVE' && (
-                                                    <Text style={styles.timelineStatus}>Happening Now</Text>
-                                                )}
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                ))}
-                            </View>
-                        )}
+                    {/* Schedule Tabs */}
+                    <View style={styles.tabContainer}>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'TODAY' && styles.activeTab]}
+                            onPress={() => setActiveTab('TODAY')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'TODAY' && styles.activeTabText]}>Today</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'UPCOMING' && styles.activeTab]}
+                            onPress={() => setActiveTab('UPCOMING')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'UPCOMING' && styles.activeTabText]}>Upcoming</Text>
+                        </TouchableOpacity>
                     </View>
+
+                    {/* Today's Timeline */}
+                    {activeTab === 'TODAY' && (
+                        <View style={styles.section}>
+                            {todayEvents.length === 0 && !loading ? (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="calendar-outline" size={48} color={PALETTE.mediumGray} />
+                                    <Text style={styles.emptyText}>No events scheduled for today.</Text>
+                                </View>
+                            ) : (
+                                <View style={styles.timeline}>
+                                    {todayEvents.map((event, index) => (
+                                        <View key={event.id} style={styles.timelineItem}>
+                                            <View style={styles.timelineLeft}>
+                                                <Text style={styles.timelineTime}>{formatDate(event.startTime)}</Text>
+                                                <View style={[styles.timelineLine, index === todayEvents.length - 1 && { height: 0 }]} />
+                                                <View style={styles.timelineDot} />
+                                            </View>
+                                            <TouchableOpacity style={styles.timelineContent} onPress={() => router.push('/participant/map')}>
+                                                <View style={styles.timelineCard}>
+                                                    <Text style={styles.timelineTitle}>{event.title}</Text>
+                                                    <View style={styles.timelineLocationRow}>
+                                                        <Ionicons name="location-outline" size={14} color={PALETTE.primaryBlue} />
+                                                        <Text style={styles.timelineLocation}>{event.location}</Text>
+                                                    </View>
+                                                    {event.status === 'LIVE' && (
+                                                        <Text style={styles.timelineStatus}>Happening Now</Text>
+                                                    )}
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Upcoming Schedule */}
+                    {activeTab === 'UPCOMING' && (
+                        <View style={styles.section}>
+                            {upcomingEvents.length === 0 && !loading ? (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="calendar-sharp" size={48} color={PALETTE.mediumGray} />
+                                    <Text style={styles.emptyText}>No upcoming events found.</Text>
+                                </View>
+                            ) : (
+                                <View style={styles.timeline}>
+                                    {upcomingEvents.map((event, index) => (
+                                        <View key={event.id} style={styles.timelineItem}>
+                                            <View style={styles.timelineLeft}>
+                                                <Text style={[styles.timelineTime, { fontSize: 10, marginBottom: 2 }]}>{formatUpcomingDate(event.startTime)}</Text>
+                                                <Text style={styles.timelineTime}>{formatDate(event.startTime)}</Text>
+                                                <View style={[styles.timelineLine, index === upcomingEvents.length - 1 && { height: 0 }]} />
+                                                <View style={[styles.timelineDot, { borderColor: PALETTE.darkGray }]} />
+                                            </View>
+                                            <TouchableOpacity style={styles.timelineContent} onPress={() => router.push('/participant/map')}>
+                                                <View style={[styles.timelineCard, { borderColor: PALETTE.lightGray }]}>
+                                                    <Text style={styles.timelineTitle}>{event.title}</Text>
+                                                    <View style={styles.timelineLocationRow}>
+                                                        <Ionicons name="location-outline" size={14} color={PALETTE.gray} />
+                                                        <Text style={[styles.timelineLocation, { color: PALETTE.gray }]}>{event.location}</Text>
+                                                    </View>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                    )}
                 </ScrollView>
             </View>
         </View>
@@ -477,5 +567,31 @@ const styles = StyleSheet.create({
         ...TYPOGRAPHY.body,
         color: PALETTE.mediumGray,
         marginTop: SPACING.m,
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: SPACING.l,
+        marginBottom: SPACING.m,
+        gap: SPACING.m,
+    },
+    tab: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: RADIUS.round,
+        backgroundColor: PALETTE.bgSuperLight,
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+    },
+    activeTab: {
+        backgroundColor: PALETTE.primaryBlue,
+        borderColor: PALETTE.primaryBlue,
+    },
+    tabText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.gray,
+        fontWeight: 'bold',
+    },
+    activeTabText: {
+        color: PALETTE.white,
     },
 });

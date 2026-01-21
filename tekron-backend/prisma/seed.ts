@@ -215,38 +215,62 @@ async function main() {
     }
 
     // 6. Dummy Events
-    const events = [
-        {
-            title: 'Hackron 2.0',
-            description: 'The ultimate hackathon event.',
-            location: 'Main Auditorium',
-            startTime: new Date(new Date().setHours(9, 0, 0, 0)),
-            endTime: new Date(new Date().setHours(21, 0, 0, 0)),
-            status: EventStatus.UPCOMING,
-        },
-        {
-            title: 'RoboWars',
-            description: 'Battle of the bots.',
-            location: 'Open Ground',
-            startTime: new Date(new Date().setDate(new Date().getDate() + 1)),
-            endTime: new Date(new Date().setDate(new Date().getDate() + 1)),
-            status: EventStatus.UPCOMING,
-        },
-        {
-            title: 'Keynote Session',
-            description: 'Insights from industry leaders.',
-            location: 'Seminar Hall',
-            startTime: new Date(new Date().setDate(new Date().getDate() + 2)),
-            endTime: new Date(new Date().setDate(new Date().getDate() + 2)),
-            status: EventStatus.UPCOMING,
-        },
+    const events: { title: string; description: string; location: string; startTime: Date; endTime: Date; status: EventStatus }[] = [];
+    const baseDate = new Date();
+    // Set to 2026 explicitly to match current context or use current year if preferred. 
+    // Context says current time is 2026-01-21, so Jan 30/31 2026 are correct.
+    const year = baseDate.getFullYear();
+
+    const dates = [
+        new Date(year, 0, 30), // Jan 30
+        new Date(year, 0, 31)  // Jan 31
     ];
+
+    const eventTemplates = [
+        { title: 'Opening Ceremony', desc: 'Kickoff for the event.', loc: 'Main Auditorium' },
+        { title: 'Hackathon Round 1', desc: 'First coding sprint.', loc: 'Lab A' },
+        { title: 'Lunch Break', desc: 'Networking and food.', loc: 'Cafeteria' },
+        { title: 'Guest Lecture', desc: 'Talk by industry expert.', loc: 'Seminar Hall' },
+        { title: 'Gaming Tournament', desc: 'FIFA and Valorant.', loc: 'Recreation Room' },
+        { title: 'Hackathon Round 2', desc: 'Deep work session.', loc: 'Lab B' },
+        { title: 'Tech Quiz', desc: 'Test your tech trivia.', loc: 'Room 101' },
+        { title: 'Workshop: AI', desc: 'Hands-on AI session.', loc: 'Lab C' },
+        { title: 'Closing Ceremony', desc: 'Prize distribution.', loc: 'Main Auditorium' },
+        { title: 'After Party', desc: 'Music and fun.', loc: 'Open Ground' }
+    ];
+
+    let eventIdx = 0;
+
+    for (const date of dates) {
+        // 5 events per day
+        const startTimes = [9, 11, 14, 16, 18]; // 9 AM, 11 AM, 2 PM, 4 PM, 6 PM
+
+        for (const hour of startTimes) {
+            if (eventIdx >= eventTemplates.length) break;
+
+            const startTime = new Date(date);
+            startTime.setHours(hour, 0, 0, 0);
+
+            const endTime = new Date(date);
+            endTime.setHours(hour + 1, 30, 0, 0); // 1.5 hour duration
+
+            events.push({
+                title: eventTemplates[eventIdx].title,
+                description: eventTemplates[eventIdx].desc,
+                location: eventTemplates[eventIdx].loc,
+                startTime: startTime,
+                endTime: endTime,
+                status: EventStatus.UPCOMING,
+            });
+            eventIdx++;
+        }
+    }
 
     await prisma.event.createMany({
         data: events
     });
 
-    console.log('📅 Created 3 Dummy Events');
+    console.log('📅 Created 10 Dummy Events');
 
     console.log('✅ Secure Seeding completed!');
 }

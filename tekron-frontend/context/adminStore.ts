@@ -12,6 +12,8 @@ interface Participant {
     approved: boolean;
     createdAt: string;
     events?: { id: string; title: string }[];
+    approvedBy?: { id: string; name: string; email: string };
+    approvedAt?: string;
 }
 
 interface DashboardStats {
@@ -95,7 +97,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
                 // Map backend participant to frontend interface
                 return {
                     ...data.participant,
-                    status: data.participant.approved ? 'approved' : 'pending'
+                    status: data.participant.approved ? 'approved' : 'pending',
+                    approvedBy: data.participant.approvedBy,
+                    approvedAt: data.participant.approvedAt
                 };
             }
             set({ isLoading: false });

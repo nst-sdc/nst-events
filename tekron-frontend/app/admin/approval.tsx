@@ -20,7 +20,8 @@ export default function Approval() {
         fetchStats
     } = useAdminStore();
 
-    // State for local interaction
+    // State
+    const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED'>('PENDING');
     const [showSuccess, setShowSuccess] = useState(false);
     const [actionType, setActionType] = useState<'approved' | 'rejected'>('approved');
     const [refreshing, setRefreshing] = useState(false);
@@ -49,7 +50,7 @@ export default function Approval() {
             setActionType('approved');
             setShowSuccess(true);
         } else {
-            fetchStats(); // Just refresh list
+            fetchStats();
         }
     };
 
@@ -59,7 +60,7 @@ export default function Approval() {
             setActionType('rejected');
             setShowSuccess(true);
         } else {
-            fetchStats(); // Just refresh list
+            fetchStats();
         }
     };
 
@@ -68,9 +69,11 @@ export default function Approval() {
         router.back();
     };
 
-    // --- RENDER: LIST MODE (Pending Approvals) ---
+    // --- RENDER: LIST MODE (Tabs for Pending/Approved) ---
     if (!participantData) {
-        const pendingParticipants = participants.filter(p => !p.approved);
+        const filteredParticipants = participants.filter(p =>
+            activeTab === 'PENDING' ? !p.approved : p.approved
+        );
 
         const renderParticipantItem = ({ item }: { item: any }) => (
             <TouchableOpacity
@@ -81,17 +84,24 @@ export default function Approval() {
                 })}
             >
                 <View style={styles.participantRow}>
-                    <View style={styles.avatarContainerSmall}>
-                        <Text style={styles.avatarTextSmall}>
+                    <View style={[styles.avatarContainerSmall, item.approved && { backgroundColor: PALETTE.mintLight }]}>
+                        <Text style={[styles.avatarTextSmall, item.approved && { color: PALETTE.primaryMint }]}>
                             {item.name ? item.name.charAt(0).toUpperCase() : 'U'}
                         </Text>
                     </View>
                     <View style={styles.participantInfo}>
                         <Text style={styles.participantName}>{item.name}</Text>
                         <Text style={styles.participantEmail}>{item.email}</Text>
-                        <Text style={styles.participantDate}>
-                            {item.events && item.events.length > 0 ? `${item.events.length} Events` : 'No events'}
-                        </Text>
+
+                        {item.approved && item.approvedBy ? (
+                            <Text style={styles.approvalInfo}>
+                                Approved by {item.approvedBy.name}
+                            </Text>
+                        ) : (
+                            <Text style={styles.participantDate}>
+                                {item.events && item.events.length > 0 ? `${item.events.length} Events` : 'No events'}
+                            </Text>
+                        )}
                     </View>
                     <Ionicons name="chevron-forward" size={20} color={PALETTE.gray} />
                 </View>
@@ -100,12 +110,28 @@ export default function Approval() {
 
         return (
             <View style={styles.container}>
-                <AppHeader title="Pending Approvals" showBack />
+                <AppHeader title="User Managment" showBack />
+
+                {/* Tabs */}
+                <View style={styles.tabContainer}>
+                    <TouchableOpacity
+                        style={[styles.tab, activeTab === 'PENDING' && styles.activeTab]}
+                        onPress={() => setActiveTab('PENDING')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'PENDING' && styles.activeTabText]}>Pending</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.tab, activeTab === 'APPROVED' && styles.activeTab]}
+                        onPress={() => setActiveTab('APPROVED')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'APPROVED' && styles.activeTabText]}>Approved</Text>
+                    </TouchableOpacity>
+                </View>
 
                 {isLoading && !refreshing && <Loader visible={true} />}
 
                 <FlatList
-                    data={pendingParticipants}
+                    data={filteredParticipants}
                     renderItem={renderParticipantItem}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
@@ -115,9 +141,19 @@ export default function Approval() {
                     ListEmptyComponent={
                         !isLoading ? (
                             <View style={styles.emptyContainer}>
-                                <Ionicons name="checkmark-done-circle-outline" size={64} color={PALETTE.successGreen} />
-                                <Text style={styles.emptyText}>All caught up!</Text>
-                                <Text style={styles.emptySubText}>No pending approvals found.</Text>
+                                <Ionicons
+                                    name={activeTab === 'PENDING' ? "checkmark-done-circle-outline" : "people-outline"}
+                                    size={64}
+                                    color={PALETTE.gray}
+                                />
+                                <Text style={styles.emptyText}>
+                                    {activeTab === 'PENDING' ? "All caught up!" : "No approved users yet"}
+                                </Text>
+                                <Text style={styles.emptySubText}>
+                                    {activeTab === 'PENDING'
+                                        ? "No pending approvals found."
+                                        : "Approved participants will appear here."}
+                                </Text>
                             </View>
                         ) : null
                     }
@@ -127,9 +163,11 @@ export default function Approval() {
     }
 
     // --- RENDER: DETAIL MODE (Single Participant Review) ---
+    const isApproved = participantData.approved;
+
     return (
         <View style={styles.container}>
-            <AppHeader title="Review Participant" showBack />
+            <AppHeader title="Participant Details" showBack />
             <Loader visible={isLoading} />
 
             <Popup
@@ -143,7 +181,7 @@ export default function Approval() {
             <ScrollView contentContainerStyle={styles.content}>
                 <Card style={styles.profileCard}>
                     <View style={styles.avatarContainer}>
-                        <View style={styles.avatar}>
+                        <View style={[styles.avatar, isApproved && { backgroundColor: PALETTE.successGreen }]}>
                             <Text style={styles.avatarText}>
                                 {participantData.name ? participantData.name.charAt(0).toUpperCase() : 'U'}
                             </Text>
@@ -153,10 +191,26 @@ export default function Approval() {
                     <Text style={styles.name}>{participantData.name}</Text>
                     <Text style={styles.email}>{participantData.email}</Text>
 
-                    <View style={[styles.statusBadge, { backgroundColor: participantData.status === 'approved' ? PALETTE.purpleMedium : PALETTE.pinkDark }]}>
-                        <Text style={styles.statusText}>{participantData.status ? participantData.status.toUpperCase() : 'UNKNOWN'}</Text>
+                    <View style={[styles.statusBadge, {
+                        backgroundColor: isApproved ? PALETTE.mintLight : PALETTE.orangeLight
+                    }]}>
+                        <Text style={[styles.statusText, {
+                            color: isApproved ? PALETTE.mintDark : PALETTE.orangeDark
+                        }]}>
+                            {isApproved ? 'APPROVED USER' : 'PENDING APPROVAL'}
+                        </Text>
                     </View>
                 </Card>
+
+                {isApproved && participantData.approvedBy && (
+                    <View style={styles.attributionCard}>
+                        <Ionicons name="shield-checkmark" size={20} color={PALETTE.primaryMint} />
+                        <Text style={styles.attributionText}>
+                            Approved by <Text style={{ fontWeight: 'bold' }}>{participantData.approvedBy.name}</Text>
+                            {participantData.approvedAt && ` on ${new Date(participantData.approvedAt).toLocaleDateString()}`}
+                        </Text>
+                    </View>
+                )}
 
                 <Text style={styles.sectionTitle}>Event Details</Text>
                 <Card style={styles.detailsCard}>
@@ -177,30 +231,35 @@ export default function Approval() {
                         <Text style={styles.detailLabel}>Role</Text>
                         <Text style={styles.detailValue}>Participant</Text>
                     </View>
-                    <View style={styles.divider} />
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Check-in History</Text>
-                        <Text style={styles.detailValue}>No prior check-ins</Text>
-                    </View>
                 </Card>
 
-                <View style={styles.actions}>
+                {!isApproved ? (
+                    <View style={styles.actions}>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.rejectBtn]}
+                            onPress={() => handleReject(participantData.id)}
+                        >
+                            <Ionicons name="close-circle-outline" size={24} color={PALETTE.white} />
+                            <Text style={styles.btnText}>Reject</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.approveBtn]}
+                            onPress={() => handleApprove(participantData.id)}
+                        >
+                            <Ionicons name="checkmark-circle-outline" size={24} color={PALETTE.white} />
+                            <Text style={styles.btnText}>Approve</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
                     <TouchableOpacity
-                        style={[styles.actionBtn, styles.rejectBtn]}
+                        style={[styles.actionBtn, styles.rejectBtn, { marginTop: SPACING.l, backgroundColor: PALETTE.bgSuperLight, borderWidth: 1, borderColor: PALETTE.alertRed }]}
                         onPress={() => handleReject(participantData.id)}
                     >
-                        <Ionicons name="close-circle-outline" size={24} color={PALETTE.white} />
-                        <Text style={styles.btnText}>Reject</Text>
+                        <Ionicons name="ban-outline" size={24} color={PALETTE.alertRed} />
+                        <Text style={[styles.btnText, { color: PALETTE.alertRed }]}>Revoke Approval</Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionBtn, styles.approveBtn]}
-                        onPress={() => handleApprove(participantData.id)}
-                    >
-                        <Ionicons name="checkmark-circle-outline" size={24} color={PALETTE.white} />
-                        <Text style={styles.btnText}>Approve</Text>
-                    </TouchableOpacity>
-                </View>
+                )}
             </ScrollView>
         </View>
     );
@@ -383,4 +442,47 @@ const styles = StyleSheet.create({
         color: PALETTE.gray,
         marginTop: SPACING.s,
     },
+    tabContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: SPACING.l,
+        paddingTop: SPACING.m,
+        gap: SPACING.m,
+        marginBottom: SPACING.s,
+    },
+    tab: {
+        paddingVertical: SPACING.s,
+        paddingHorizontal: SPACING.m,
+        borderRadius: RADIUS.round,
+        backgroundColor: PALETTE.bgSuperLight,
+    },
+    activeTab: {
+        backgroundColor: PALETTE.primaryBlue,
+    },
+    tabText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.gray,
+        fontWeight: 'bold',
+    },
+    activeTabText: {
+        color: PALETTE.white,
+    },
+    approvalInfo: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.successGreen,
+        marginTop: 2,
+    },
+    attributionCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: PALETTE.mintLight,
+        padding: SPACING.m,
+        borderRadius: RADIUS.m,
+        marginBottom: SPACING.l,
+        gap: SPACING.s,
+    },
+    attributionText: {
+        ...TYPOGRAPHY.caption,
+        color: PALETTE.primaryMint,
+        flex: 1,
+    }
 });
