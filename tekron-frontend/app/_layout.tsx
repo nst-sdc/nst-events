@@ -1,17 +1,38 @@
-import { Stack } from 'expo-router';
+import { useFonts, Orbitron_700Bold } from '@expo-google-fonts/orbitron';
+import { Rajdhani_500Medium, Rajdhani_600SemiBold, Rajdhani_700Bold } from '@expo-google-fonts/rajdhani';
+import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { Stack } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
 import { StatusBar } from 'expo-status-bar';
 import { THEME } from '../constants/theme';
 import Toast from 'react-native-toast-message';
 import AuthLinkHandler from './utils/AuthLinkHandler';
 
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
     const restoreSession = useAuthStore((state) => state.restoreSession);
+    const [fontsLoaded] = useFonts({
+        Orbitron_700Bold,
+        Rajdhani_500Medium,
+        Rajdhani_600SemiBold,
+        Rajdhani_700Bold,
+    });
 
     useEffect(() => {
         restoreSession();
     }, [restoreSession]);
+
+    useEffect(() => {
+        if (fontsLoaded) {
+            SplashScreen.hideAsync();
+        }
+    }, [fontsLoaded]);
+
+    if (!fontsLoaded) {
+        return null;
+    }
 
 
 

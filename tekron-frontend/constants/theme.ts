@@ -95,10 +95,10 @@ export const RADIUS = {
 };
 
 export const TYPOGRAPHY = {
-  h1: { fontSize: 32, fontWeight: 'bold' as TextStyle['fontWeight'] },
-  h2: { fontSize: 24, fontWeight: 'bold' as TextStyle['fontWeight'] },
-  h3: { fontSize: 20, fontWeight: '600' as TextStyle['fontWeight'] },
-  h4: { fontSize: 18, fontWeight: '600' as TextStyle['fontWeight'] },
-  body: { fontSize: 16, fontWeight: 'normal' as TextStyle['fontWeight'] },
-  caption: { fontSize: 12, fontWeight: 'normal' as TextStyle['fontWeight'] },
+  h1: { fontSize: 32, fontFamily: 'Orbitron_700Bold' },
+  h2: { fontSize: 24, fontFamily: 'Orbitron_700Bold' },
+  h3: { fontSize: 20, fontFamily: 'Rajdhani_600SemiBold' },
+  h4: { fontSize: 18, fontFamily: 'Rajdhani_600SemiBold' },
+  body: { fontSize: 16, fontFamily: 'Rajdhani_500Medium' },
+  caption: { fontSize: 12, fontFamily: 'Rajdhani_500Medium' },
 };

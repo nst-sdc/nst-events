@@ -8,6 +8,9 @@ import { Popup } from '../../components/Popup';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../../constants/config';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import { Alert } from 'react-native';
 
 interface Photo {
     id: string;
@@ -87,6 +90,26 @@ export default function PhotoModeration() {
         }
     };
 
+    const downloadPhoto = async (photoUrl: string) => {
+        try {
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission needed', 'Please grant permission to save photos to your gallery.');
+                return;
+            }
+
+            const filename = photoUrl.split('/').pop() || `photo_${Date.now()}.jpg`;
+            const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
+
+            const { uri } = await FileSystem.downloadAsync(photoUrl, fileUri);
+            await MediaLibrary.saveToLibraryAsync(uri);
+            Alert.alert('Saved', 'Photo saved to gallery!');
+        } catch (error) {
+            console.error('Download error:', error);
+            Alert.alert('Error', 'Failed to save photo.');
+        }
+    };
+
     const renderItem = ({ item }: { item: Photo }) => (
         <View style={styles.card}>
             <Image source={{ uri: item.url }} style={styles.image} resizeMode="cover" />
@@ -122,6 +145,12 @@ export default function PhotoModeration() {
                         <Ionicons name="time" size={20} color="white" />
                     </TouchableOpacity>
                 )}
+                <TouchableOpacity
+                    style={[styles.actionBtn, styles.downloadBtn]}
+                    onPress={() => downloadPhoto(item.url)}
+                >
+                    <Ionicons name="download-outline" size={20} color="white" />
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -172,12 +201,12 @@ export default function PhotoModeration() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     tabs: {
         flexDirection: 'row',
         padding: SPACING.s,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.blueDark,
     },
     tab: {
         flex: 1,
@@ -186,24 +215,31 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.s,
     },
     activeTab: {
-        backgroundColor: PALETTE.purpleMedium,
+        backgroundColor: PALETTE.primaryBlue,
     },
     tabText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
+        color: PALETTE.blueLight,
         fontWeight: 'bold',
     },
     activeTabText: {
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
     },
     list: {
         padding: SPACING.m,
     },
     card: {
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.m, // Ensure spacing between cards
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: PALETTE.blueLight,
+        shadowColor: PALETTE.primaryBlue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
     },
     image: {
         width: '100%',
@@ -214,19 +250,19 @@ const styles = StyleSheet.create({
     },
     uploader: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontWeight: 'bold',
     },
     caption: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
         marginTop: SPACING.xs,
     },
     actions: {
         flexDirection: 'row',
         padding: SPACING.s,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopColor: PALETTE.blueLight,
         justifyContent: 'flex-end',
         gap: SPACING.s,
     },
@@ -238,13 +274,13 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.s,
     },
     approveBtn: {
-        backgroundColor: '#2ecc71',
+        backgroundColor: PALETTE.successGreen,
     },
     rejectBtn: {
-        backgroundColor: PALETTE.pinkDark,
+        backgroundColor: PALETTE.alertRed,
     },
     pendingBtn: {
-        backgroundColor: '#95a5a6', // Hardcoded gray for now
+        backgroundColor: PALETTE.mediumGray,
     },
     btnText: {
         color: 'white',
@@ -252,8 +288,11 @@ const styles = StyleSheet.create({
         marginLeft: SPACING.xs,
         fontSize: 12,
     },
+    downloadBtn: {
+        backgroundColor: PALETTE.primaryBlue,
+    },
     emptyText: {
-        color: PALETTE.creamDark,
+        color: PALETTE.mediumGray,
         textAlign: 'center',
         marginTop: SPACING.xl,
         ...TYPOGRAPHY.body,

@@ -9,6 +9,8 @@ import { useAuthStore } from '../../context/authStore';
 import { BACKEND_URL } from '../../constants/config';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
@@ -89,9 +91,35 @@ export default function PhotoGallery() {
         }
     };
 
+    const downloadPhoto = async (photoUrl: string) => {
+        try {
+            const { status } = await MediaLibrary.requestPermissionsAsync(true, ['photo']);
+            if (status !== 'granted') {
+                Alert.alert('Permission needed', 'Please grant permission to save photos to your gallery.');
+                return;
+            }
+
+            const filename = photoUrl.split('/').pop() || `photo_${Date.now()}.jpg`;
+            const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
+
+            const { uri } = await FileSystem.downloadAsync(photoUrl, fileUri);
+            await MediaLibrary.saveToLibraryAsync(uri);
+            Alert.alert('Saved', 'Photo saved to your gallery!');
+        } catch (error) {
+            console.error('Download error:', error);
+            Alert.alert('Error', 'Failed to save photo.');
+        }
+    };
+
     const renderItem = ({ item }: { item: Photo }) => (
         <View style={styles.photoCard}>
             <Image source={{ uri: item.url }} style={styles.photo} resizeMode="cover" />
+            <TouchableOpacity
+                style={styles.downloadBtn}
+                onPress={() => downloadPhoto(item.url)}
+            >
+                <Ionicons name="download-outline" size={20} color={PALETTE.white} />
+            </TouchableOpacity>
             <View style={styles.captionContainer}>
                 <Text style={styles.uploaderName} numberOfLines={1}>By {item.uploader.name}</Text>
                 {item.caption && <Text style={styles.caption} numberOfLines={1}>{item.caption}</Text>}
@@ -203,6 +231,17 @@ const styles = StyleSheet.create({
     caption: {
         fontSize: 10,
         color: PALETTE.darkGray,
+    },
+    downloadBtn: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     fab: {
         position: 'absolute',
