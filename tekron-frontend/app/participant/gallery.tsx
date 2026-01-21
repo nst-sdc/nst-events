@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndi
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { BACKEND_URL } from '../../constants/config';
@@ -163,21 +163,14 @@ export default function PhotoGallery() {
             </LinearGradient>
 
             <TouchableOpacity
-                style={[styles.fab, { bottom: insets.bottom + SPACING.l }]}
+                style={styles.fab}
                 onPress={handleUpload}
                 disabled={isUploading}
             >
                 {isUploading ? (
-                    <ActivityIndicator color={PALETTE.white} />
+                    <ActivityIndicator color={PALETTE.navyDark} />
                 ) : (
-                    <LinearGradient
-                        colors={[...GRADIENTS.primary]}
-                        style={styles.fabGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <Ionicons name="camera" size={28} color={PALETTE.white} />
-                    </LinearGradient>
+                    <Ionicons name="camera" size={30} color={PALETTE.navyDark} />
                 )}
             </TouchableOpacity>
         </View>
@@ -245,22 +238,19 @@ const styles = StyleSheet.create({
     },
     fab: {
         position: 'absolute',
-        right: SPACING.l,
+        bottom: SPACING.xl,
+        right: SPACING.xl,
         width: 56,
         height: 56,
         borderRadius: 28,
-        shadowColor: PALETTE.primaryBlue,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    fabGradient: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 28,
+        backgroundColor: PALETTE.pinkLight,
         justifyContent: 'center',
         alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
     },
     emptyContainer: {
         padding: SPACING.xl,

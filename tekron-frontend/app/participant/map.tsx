@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: SPACING.m,
         gap: SPACING.m,
+        backgroundColor: PALETTE.white,
     },
     toggleButton: {
         flex: 1,

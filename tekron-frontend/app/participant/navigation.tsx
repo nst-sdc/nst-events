@@ -61,16 +61,16 @@ export default function Navigation() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     header: {
         padding: SPACING.l,
         paddingTop: SPACING.xxl,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.primaryBlue,
     },
     title: {
         ...TYPOGRAPHY.h2,
-        color: PALETTE.creamLight,
+        color: PALETTE.white,
         marginBottom: SPACING.m,
     },
     locationInfo: {
@@ -80,12 +80,11 @@ const styles = StyleSheet.create({
     },
     building: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.pinkLight,
+        color: PALETTE.primaryOrange,
     },
     floor: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
-        opacity: 0.8,
+        color: 'rgba(255,255,255,0.8)',
     },
     mapContainer: {
         flex: 1,
@@ -97,7 +96,9 @@ const styles = StyleSheet.create({
     },
     footer: {
         padding: SPACING.l,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
+        borderTopWidth: 1,
+        borderTopColor: PALETTE.lightGray,
     },
     button: {
         marginBottom: SPACING.s,

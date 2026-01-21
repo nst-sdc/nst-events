@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./src/dbProxy'); // Start DB Proxy
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -27,7 +28,6 @@ app.use('/volunteer', require('./src/routes/volunteerRoutes'));
 app.use('/feedback', require('./src/routes/feedbackRoutes'));
 app.use('/photos', require('./src/routes/photoRoutes'));
 app.use('/lost-found', require('./src/routes/lostFoundRoutes'));
-app.use('/events', require('./src/routes/event.routes'));
 
 // Health Check
 app.get('/', (req, res) => {

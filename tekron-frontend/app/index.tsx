@@ -26,7 +26,7 @@ export default function Index() {
         } else if (user) {
 
             if (user.role === 'admin' || user.role === 'superadmin') {
-                setTimeout(() => router.replace('/admin/dashboard'), 0);
+                setTimeout(() => router.replace('/admin/dashboard' as any), 0);
             } else if (user.role === 'participant') {
                 if (user.approved) {
                     setTimeout(() => router.replace('/participant/home'), 0);
@@ -34,7 +34,7 @@ export default function Index() {
                     setTimeout(() => router.replace('/participant/map'), 0);
                 }
             } else if (user.role === 'superadmin') {
-                setTimeout(() => router.replace('/admin/dashboard'), 0);
+                setTimeout(() => router.replace('/admin/dashboard' as any), 0);
             }
         }
     }, [isAuthenticated, user, isLoading, segments, router, rootNavigationState]);

@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { Loader } from '../../components/Loader';
 import { Popup } from '../../components/Popup';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../../constants/config';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
-import { Alert } from 'react-native';
 
 interface Photo {
     id: string;
@@ -90,26 +87,6 @@ export default function PhotoModeration() {
         }
     };
 
-    const downloadPhoto = async (photoUrl: string) => {
-        try {
-            const { status } = await MediaLibrary.requestPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permission needed', 'Please grant permission to save photos to your gallery.');
-                return;
-            }
-
-            const filename = photoUrl.split('/').pop() || `photo_${Date.now()}.jpg`;
-            const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
-
-            const { uri } = await FileSystem.downloadAsync(photoUrl, fileUri);
-            await MediaLibrary.saveToLibraryAsync(uri);
-            Alert.alert('Saved', 'Photo saved to gallery!');
-        } catch (error) {
-            console.error('Download error:', error);
-            Alert.alert('Error', 'Failed to save photo.');
-        }
-    };
-
     const renderItem = ({ item }: { item: Photo }) => (
         <View style={styles.card}>
             <Image source={{ uri: item.url }} style={styles.image} resizeMode="cover" />
@@ -145,12 +122,6 @@ export default function PhotoModeration() {
                         <Ionicons name="time" size={20} color="white" />
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                    style={[styles.actionBtn, styles.downloadBtn]}
-                    onPress={() => downloadPhoto(item.url)}
-                >
-                    <Ionicons name="download-outline" size={20} color="white" />
-                </TouchableOpacity>
             </View>
         </View>
     );
@@ -206,7 +177,7 @@ const styles = StyleSheet.create({
     tabs: {
         flexDirection: 'row',
         padding: SPACING.s,
-        backgroundColor: PALETTE.blueDark,
+        backgroundColor: PALETTE.bgSuperLight,
     },
     tab: {
         flex: 1,
@@ -219,7 +190,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.blueLight,
+        color: PALETTE.mediumGray,
         fontWeight: 'bold',
     },
     activeTabText: {
@@ -232,14 +203,8 @@ const styles = StyleSheet.create({
         backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.m, // Ensure spacing between cards
+        ...SHADOWS.medium,
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: PALETTE.blueLight,
-        shadowColor: PALETTE.primaryBlue,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
     },
     image: {
         width: '100%',
@@ -250,19 +215,19 @@ const styles = StyleSheet.create({
     },
     uploader: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.primaryBlue,
+        color: PALETTE.darkGray,
         fontWeight: 'bold',
     },
     caption: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.darkGray,
+        color: PALETTE.mediumGray,
         marginTop: SPACING.xs,
     },
     actions: {
         flexDirection: 'row',
         padding: SPACING.s,
         borderTopWidth: 1,
-        borderTopColor: PALETTE.blueLight,
+        borderTopColor: PALETTE.lightGray,
         justifyContent: 'flex-end',
         gap: SPACING.s,
     },
@@ -283,13 +248,10 @@ const styles = StyleSheet.create({
         backgroundColor: PALETTE.mediumGray,
     },
     btnText: {
-        color: 'white',
+        color: PALETTE.white,
         fontWeight: 'bold',
         marginLeft: SPACING.xs,
         fontSize: 12,
-    },
-    downloadBtn: {
-        backgroundColor: PALETTE.primaryBlue,
     },
     emptyText: {
         color: PALETTE.mediumGray,

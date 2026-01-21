@@ -50,8 +50,8 @@ export default function Alerts() {
     };
 
     const getAlertColor = (role: string) => {
-        if (role === 'superadmin') return PALETTE.pinkDark;
-        return PALETTE.purpleMedium;
+        if (role === 'superadmin') return PALETTE.alertRed;
+        return PALETTE.primaryBlue;
     };
 
     const formatDate = (dateString: string) => {
@@ -66,12 +66,12 @@ export default function Alerts() {
             <ScrollView
                 contentContainerStyle={styles.content}
                 refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={fetchAlerts} tintColor={PALETTE.creamLight} />
+                    <RefreshControl refreshing={loading} onRefresh={fetchAlerts} tintColor={PALETTE.primaryBlue} />
                 }
             >
                 {alerts.length === 0 && !loading ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="notifications-off-outline" size={48} color={PALETTE.purpleLight} />
+                        <Ionicons name="notifications-off-outline" size={48} color={PALETTE.mediumGray} />
                         <Text style={styles.emptyText}>No alerts at the moment.</Text>
                     </View>
                 ) : (
@@ -79,7 +79,7 @@ export default function Alerts() {
                         <Card key={alert.id} style={styles.alertCard}>
                             <View style={styles.alertHeader}>
                                 <View style={[styles.iconContainer, { backgroundColor: getAlertColor(alert.senderRole) }]}>
-                                    <Ionicons name={getAlertIcon(alert.senderRole)} size={20} color={PALETTE.creamLight} />
+                                    <Ionicons name={getAlertIcon(alert.senderRole)} size={20} color={PALETTE.white} />
                                 </View>
                                 <View style={styles.headerText}>
                                     <Text style={styles.alertTitle}>{alert.title}</Text>
@@ -98,7 +98,7 @@ export default function Alerts() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.navyDark,
+        backgroundColor: PALETTE.bgLight,
     },
     content: {
         padding: SPACING.l,
@@ -112,14 +112,19 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
         marginTop: SPACING.m,
     },
     alertCard: {
         marginBottom: SPACING.m,
-        backgroundColor: PALETTE.purpleDeep,
+        backgroundColor: PALETTE.white,
         borderLeftWidth: 4,
-        borderLeftColor: PALETTE.purpleMedium,
+        borderLeftColor: PALETTE.primaryBlue,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 2,
     },
     alertHeader: {
         flexDirection: 'row',
@@ -136,16 +141,16 @@ const styles = StyleSheet.create({
     },
     alertTitle: {
         ...TYPOGRAPHY.h3,
-        color: PALETTE.creamLight,
+        color: PALETTE.primaryBlue,
         fontSize: 18,
     },
     alertTime: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.purpleLight,
+        color: PALETTE.mediumGray,
     },
     alertMessage: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.creamDark,
+        color: PALETTE.darkGray,
         lineHeight: 22,
     },
 });

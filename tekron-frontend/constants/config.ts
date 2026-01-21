@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 export const BACKEND_URL = Platform.OS === 'web'
     ? 'http://localhost:3000'
-    : 'http://10.254.200.254:3000';
+    : 'http://10.254.200.210:3000';
 
 export const SOCKET_URL = BACKEND_URL;
 console.log('Configured SOCKET_URL:', SOCKET_URL);

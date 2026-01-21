@@ -185,27 +185,25 @@ const styles = StyleSheet.create({
         backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         padding: SPACING.m,
-        color: PALETTE.primaryBlue,
+        color: PALETTE.creamLight,
         marginBottom: SPACING.l,
-        borderWidth: 1.5,
-        borderColor: PALETTE.primaryBlue,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     textArea: {
         height: 120,
     },
     warningBox: {
-        backgroundColor: 'rgba(235, 94, 40, 0.1)', // Orange with opacity
+        backgroundColor: 'rgba(247, 232, 164, 0.1)', // Yellow with opacity
         padding: SPACING.m,
         borderRadius: RADIUS.m,
         marginBottom: SPACING.xl,
         borderLeftWidth: 4,
-        borderLeftColor: PALETTE.primaryOrange,
-        borderWidth: 1,
-        borderColor: 'rgba(235, 94, 40, 0.2)',
+        borderLeftColor: PALETTE.yellowLight,
     },
     warningTitle: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.primaryOrange,
+        color: PALETTE.yellowLight,
         fontWeight: 'bold',
         marginBottom: 4,
     },
