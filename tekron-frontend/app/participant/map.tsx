@@ -11,7 +11,7 @@ import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../../constants/config';
 import { IndoorMap } from '../../components/IndoorMap';
-const CampusMap = require('../../assets/images/campus-map.jpg');
+const CampusMap = require('../../assets/images/campus-map.png');
 
 export default function MapScreen() {
     const { user, logout } = useAuthStore();
@@ -78,17 +78,6 @@ export default function MapScreen() {
         label: loc.name
     }));
 
-    const indoorMarkers = [
-        { x: 62, y: 55, label: 'Newton School of Technology' },
-        { x: 60, y: 70, label: 'Hostel Area' },
-        { x: 67, y: 65, label: 'Canteen' },
-        { x: 45, y: 25, label: 'Cricket Ground' },
-        { x: 35, y: 45, label: 'Volleyball Court' },
-        { x: 50, y: 85, label: 'Main Gate' },
-        { x: 20, y: 40, label: 'DY Patil Int. School' },
-        { x: 36, y: 70, label: 'Dental College' },
-        { x: 23, y: 75, label: 'Parking' },
-    ];
 
     const wrapHtmlContent = (content: string) => `
     <!DOCTYPE html>
@@ -157,7 +146,7 @@ export default function MapScreen() {
                         style={styles.webview}
                     />
                 ) : (
-                    <IndoorMap imageSource={CampusMap} markers={indoorMarkers} />
+                    <IndoorMap imageSource={CampusMap} />
                 )}
             </View>
 
