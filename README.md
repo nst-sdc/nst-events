@@ -10,7 +10,7 @@ Tekron is the flagship tech fest at **Newton School of Technology - Pune**. This
   - `*@admin.com` → **Ops (Admin)**
   - Others → **Hacker (Participant)**
 - **Secure Login**: JWT-based auth. No imposters allowed.
-- **No Public Registration**: Invite-only. If you're in, you're in.
+- **Registration**: Open for participants (Subject to Admin Approval).
 
 ### Hacker Features (Participants)
 - **Unapproved Access**:
@@ -56,7 +56,7 @@ tekron-2.0-APK/
 │   │   ├── routes/        # API Endpoints
 │   │   ├── middleware/    # Auth Guards
 │   │   └── utils/         # JWT, QR helpers
-│   └── server.js          # Entry point
+│   └── server.js          # Entry point (Root of backend)
 │
 └── tekron-frontend/        # Expo React Native App
     ├── app/               # Screens & Navigation (File-based routing)
@@ -99,7 +99,7 @@ tekron-2.0-APK/
    ```
 5. Seed the Database (Create default users):
    ```bash
-   node prisma/seed.js
+   npx prisma db seed
    ```
 6. Start the Server:
    ```bash
@@ -133,20 +133,23 @@ tekron-2.0-APK/
 
 | Role | Email | Password | Access |
 |------|-------|----------|--------|
-| **SuperAdmin** | `superadmin@superadmin.com` | `Password` | Full System Access |
-| **Admin** | `admin@admin.com` | `Password` | Dashboard, Scanner, Approvals |
-| **Participant (Approved)** | `arpit@example.com` | `ArpitSarang` | Dashboard, Events, Alerts |
-| **Participant (Unapproved)** | `maverick@example.com` | `Maverick` | Map/QR Only |
+| **SuperAdmin** | `superadmin@gmail.com` | `superadmin123@` | Full System Access |
+| **Admin** | `admin@gmail.com` | `admin123@` | Dashboard, Scanner, Approvals |
+| **Participant (Approved)** | `arpitsarang@gmail.com` | `ArpitSarang` | Dashboard, Events, Alerts |
+
+> **Note**: The seed does not create a default unapproved user. You can register a new user in the app to test the approval flow.
 
 ### Testing the Flow
-1. **Login as Participant** (`arpit@example.com`).
-   - You will see the **Venue Map** and **QR Code**.
-   - You cannot access the Dashboard yet.
-2. **Login as Admin** (`john@admin.com`) on another device or simulator.
+1. **Register User / Login as Unapproved**:
+   - Register a new user via the app (if registration is enabled) OR create a new participant via separate API call.
+   - **Alternatively**, use the **Identity Matrix** viewer for existing participants.
+   - Initial state for new registrations is **Pending Approval**.
+2. **Login as Admin** (`admin@gmail.com`) on another device or simulator.
    - Go to **Scanner** or **Approvals**.
-   - Scan the participant's QR or manually approve them.
+   - If testing a new registration, find them in the **Approvals** list and approve them.
+   - Or scan a participant's QR code to view details.
 3. **Refresh Participant App**.
-   - You should now have full access to the **Dashboard**, **Events**, and **Alerts**.
+   - Upon approval, you should now have full access to the **Dashboard**, **Events**, and **Alerts**.
 
 ## Contributing
 1. Fork the repository.
