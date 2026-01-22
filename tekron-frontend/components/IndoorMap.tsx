@@ -7,10 +7,11 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 
 interface IndoorMapProps {
     imageUrl?: string;
+    imageSource?: any;
     markers?: { x: number; y: number; label: string }[];
 }
 
-export const IndoorMap = ({ imageUrl, markers = [] }: IndoorMapProps) => {
+export const IndoorMap = ({ imageUrl, imageSource, markers = [] }: IndoorMapProps) => {
     const scale = useSharedValue(1);
     const savedScale = useSharedValue(1);
     const translateX = useSharedValue(0);
@@ -46,13 +47,15 @@ export const IndoorMap = ({ imageUrl, markers = [] }: IndoorMapProps) => {
         ],
     }));
 
+    const source = imageSource || (imageUrl ? { uri: imageUrl } : null);
+
     return (
         <GestureHandlerRootView style={styles.container}>
             <GestureDetector gesture={composed}>
                 <Animated.View style={[styles.mapWrapper, animatedStyle]}>
-                    {imageUrl ? (
+                    {source ? (
                         <Image
-                            source={{ uri: imageUrl }}
+                            source={source}
                             style={styles.mapImage}
                             resizeMode="contain"
                         />

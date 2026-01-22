@@ -11,6 +11,7 @@ import { useAuthStore } from '../../context/authStore';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../../constants/config';
 import { IndoorMap } from '../../components/IndoorMap';
+const CampusMap = require('../../assets/images/campus-map.jpg');
 
 export default function MapScreen() {
     const { user, logout } = useAuthStore();
@@ -77,6 +78,18 @@ export default function MapScreen() {
         label: loc.name
     }));
 
+    const indoorMarkers = [
+        { x: 62, y: 55, label: 'Newton School of Technology' },
+        { x: 60, y: 70, label: 'Hostel Area' },
+        { x: 67, y: 65, label: 'Canteen' },
+        { x: 45, y: 25, label: 'Cricket Ground' },
+        { x: 35, y: 45, label: 'Volleyball Court' },
+        { x: 50, y: 85, label: 'Main Gate' },
+        { x: 20, y: 40, label: 'DY Patil Int. School' },
+        { x: 36, y: 70, label: 'Dental College' },
+        { x: 23, y: 75, label: 'Parking' },
+    ];
+
     const wrapHtmlContent = (content: string) => `
     <!DOCTYPE html>
     <html>
@@ -93,7 +106,7 @@ export default function MapScreen() {
     </html>
     `;
 
-    const VENUE_MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.265588856342!2d73.91411937501422!3d18.56206128253963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c147b8b3a3bf%3A0x6f7fdcc8e4136c54!2sPhoenix%20Marketcity%20-%20Viman%20Nagar!5e0!3m2!1sen!2sin!4v1709636660000!5m2!1sen!2sin';
+    const VENUE_MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4662.709054519496!2d73.91173417216432!3d18.620788433613384!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c7007ca391d7%3A0x9da4723c416a8ee5!2sNewton%20school%20of%20technology%20pune%20campus!5e1!3m2!1sen!2sin!4v1769055274617!5m2!1sen!2sin';
 
     return (
         <View style={styles.container}>
@@ -101,7 +114,7 @@ export default function MapScreen() {
                 title="Venue Map"
                 rightIcon="log-out-outline"
                 onRightPress={logout}
-                showBack={false}
+                showBack={true}
             />
 
             {user?.approved && (
@@ -144,7 +157,7 @@ export default function MapScreen() {
                         style={styles.webview}
                     />
                 ) : (
-                    <IndoorMap markers={markers} />
+                    <IndoorMap imageSource={CampusMap} markers={indoorMarkers} />
                 )}
             </View>
 

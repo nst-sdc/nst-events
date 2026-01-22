@@ -29,6 +29,7 @@ export default function ParticipantHome() {
     const [loading, setLoading] = useState(true);
     const [pulseAnim] = useState(new Animated.Value(1));
     const insets = useSafeAreaInsets();
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const [error, setError] = useState<string | null>(null);
 
@@ -60,8 +61,35 @@ export default function ParticipantHome() {
         }
     };
 
+    const fetchUnreadAlerts = async () => {
+        try {
+            const token = await SecureStore.getItemAsync('token');
+            const lastViewed = await SecureStore.getItemAsync('last_alerts_viewed_at');
+            const response = await fetch(`${BACKEND_URL}/participant/alerts`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    const lastViewedDate = lastViewed ? new Date(lastViewed) : new Date(0);
+                    const unread = data.filter((alert: any) => new Date(alert.createdAt) > lastViewedDate).length;
+                    setUnreadCount(unread);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching alerts:', error);
+        }
+    };
+
+    const handleAlertsPress = async () => {
+        await SecureStore.setItemAsync('last_alerts_viewed_at', new Date().toISOString());
+        setUnreadCount(0);
+        router.push('/participant/alerts');
+    };
+
     useEffect(() => {
         fetchEvents();
+        fetchUnreadAlerts();
 
         socket.on('eventStatusUpdated', (updatedEvent: Event) => {
             setEvents((prevEvents) => {
@@ -163,8 +191,13 @@ export default function ParticipantHome() {
                         <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Participant'}</Text>
                     </View>
                     <View style={styles.headerActions}>
-                        <TouchableOpacity onPress={() => router.push('/participant/alerts')} style={styles.iconBtn}>
+                        <TouchableOpacity onPress={handleAlertsPress} style={styles.iconBtn}>
                             <Ionicons name="notifications-outline" size={24} color={PALETTE.white} />
+                            {unreadCount > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                                </View>
+                            )}
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleLogout} style={styles.iconBtn}>
                             <Ionicons name="log-out-outline" size={24} color={PALETTE.white} />
@@ -177,7 +210,7 @@ export default function ParticipantHome() {
             <View style={styles.contentContainer}>
                 {/* Quick Access - Pinned */}
                 <View style={styles.quickAccessContainer}>
-                    <Text style={styles.sectionHeader}>Quick Access</Text>
+                    <Text style={[styles.sectionHeader, { marginBottom: SPACING.m }]}>Quick Access</Text>
                     <View style={styles.actionGrid}>
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/participant/profile')}>
                             <View style={[styles.actionIcon, { backgroundColor: PALETTE.blueLight }]}>
@@ -387,9 +420,27 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'rgba(255,255,255,0.15)',
         borderRadius: RADIUS.round,
-        // backdropFilter removed as it is not supported in React Native
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)',
+    },
+    badge: {
+        position: 'absolute',
+        top: -5,
+        right: -5,
+        backgroundColor: PALETTE.alertRed,
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+        borderWidth: 1.5,
+        borderColor: PALETTE.primaryBlue, // Matches header background for cutout effect
+    },
+    badgeText: {
+        color: PALETTE.white,
+        fontSize: 10,
+        fontWeight: 'bold',
     },
 
     contentContainer: {

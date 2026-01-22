@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
@@ -39,7 +39,22 @@ export default function TermsOfService() {
             </ScrollView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Created & Managed by NST-SDC</Text>
+                <Text style={styles.footerText}>
+                    Created & Managed by{' '}
+                    <Text
+                        style={styles.linkText}
+                        onPress={() => Linking.openURL('https://www.linkedin.com/in/arpitsarang')}
+                    >
+                        Arpit
+                    </Text>
+                    {' '}&{' '}
+                    <Text
+                        style={styles.linkText}
+                        onPress={() => Linking.openURL('https://www.linkedin.com/in/harshpatel101')}
+                    >
+                        Harsh
+                    </Text>
+                </Text>
                 <Text style={styles.footerSubText}>© 2026 Tekron. All rights reserved.</Text>
             </View>
         </View>
@@ -83,9 +98,13 @@ const styles = StyleSheet.create({
     },
     footerText: {
         ...TYPOGRAPHY.body,
+        color: PALETTE.darkGray,
+        marginBottom: 4,
+    },
+    linkText: {
         color: PALETTE.primaryBlue,
         fontWeight: 'bold',
-        marginBottom: 4,
+        textDecorationLine: 'underline',
     },
     footerSubText: {
         ...TYPOGRAPHY.caption,

@@ -2,9 +2,9 @@
   "expo": {
     "name": "Tekron",
     "slug": "tekron",
-    "version": "1.0.0",
+    "version": "1.1.8",
     "orientation": "portrait",
-    "icon": "./assets/images/newton-school-logo.jpg",
+    "icon": "./assets/images/appIcon.png",
     "scheme": "tekron",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,7 +15,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/newton-school-logo.jpg"
+        "foregroundImage": "./assets/images/appIcon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -28,7 +28,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/newton-school-logo.jpg",
+      "favicon": "./assets/images/appIcon.png",
       "bundler": "metro",
       "pwa": {
         "enabled": true,
@@ -42,7 +42,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/newton-school-logo.jpg",
+          "image": "./assets/images/appIcon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

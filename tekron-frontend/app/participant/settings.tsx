@@ -1,86 +1,138 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
-import { Card } from '../../components/Card';
-import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { useAuthStore } from '../../context/authStore';
+
+interface SettingsRowProps {
+    icon: keyof typeof Ionicons.glyphMap;
+    title: string;
+    subtitle?: string;
+    value?: string;
+    onPress?: () => void;
+    isSwitch?: boolean;
+    switchValue?: boolean;
+    onSwitchChange?: (val: boolean) => void;
+    showChevron?: boolean;
+    color?: string;
+}
+
+const SettingsRow = ({
+    icon,
+    title,
+    subtitle,
+    value,
+    onPress,
+    isSwitch,
+    switchValue,
+    onSwitchChange,
+    showChevron = true,
+    color = PALETTE.primaryBlue
+}: SettingsRowProps) => {
+    return (
+        <TouchableOpacity
+            style={styles.row}
+            onPress={isSwitch ? undefined : onPress}
+            disabled={isSwitch && !onPress}
+            activeOpacity={isSwitch ? 1 : 0.7}
+        >
+            <View style={styles.rowLeft}>
+                <View style={[styles.iconContainer, { backgroundColor: color === PALETTE.alertRed ? PALETTE.pinkLight : PALETTE.blueLight }]}>
+                    <Ionicons name={icon} size={20} color={color} />
+                </View>
+                <View>
+                    <Text style={[styles.rowTitle, { color: color === PALETTE.alertRed ? PALETTE.alertRed : PALETTE.darkGray }]}>{title}</Text>
+                    {subtitle && <Text style={styles.rowSubtitle}>{subtitle}</Text>}
+                </View>
+            </View>
+
+            <View style={styles.rowRight}>
+                {value && <Text style={styles.rowValue}>{value}</Text>}
+                {isSwitch ? (
+                    <Switch
+                        value={switchValue}
+                        onValueChange={onSwitchChange}
+                        trackColor={{ false: PALETTE.mediumGray, true: PALETTE.primaryBlue }}
+                        thumbColor={PALETTE.white}
+                    />
+                ) : showChevron && (
+                    <Ionicons name="chevron-forward" size={20} color={PALETTE.gray} />
+                )}
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 export default function Settings() {
     const router = useRouter();
+    const { logout } = useAuthStore();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const { expoPushToken } = usePushNotifications();
 
-    const toggleNotifications = () => {
-        setNotificationsEnabled(prev => !prev);
-        // In a real app, you might want to call an API to disable notifications on the backend
-        // or just rely on the OS permission toggle.
+    const handleLogout = () => {
+        Alert.alert(
+            "Sign Out",
+            "Are you sure you want to sign out?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Sign Out", style: "destructive", onPress: logout }
+            ]
+        );
     };
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Settings" />
+            <AppHeader title="Settings" showBack={true} />
 
-            <View style={styles.content}>
+            <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: SPACING.xxl }}>
                 <Text style={styles.sectionTitle}>Preferences</Text>
+                <View style={styles.card}>
+                    <SettingsRow
+                        icon="notifications-outline"
+                        title="Push Notifications"
+                        subtitle="Receive updates about events"
+                        isSwitch
+                        switchValue={notificationsEnabled}
+                        onSwitchChange={setNotificationsEnabled}
+                    />
+                </View>
 
-                <Card style={styles.card}>
-                    <View style={styles.row}>
-                        <View style={styles.rowLeft}>
-                            <Ionicons name="notifications-outline" size={24} color={PALETTE.primaryBlue} />
-                            <View>
-                                <Text style={styles.rowTitle}>Push Notifications</Text>
-                                <Text style={styles.rowSubtitle}>
-                                    {notificationsEnabled ? 'Enabled' : 'Disabled'}
-                                </Text>
-                            </View>
-                        </View>
-                        <Switch
-                            value={notificationsEnabled}
-                            onValueChange={toggleNotifications}
-                            trackColor={{ false: PALETTE.mediumGray, true: PALETTE.primaryBlue }}
-                            thumbColor={PALETTE.white}
-                        />
-                    </View>
-
-                    {expoPushToken && (
-                        <View style={styles.debugInfo}>
-                            <Text style={styles.debugText}>Token Active</Text>
-                        </View>
-                    )}
-                </Card>
-
-                <Text style={styles.sectionTitle}>About</Text>
-
-                <Card style={styles.card}>
-                    <TouchableOpacity style={styles.row}>
-                        <View style={styles.rowLeft}>
-                            <Ionicons name="information-circle-outline" size={24} color={PALETTE.primaryBlue} />
-                            <Text style={styles.rowTitle}>Version</Text>
-                        </View>
-                        <Text style={styles.rowValue}>2.0.0</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.row} onPress={() => router.push('/participant/privacy')}>
-                        <View style={styles.rowLeft}>
-                            <Ionicons name="shield-checkmark-outline" size={24} color={PALETTE.primaryBlue} />
-                            <Text style={styles.rowTitle}>Privacy Policy</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color={PALETTE.mediumGray} />
-                    </TouchableOpacity>
-
+                <Text style={styles.sectionTitle}>Support</Text>
+                <View style={styles.card}>
+                    <SettingsRow
+                        icon="information-circle-outline"
+                        title="About App"
+                        value="v2.0.0"
+                        showChevron={false}
+                    />
                     <View style={styles.divider} />
+                    <SettingsRow
+                        icon="shield-checkmark-outline"
+                        title="Privacy Policy"
+                        onPress={() => router.push('/participant/privacy')}
+                    />
+                    <View style={styles.divider} />
+                    <SettingsRow
+                        icon="document-text-outline"
+                        title="Terms of Service"
+                        onPress={() => router.push('/participant/terms')}
+                    />
+                </View>
 
-                    <TouchableOpacity style={styles.row} onPress={() => router.push('/participant/terms')}>
-                        <View style={styles.rowLeft}>
-                            <Ionicons name="document-text-outline" size={24} color={PALETTE.primaryBlue} />
-                            <Text style={styles.rowTitle}>Terms of Service</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color={PALETTE.mediumGray} />
-                    </TouchableOpacity>
-                </Card>
-            </View>
+                <Text style={styles.sectionTitle}>Account</Text>
+                <View style={styles.card}>
+                    <SettingsRow
+                        icon="log-out-outline"
+                        title="Sign Out"
+                        color={PALETTE.alertRed}
+                        onPress={handleLogout}
+                        showChevron={false}
+                    />
+                </View>
+
+                <Text style={styles.versionText}>Tekron 2.0 • Build 2024.1</Text>
+            </ScrollView>
         </View>
     );
 }
@@ -88,64 +140,77 @@ export default function Settings() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PALETTE.bgLight,
+        backgroundColor: PALETTE.bgSuperLight,
     },
     content: {
-        padding: SPACING.l,
+        flex: 1,
+        padding: SPACING.m,
     },
     sectionTitle: {
-        ...TYPOGRAPHY.h3,
-        color: PALETTE.primaryBlue,
-        marginBottom: SPACING.m,
+        ...TYPOGRAPHY.h4,
+        fontSize: 14,
+        color: PALETTE.gray,
+        marginBottom: SPACING.s,
         marginTop: SPACING.m,
+        marginLeft: SPACING.s,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     card: {
-        marginBottom: SPACING.l,
-        shadowColor: 'transparent',
-        shadowOpacity: 0,
-        elevation: 0,
+        backgroundColor: PALETTE.white,
+        borderRadius: RADIUS.l,
+        overflow: 'hidden',
+        ...SHADOWS.small,
+        marginBottom: SPACING.s,
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: SPACING.m,
+        backgroundColor: PALETTE.white,
     },
     rowLeft: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: SPACING.m,
     },
+    rowRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.s,
+    },
+    iconContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: RADIUS.m,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     rowTitle: {
         ...TYPOGRAPHY.body,
+        fontWeight: '600',
         color: PALETTE.darkGray,
-        fontWeight: '500',
     },
     rowSubtitle: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.mediumGray,
+        color: PALETTE.gray,
+        marginTop: 2,
     },
     rowValue: {
         ...TYPOGRAPHY.body,
-        color: PALETTE.primaryBlue,
-        fontWeight: '600',
+        color: PALETTE.gray,
+        fontSize: 14,
     },
     divider: {
         height: 1,
-        backgroundColor: PALETTE.blueLight,
-        marginLeft: SPACING.xl + SPACING.m,
+        backgroundColor: PALETTE.bgSuperLight,
+        marginLeft: SPACING.xl + SPACING.l,
     },
-    debugInfo: {
-        padding: SPACING.s,
-        backgroundColor: PALETTE.blueLight,
-        alignItems: 'center',
-        borderBottomLeftRadius: RADIUS.m,
-        borderBottomRightRadius: RADIUS.m,
-    },
-    debugText: {
+    versionText: {
         ...TYPOGRAPHY.caption,
-        color: PALETTE.primaryBlue,
-        fontSize: 10,
-        fontWeight: 'bold',
+        color: PALETTE.mediumGray,
+        textAlign: 'center',
+        marginTop: SPACING.xl,
     },
 });
