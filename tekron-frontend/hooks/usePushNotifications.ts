@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { router } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
 import { BACKEND_URL } from '../constants/config';
 import * as SecureStore from 'expo-secure-store';
@@ -138,7 +139,25 @@ export const usePushNotifications = () => {
                 });
 
                 responseListener.current = Notifications.addNotificationResponseReceivedListener((response: any) => {
-                    console.log(response);
+                    const data = response.notification.request.content.data;
+                    console.log('Notification Response:', JSON.stringify(response, null, 2));
+
+                    if (data?.alertId) {
+                        // Navigate to alerts list
+                        // Use a timeout to ensure navigation happens after any app initialization
+                        setTimeout(() => {
+                            // TODO: Add proper routing to alerts page once created for participant
+                            // For now navigate to home or participant dashboard
+                            router.push('/participant/alerts');
+                            console.log("Navigating to alert:", data.alertId);
+                        }, 500);
+                    } else if (data?.eventId) {
+                        // Navigate to event details
+                        setTimeout(() => {
+                            router.push(`/participant/events/${data.eventId}` as any);
+                            console.log("Navigating to event:", data.eventId);
+                        }, 500);
+                    }
                 });
             }
 
