@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS, GRADIENTS } from '../../constants/theme';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { BACKEND_URL } from '../../constants/config';
 
 interface LostFoundItem {
@@ -34,7 +34,7 @@ export default function AdminLostFound() {
     const fetchItems = async () => {
         setLoading(true);
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/lost-found?type=`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -56,7 +56,7 @@ export default function AdminLostFound() {
 
     const updateStatus = async (id: string, status?: string, isApproved?: boolean) => {
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const body: any = {};
             if (status) body.status = status;
             if (isApproved !== undefined) body.isApproved = isApproved;

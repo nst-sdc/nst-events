@@ -1,19 +1,15 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
     useSharedValue,
-    useAnimatedProps,
     withRepeat,
     withTiming,
     Easing,
     useAnimatedStyle,
     cancelAnimation,
-    interpolate,
 } from 'react-native-reanimated';
-import { PALETTE, GRADIENTS } from '../constants/theme';
+import { GRADIENTS } from '../constants/theme';
 
-const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 
 interface GradientSpinnerProps {
     size?: number;
@@ -37,7 +33,7 @@ export const GradientSpinner = ({
             -1
         );
         return () => cancelAnimation(rotation);
-    }, []);
+    }, [rotation]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -49,12 +45,11 @@ export const GradientSpinner = ({
     const circumference = radius * 2 * Math.PI;
 
     return (
-        <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-            <AnimatedSvg
+        <Animated.View style={[{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }, animatedStyle]}>
+            <Svg
                 width={size}
                 height={size}
                 viewBox={`0 0 ${size} ${size}`}
-                style={animatedStyle}
             >
                 <Defs>
                     <LinearGradient id="spinnerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -73,7 +68,7 @@ export const GradientSpinner = ({
                     strokeDashoffset={circumference * 0.2} // 20% gap
                     strokeLinecap="round"
                 />
-            </AnimatedSvg>
-        </View>
+            </Svg>
+        </Animated.View>
     );
 };

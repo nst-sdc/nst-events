@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,9 +8,8 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants
 import { useAuthStore } from '../../context/authStore';
 import { useAdminStore } from '../../context/adminStore';
 
-const { width } = Dimensions.get('window');
-
 export default function AdminDashboard() {
+    const { width } = useWindowDimensions();
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const { stats, fetchStats, isLoading } = useAdminStore();
@@ -46,10 +45,14 @@ export default function AdminDashboard() {
     };
 
     const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning,';
-        if (hour < 17) return 'Good Afternoon,';
-        return 'Good Evening,';
+        const options = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false } as const;
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+        const hour = parseInt(formatter.format(new Date()));
+
+        if (hour >= 5 && hour < 12) return 'Good Morning,';
+        if (hour >= 12 && hour < 17) return 'Good Afternoon,';
+        if (hour >= 17 && hour < 21) return 'Good Evening,';
+        return 'Good Night,';
     };
 
     return (

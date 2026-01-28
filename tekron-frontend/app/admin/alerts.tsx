@@ -11,6 +11,7 @@ import { useAdminStore } from '../../context/adminStore';
 
 import { Ionicons } from '@expo/vector-icons';
 import { BACKEND_URL } from '../../constants/config';
+import { storage } from '../../utils/storage';
 
 export default function SendAlert() {
     const router = useRouter();
@@ -30,11 +31,22 @@ export default function SendAlert() {
         if (scope === 'event' && events.length === 0) {
             setIsLoadingEvents(true);
             try {
-                // Fetch events logic - reusing from register or similar, assuming public/admin access
-                const response = await fetch(`${BACKEND_URL}/events/live`);
-                const data = await response.json();
+                const token = await storage.getItem('token');
+                // Use the same robust fetching strategy as AdminEvents
+                let response = await fetch(`${BACKEND_URL}/superadmin/events`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    // Fallback to participant events or live events if superadmin fails (e.g. role issue)
+                    response = await fetch(`${BACKEND_URL}/events/live`);
+                }
+
                 if (response.ok) {
+                    const data = await response.json();
                     setEvents(data);
+                } else {
+                    Toast.show({ type: 'error', text1: 'Error', text2: 'Could not load events' });
                 }
             } catch (error) {
                 console.error("Failed to fetch events", error);
@@ -75,7 +87,11 @@ export default function SendAlert() {
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Send Alert" showBack />
+            <AppHeader
+                title="Send Alert"
+                showBack
+                onBackPress={() => router.push('/admin/dashboard')}
+            />
             <Loader visible={isSending} />
 
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>

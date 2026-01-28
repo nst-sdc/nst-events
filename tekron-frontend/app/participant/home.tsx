@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, GRADIENTS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { useAuthStore } from '../../context/authStore';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { socket } from '../../context/socket';
 import { BACKEND_URL } from '../../constants/config';
 
@@ -36,7 +36,7 @@ export default function ParticipantHome() {
     const fetchEvents = async () => {
         try {
             setError(null);
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/participant/events`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -63,8 +63,8 @@ export default function ParticipantHome() {
 
     const fetchUnreadAlerts = async () => {
         try {
-            const token = await SecureStore.getItemAsync('token');
-            const lastViewed = await SecureStore.getItemAsync('last_alerts_viewed_at');
+            const token = await storage.getItem('token');
+            const lastViewed = await storage.getItem('last_alerts_viewed_at');
             const response = await fetch(`${BACKEND_URL}/participant/alerts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -82,7 +82,7 @@ export default function ParticipantHome() {
     };
 
     const handleAlertsPress = async () => {
-        await SecureStore.setItemAsync('last_alerts_viewed_at', new Date().toISOString());
+        await storage.setItem('last_alerts_viewed_at', new Date().toISOString());
         setUnreadCount(0);
         router.push('/participant/alerts');
     };

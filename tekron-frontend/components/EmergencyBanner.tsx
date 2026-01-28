@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../constants/theme';
 import { useAuthStore } from '../context/authStore';
 import { BACKEND_URL } from '../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 
 export const EmergencyBanner = () => {
     const [alert, setAlert] = useState<any>(null);
@@ -14,7 +14,7 @@ export const EmergencyBanner = () => {
     useEffect(() => {
         const checkAlerts = async () => {
             try {
-                const token = await SecureStore.getItemAsync('token');
+                const token = await storage.getItem('token');
                 if (!token) return;
 
                 const res = await fetch(`${BACKEND_URL}/alerts`, {

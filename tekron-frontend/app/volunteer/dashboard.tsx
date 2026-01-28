@@ -5,7 +5,7 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { BACKEND_URL } from '../../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 
 interface Participant {
     id: string;
@@ -24,7 +24,7 @@ export default function VolunteerDashboard() {
 
     const fetchAssignedEvent = async () => {
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const res = await fetch(`${BACKEND_URL}/volunteer/event`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

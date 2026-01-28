@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 
 import { BACKEND_URL } from '../constants/config';
 
@@ -47,7 +47,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     fetchStats: async () => {
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/admin/participants`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -81,7 +81,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     validateParticipant: async (qrData: string) => {
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/admin/validate-qr`, {
                 method: 'POST',
                 headers: {
@@ -113,7 +113,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     approveParticipant: async (id: string) => {
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             await fetch(`${BACKEND_URL}/admin/approve/${id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }
@@ -130,7 +130,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     rejectParticipant: async (id: string) => {
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             await fetch(`${BACKEND_URL}/admin/reject/${id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }
@@ -146,7 +146,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     sendAlert: async (title: string, message: string, options?: { targetScope: 'all' | 'event', targetEventIds?: string[] }) => {
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             await fetch(`${BACKEND_URL}/admin/alerts/send`, {
                 method: 'POST',
                 headers: {

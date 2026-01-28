@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, useWindowDimensions, TouchableOpacity } from 'react-native';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -12,6 +12,7 @@ interface IndoorMapProps {
 }
 
 export const IndoorMap = ({ imageUrl, imageSource, markers = [] }: IndoorMapProps) => {
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const scale = useSharedValue(1);
     const savedScale = useSharedValue(1);
     const translateX = useSharedValue(0);
@@ -56,11 +57,14 @@ export const IndoorMap = ({ imageUrl, imageSource, markers = [] }: IndoorMapProp
                     {source ? (
                         <Image
                             source={source}
-                            style={styles.mapImage}
+                            style={{
+                                width: windowWidth,
+                                height: windowHeight * 0.6,
+                            }}
                             resizeMode="contain"
                         />
                     ) : (
-                        <View style={styles.placeholderMap}>
+                        <View style={[styles.placeholderMap, { width: windowWidth, height: windowHeight * 0.6 }]}>
                             <Ionicons name="map" size={64} color={PALETTE.primaryBlue} />
                             <Text style={styles.placeholderText}>No Map Available</Text>
                         </View>
@@ -101,13 +105,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    mapImage: {
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height * 0.6,
-    },
+    // Removed fixed dimensions from styles since they apply dynamically now
     placeholderMap: {
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height * 0.6,
         backgroundColor: PALETTE.bgLight,
         justifyContent: 'center',
         alignItems: 'center',

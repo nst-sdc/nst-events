@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,14 +7,10 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { BACKEND_URL } from '../../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
-
-const { width } = Dimensions.get('window');
-const COLUMN_COUNT = 2;
-const ITEM_WIDTH = (width - (SPACING.l * 2) - SPACING.m) / COLUMN_COUNT;
 
 interface Photo {
     id: string;
@@ -26,6 +22,9 @@ interface Photo {
 }
 
 export default function PhotoGallery() {
+    const { width } = useWindowDimensions();
+    const COLUMN_COUNT = 2;
+    const ITEM_WIDTH = (width - (SPACING.l * 2) - SPACING.m) / COLUMN_COUNT;
     const { logout } = useAuthStore();
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +61,7 @@ export default function PhotoGallery() {
         if (!result.canceled) {
             setIsUploading(true);
             try {
-                const token = await SecureStore.getItemAsync('token');
+                const token = await storage.getItem('token');
                 const base64Img = `data:image/jpeg;base64,${result.assets[0].base64}`;
 
                 const res = await fetch(`${BACKEND_URL}/photos`, {
@@ -112,7 +111,7 @@ export default function PhotoGallery() {
     };
 
     const renderItem = ({ item }: { item: Photo }) => (
-        <View style={styles.photoCard}>
+        <View style={[styles.photoCard, { width: ITEM_WIDTH }]}>
             <Image source={{ uri: item.url }} style={styles.photo} resizeMode="cover" />
             <TouchableOpacity
                 style={styles.downloadBtn}
@@ -192,7 +191,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     photoCard: {
-        width: ITEM_WIDTH,
         backgroundColor: PALETTE.white,
         borderRadius: RADIUS.m,
         overflow: 'hidden',

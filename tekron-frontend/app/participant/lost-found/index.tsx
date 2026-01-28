@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS, GRADIENTS } from '../../../constants/theme';
 import { AppHeader } from '../../../components/AppHeader';
 import { BACKEND_URL } from '../../../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../../utils/storage';
 import { useAuthStore } from '../../../context/authStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,9 +24,8 @@ interface LostFoundItem {
     };
 }
 
-const { width } = Dimensions.get('window');
-
 export default function LostFoundScreen() {
+    const { width } = useWindowDimensions();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { user } = useAuthStore();
@@ -41,7 +40,7 @@ export default function LostFoundScreen() {
     const fetchItems = async () => {
         setLoading(true);
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const res = await fetch(`${BACKEND_URL}/lost-found?type=${activeTab}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

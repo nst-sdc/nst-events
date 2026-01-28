@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ActivityInd
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../constants/theme';
 import { BACKEND_URL } from '../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 
 interface FeedbackModalProps {
     visible: boolean;
@@ -23,7 +23,7 @@ export const FeedbackModal = ({ visible, onClose, eventId, eventName }: Feedback
 
         setIsSubmitting(true);
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const res = await fetch(`${BACKEND_URL}/feedback`, {
                 method: 'POST',
                 headers: {
