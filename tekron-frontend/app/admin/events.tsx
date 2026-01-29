@@ -6,7 +6,7 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
 import { Loader } from '../../components/Loader';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { BACKEND_URL } from '../../constants/config';
 
 interface Event {
@@ -37,7 +37,7 @@ export default function AdminEvents() {
     const fetchEvents = async () => {
         setLoading(true);
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/superadmin/events`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -71,7 +71,7 @@ export default function AdminEvents() {
         }
 
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/superadmin/create-event`, {
                 method: 'POST',
                 headers: {
@@ -98,7 +98,7 @@ export default function AdminEvents() {
 
     const updateStatus = async (id: string, status: string, round?: number) => {
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/admin/events/${id}/status`, {
                 method: 'PATCH',
                 headers: {

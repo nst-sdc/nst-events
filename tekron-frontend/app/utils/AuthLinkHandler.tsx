@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Linking } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { router } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { BACKEND_URL } from '../../constants/config';
@@ -72,7 +72,7 @@ export default function AuthLinkHandler() {
             }
 
             // Success!
-            await SecureStore.setItemAsync('session_token', data.token);
+            await storage.setItem('session_token', data.token);
             setSession(data.user, data.token);
 
             Toast.show({ type: 'success', text1: 'Welcome!', text2: `Logged in as ${data.user.email}` });

@@ -19,6 +19,12 @@ export default function Scanner() {
     // Animation value for scan line
     const scanAnim = useRef(new Animated.Value(0)).current;
 
+    const [facing, setFacing] = useState<'front' | 'back'>('back');
+
+    const toggleCameraFacing = () => {
+        setFacing(current => (current === 'back' ? 'front' : 'back'));
+    };
+
     useEffect(() => {
         if (!permission) {
             requestPermission();
@@ -115,7 +121,7 @@ export default function Scanner() {
             <View style={styles.cameraContainer}>
                 <CameraView
                     style={styles.camera}
-                    facing="back"
+                    facing={facing}
                     onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
                 />
                 <View style={styles.overlay}>
@@ -137,6 +143,10 @@ export default function Scanner() {
                         )}
                     </View>
                     <Text style={styles.instructionText}>Align QR code within the frame</Text>
+
+                    <TouchableOpacity onPress={toggleCameraFacing} style={styles.flipButton}>
+                        <Ionicons name="camera-reverse" size={32} color={PALETTE.white} />
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -216,4 +226,12 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.s,
         overflow: 'hidden',
     },
+    flipButton: {
+        position: 'absolute',
+        bottom: 40,
+        right: 40,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        padding: 12,
+        borderRadius: 30,
+    }
 });

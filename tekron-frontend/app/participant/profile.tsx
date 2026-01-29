@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import QRCode from 'react-native-qrcode-svg';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { BACKEND_URL } from '../../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
+import { QRCodeDisplay } from '../../components/QRCodeDisplay';
 
 export default function Profile() {
     const { user, logout } = useAuthStore();
@@ -22,7 +22,7 @@ export default function Profile() {
 
     const fetchData = async () => {
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
             // Fetch QR
@@ -75,11 +75,9 @@ export default function Profile() {
 
                     <View style={styles.qrContainer}>
                         {qrCodeData ? (
-                            <QRCode
+                            <QRCodeDisplay
                                 value={qrCodeData}
                                 size={180}
-                                backgroundColor="white"
-                                color="black"
                             />
                         ) : (
                             <View style={styles.qrPlaceholder}>

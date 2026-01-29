@@ -22,7 +22,7 @@ export default function TermsOfService() {
 
                 <Text style={styles.heading}>3. User Content</Text>
                 <Text style={styles.paragraph}>
-                    In these terms and conditions, "your user content" means material (including without limitation text, images, audio material, video material, and audio-visual material) that you submit to this app, for whatever purpose.
+                    In these terms and conditions, &quot;your user content&quot; means material (including without limitation text, images, audio material, video material, and audio-visual material) that you submit to this app, for whatever purpose.
                 </Text>
 
                 <Text style={styles.heading}>4. Privacy</Text>

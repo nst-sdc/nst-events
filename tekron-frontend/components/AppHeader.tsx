@@ -9,11 +9,12 @@ import { router } from 'expo-router';
 interface AppHeaderProps {
     title: string;
     showBack?: boolean;
+    onBackPress?: () => void;
     rightIcon?: keyof typeof Ionicons.glyphMap;
     onRightPress?: () => void;
 }
 
-export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: AppHeaderProps) {
+export function AppHeader({ title, showBack = false, onBackPress, rightIcon, onRightPress }: AppHeaderProps) {
     const insets = useSafeAreaInsets();
 
     return (
@@ -29,7 +30,7 @@ export function AppHeader({ title, showBack = false, rightIcon, onRightPress }: 
 
             <View style={styles.leftContainer}>
                 {showBack && (
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <TouchableOpacity onPress={onBackPress || (() => router.back())} style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color={PALETTE.white} />
                     </TouchableOpacity>
                 )}

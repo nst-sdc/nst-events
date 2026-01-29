@@ -5,9 +5,10 @@ import { PALETTE, SPACING, TYPOGRAPHY, RADIUS, SHADOWS } from '../../constants/t
 import { AppHeader } from '../../components/AppHeader';
 import { Loader } from '../../components/Loader';
 import { Popup } from '../../components/Popup';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { BACKEND_URL } from '../../constants/config';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
 
 interface Photo {
     id: string;

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 import { router } from 'expo-router';
+import { BACKEND_URL } from '../constants/config';
 
 // Define the shape of the user object
 interface User {
@@ -26,8 +27,6 @@ interface AuthState {
     setSession: (user: User, token: string) => Promise<void>;
 }
 
-import { BACKEND_URL } from '../constants/config';
-
 export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     isAuthenticated: false,
@@ -50,20 +49,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             const { token, user, role } = data;
 
-            await SecureStore.setItemAsync('token', token);
-            await SecureStore.setItemAsync('user', JSON.stringify(user));
+            await storage.setItem('token', token);
+            await storage.setItem('user', JSON.stringify(user));
 
             set({ user, isAuthenticated: true, isLoading: false });
 
             // Redirect based on role
             if (role === 'superadmin') {
-                // Assuming superadmin dashboard route exists or will be created
-                // For now, redirect to admin or specific superadmin route if available
-                // User requested: superadmin -> SuperAdminDashboard
-                // I'll assume /admin/dashboard for now as placeholder or create new route if needed
-                // But let's stick to what's available. If superadmin dashboard is not built, maybe admin dashboard?
-                // Wait, user said "superadmin -> SuperAdminDashboard". I don't have that route yet.
-                // I'll redirect to admin dashboard for now as superadmin is likely an admin superset.
                 router.replace('/admin/dashboard' as any);
             } else if (role === 'admin') {
                 router.replace('/admin/dashboard' as any);
@@ -79,37 +71,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     logout: async () => {
-        await SecureStore.deleteItemAsync('token');
-        await SecureStore.deleteItemAsync('user');
+        await storage.removeItem('token');
+        await storage.removeItem('user');
         set({ user: null, isAuthenticated: false });
         router.replace('/auth/login');
     },
 
     setSession: async (user, token) => {
-        await SecureStore.setItemAsync('token', token);
-        await SecureStore.setItemAsync('user', JSON.stringify(user));
+        await storage.setItem('token', token);
+        await storage.setItem('user', JSON.stringify(user));
         set({ user, isAuthenticated: true, isLoading: false });
     },
 
     restoreSession: async () => {
-
         set({ isLoading: true });
         try {
-            const token = await SecureStore.getItemAsync('token');
-            const userString = await SecureStore.getItemAsync('user');
-
+            const token = await storage.getItem('token');
+            const userString = await storage.getItem('user');
 
             if (token && userString) {
                 const user = JSON.parse(userString);
-
                 set({ user, isAuthenticated: true });
-            } else {
-
             }
         } catch (error) {
             console.error('Restore session error:', error);
         } finally {
-
             set({ isLoading: false });
         }
     },

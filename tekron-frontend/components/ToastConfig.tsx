@@ -1,15 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 import { PALETTE, TYPOGRAPHY, RADIUS, SPACING, SHADOWS } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
-const TOAST_WIDTH = width * 0.9;
+
 
 const styles = StyleSheet.create({
     base: {
-        width: TOAST_WIDTH,
+        width: '90%',
+        maxWidth: 400,
+        alignSelf: 'center',
         height: 80, // Bigger height
         backgroundColor: PALETTE.white,
         borderLeftWidth: 6, // Thicker accent

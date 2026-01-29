@@ -1,16 +1,16 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-import QRCode from 'react-native-qrcode-svg';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { AppHeader } from '../../components/AppHeader';
 import { useAuthStore } from '../../context/authStore';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { BACKEND_URL } from '../../constants/config';
 import { IndoorMap } from '../../components/IndoorMap';
+import { QRCodeDisplay } from '../../components/QRCodeDisplay';
+
 const CampusMap = require('../../assets/images/campus-map.png');
 
 export default function MapScreen() {
@@ -25,7 +25,7 @@ export default function MapScreen() {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const token = await SecureStore.getItemAsync('token');
+                const token = await storage.getItem('token');
 
                 if (user?.approved) {
                     const res = await fetch(`${BACKEND_URL}/locations`, {
@@ -97,6 +97,60 @@ export default function MapScreen() {
 
     const VENUE_MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4662.709054519496!2d73.91173417216432!3d18.620788433613384!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c7007ca391d7%3A0x9da4723c416a8ee5!2sNewton%20school%20of%20technology%20pune%20campus!5e1!3m2!1sen!2sin!4v1769055274617!5m2!1sen!2sin';
 
+    const renderMapContent = () => {
+        if (!user?.approved) {
+            if (Platform.OS === 'web') {
+                return (
+                    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+                        <iframe
+                            srcDoc={wrapHtmlContent(unapprovedMapData?.mapIframe || '<h1>Loading Map...</h1>')}
+                            style={{ width: '100%', height: '100%', border: 0 }}
+                        />
+                    </div>
+                );
+            }
+            return (
+                <View style={{ flex: 1 }}>
+                    <WebView
+                        originWhitelist={['*']}
+                        source={{ html: wrapHtmlContent(unapprovedMapData?.mapIframe || '<h1>Loading Map...</h1>') }}
+                        style={styles.webview}
+                    />
+                    {unapprovedMapData?.instructions && (
+                        <View style={styles.instructionContainer}>
+                            <Text style={styles.instructionText}>{unapprovedMapData.instructions}</Text>
+                        </View>
+                    )}
+                </View>
+            );
+        }
+
+        if (mapMode === 'VENUE') {
+            if (Platform.OS === 'web') {
+                return (
+                    <iframe
+                        src={VENUE_MAP_EMBED_URL}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                    />
+                );
+            }
+            return (
+                <WebView
+                    originWhitelist={['*']}
+                    source={{ html: wrapHtmlContent(`<iframe src="${VENUE_MAP_EMBED_URL}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`) }}
+                    style={styles.webview}
+                />
+            );
+        }
+
+        return <IndoorMap imageSource={CampusMap} />;
+    };
+
     return (
         <View style={styles.container}>
             <AppHeader
@@ -126,27 +180,8 @@ export default function MapScreen() {
             <View style={styles.contentContainer}>
                 {isLoading ? (
                     <ActivityIndicator size="large" color={PALETTE.primaryBlue} style={{ marginTop: 50 }} />
-                ) : !user?.approved ? (
-                    <View style={{ flex: 1 }}>
-                        <WebView
-                            originWhitelist={['*']}
-                            source={{ html: wrapHtmlContent(unapprovedMapData?.mapIframe || '<h1>Loading Map...</h1>') }}
-                            style={styles.webview}
-                        />
-                        {unapprovedMapData?.instructions && (
-                            <View style={styles.instructionContainer}>
-                                <Text style={styles.instructionText}>{unapprovedMapData.instructions}</Text>
-                            </View>
-                        )}
-                    </View>
-                ) : mapMode === 'VENUE' ? (
-                    <WebView
-                        originWhitelist={['*']}
-                        source={{ html: wrapHtmlContent(`<iframe src="${VENUE_MAP_EMBED_URL}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`) }}
-                        style={styles.webview}
-                    />
                 ) : (
-                    <IndoorMap imageSource={CampusMap} />
+                    renderMapContent()
                 )}
             </View>
 
@@ -189,11 +224,9 @@ export default function MapScreen() {
 
                         <View style={styles.qrWrapper}>
                             {qrCodeData ? (
-                                <QRCode
+                                <QRCodeDisplay
                                     value={qrCodeData}
                                     size={200}
-                                    backgroundColor="white"
-                                    color="black"
                                 />
                             ) : (
                                 <Text>Loading QR...</Text>

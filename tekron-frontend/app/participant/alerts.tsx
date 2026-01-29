@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
 import { Card } from '../../components/Card';
 import { AppHeader } from '../../components/AppHeader';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 
 import { BACKEND_URL } from '../../constants/config';
 
@@ -17,12 +18,13 @@ interface Alert {
 }
 
 export default function Alerts() {
+    const router = useRouter();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchAlerts = async () => {
         try {
-            const token = await SecureStore.getItemAsync('token');
+            const token = await storage.getItem('token');
             const response = await fetch(`${BACKEND_URL}/participant/alerts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -61,7 +63,11 @@ export default function Alerts() {
 
     return (
         <View style={styles.container}>
-            <AppHeader title="Alerts" />
+            <AppHeader
+                title="Alerts"
+                showBack
+                onBackPress={() => router.push('/participant/home')}
+            />
 
             <ScrollView
                 contentContainerStyle={styles.content}

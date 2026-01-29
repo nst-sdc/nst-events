@@ -5,12 +5,12 @@ Tekron is the flagship tech fest at *Newton School of Technology - Pune*. This a
 ## Features
 
 ### Authentication & Roles
-•⁠  ⁠*Automatic Role Assignment*: Your fate is sealed by your email domain:
-  - ⁠ *@superadmin.com ⁠ → **God Mode (SuperAdmin)**
-  - ⁠ *@admin.com ⁠ → **Ops (Admin)**
-  - Others → *Hacker (Participant)*
-•⁠  ⁠*Secure Login*: JWT-based auth. No imposters allowed.
-•⁠  ⁠*Registration*: Open for participants (Subject to Admin Approval).
+- **Automatic Role Assignment**: Your fate is sealed by your email domain:
+  - `*@superadmin.com` → **God Mode (SuperAdmin)**
+  - `*@admin.com` → **Ops (Admin)**
+  - Others → **Hacker (Participant)**
+- **Secure Login**: JWT-based auth. No imposters allowed.
+- **No Public Registration**: Invite-only. If you're in, you're in.
 
 ### Hacker Features (Participants)
 •⁠  ⁠*Unapproved Access*:
@@ -96,13 +96,13 @@ tekron-2.0-APK/
 4.⁠ ⁠Push Database Schema:
    ⁠ bash
    npx prisma db push
-    ⁠
-5.⁠ ⁠Seed the Database (Create default users):
-   ⁠ bash
-   npx prisma db seed
-    ⁠
-6.⁠ ⁠Start the Server:
-   ⁠ bash
+   ```
+5. Seed the Database (Create default users):
+   ```bash
+   node prisma/seed.js
+   ```
+6. Start the Server:
+   ```bash
    npm start
     ⁠
 
@@ -133,23 +133,20 @@ tekron-2.0-APK/
 
 | Role | Email | Password | Access |
 |------|-------|----------|--------|
-| *SuperAdmin* | ⁠ superadmin@gmail.com ⁠ | ⁠ superadmin123@ ⁠ | Full System Access |
-| *Admin* | ⁠ admin@gmail.com ⁠ | ⁠ admin123@ ⁠ | Dashboard, Scanner, Approvals |
-| *Participant (Approved)* | ⁠ arpitsarang@gmail.com ⁠ | ⁠ ArpitSarang ⁠ | Dashboard, Events, Alerts |
-
-	⁠*Note*: The seed does not create a default unapproved user. You can register a new user in the app to test the approval flow.
+| **SuperAdmin** | `superadmin@superadmin.com` | `Password` | Full System Access |
+| **Admin** | `admin@admin.com` | `Password` | Dashboard, Scanner, Approvals |
+| **Participant (Approved)** | `arpit@example.com` | `ArpitSarang` | Dashboard, Events, Alerts |
+| **Participant (Unapproved)** | `maverick@example.com` | `Maverick` | Map/QR Only |
 
 ### Testing the Flow
-1.⁠ ⁠*Register User / Login as Unapproved*:
-   - Register a new user via the app (if registration is enabled) OR create a new participant via separate API call.
-   - *Alternatively, use the **Identity Matrix* viewer for existing participants.
-   - Initial state for new registrations is *Pending Approval*.
-2.⁠ ⁠*Login as Admin* (⁠ admin@gmail.com ⁠) on another device or simulator.
-   - Go to *Scanner* or *Approvals*.
-   - If testing a new registration, find them in the *Approvals* list and approve them.
-   - Or scan a participant's QR code to view details.
-3.⁠ ⁠*Refresh Participant App*.
-   - Upon approval, you should now have full access to the *Dashboard, **Events, and **Alerts*.
+1. **Login as Participant** (`arpit@example.com`).
+   - You will see the **Venue Map** and **QR Code**.
+   - You cannot access the Dashboard yet.
+2. **Login as Admin** (`john@admin.com`) on another device or simulator.
+   - Go to **Scanner** or **Approvals**.
+   - Scan the participant's QR or manually approve them.
+3. **Refresh Participant App**.
+   - You should now have full access to the **Dashboard**, **Events**, and **Alerts**.
 
 ## Contributing
 1.⁠ ⁠Fork the repository.

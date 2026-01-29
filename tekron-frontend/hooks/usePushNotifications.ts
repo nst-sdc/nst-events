@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useAuthStore } from '../context/authStore';
 import { BACKEND_URL } from '../constants/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 
 let Notifications: any;
 
@@ -32,6 +32,13 @@ export const usePushNotifications = () => {
         // Check if running in Expo Go on Android, which doesn't support push notifications in SDK 53+
         if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
             console.warn('Push notifications are not supported in Expo Go on Android (SDK 53+). Use a development build.');
+            return;
+        }
+
+        // Web support for push notifications requires Service Workers and VAPID keys.
+        // For this migration, we gracefully skip it on web to prevent runtime errors.
+        if (Platform.OS === 'web') {
+            console.log('Push notifications skipped on Web (requires VAPID configuration).');
             return;
         }
 
@@ -93,7 +100,7 @@ export const usePushNotifications = () => {
 
     const sendTokenToBackend = async (token: string) => {
         try {
-            const authToken = await SecureStore.getItemAsync('token');
+            const authToken = await storage.getItem('token');
             if (!authToken) return;
 
             await fetch(`${BACKEND_URL}/notifications/push-token`, {
