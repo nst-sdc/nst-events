@@ -27,7 +27,11 @@ export default function Approval() {
     const [refreshing, setRefreshing] = useState(false);
 
     // Parsing params for Detail Mode
-    const participantData = params.data ? JSON.parse(params.data as string) : null;
+    const initialData = params.data ? JSON.parse(params.data as string) : null;
+
+    // Get live data from store
+    const liveParticipant = participants.find(p => p.id === (initialData?.id || params.id));
+    const participantData = liveParticipant || initialData;
 
     // Refresh data when screen comes into focus
     useFocusEffect(
@@ -35,7 +39,7 @@ export default function Approval() {
             if (!participantData) {
                 fetchStats();
             }
-        }, [participantData])
+        }, [])
     );
 
     const onRefresh = async () => {

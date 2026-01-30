@@ -9,8 +9,8 @@ router.use(adminAuth);
 
 router.get('/participants', getParticipants);
 router.get('/participants/pending', getPendingParticipants);
-router.post('/approve/:participantId', approveParticipant);
-router.post('/reject/:participantId', rejectParticipant);
+router.post('/approve/:id', approveParticipant);
+router.post('/reject/:id', rejectParticipant);
 router.post('/validate-qr', validateQR);
 router.post('/alerts/send', sendAlert);
 

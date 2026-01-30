@@ -16,6 +16,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Attach IO to request
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/participant', participantRoutes);

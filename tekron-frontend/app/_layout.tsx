@@ -23,6 +23,7 @@ import AuthLinkHandler from './utils/AuthLinkHandler';
 import { View } from 'react-native';
 import { toastConfig } from '../components/ToastConfig';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { SocketHandler } from '../components/SocketHandler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -65,6 +66,7 @@ export default function RootLayout() {
                 <Stack.Screen name="participant" />
             </Stack>
             <AuthLinkHandler />
+            <SocketHandler />
             <Toast config={toastConfig} />
         </>
     );

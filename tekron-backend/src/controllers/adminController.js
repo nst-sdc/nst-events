@@ -78,8 +78,18 @@ const approveParticipant = async (req, res) => {
         const { notes } = req.body;
         const adminId = req.user.id;
 
+        if (!adminId) {
+            console.error('[Admin] Error: req.user.id is missing or undefined');
+            return res.status(401).json({ message: 'Unauthorized: Invalid admin session' });
+        }
+
+        console.log(`[Admin] Approving participant: ${id} by ${req.user.role}: ${adminId}`);
+
         const participant = await prisma.participant.findUnique({ where: { id } });
-        if (!participant) return res.status(404).json({ message: 'Participant not found' });
+        if (!participant) {
+            console.log(`[Admin] Participant not found: ${id}`);
+            return res.status(404).json({ message: 'Participant not found' });
+        }
 
         if (participant.approved) {
             return res.json({
@@ -91,24 +101,34 @@ const approveParticipant = async (req, res) => {
 
         // Update participant and create log in transaction
         const result = await prisma.$transaction(async (prisma) => {
+            const updateData = {
+                approved: true,
+                approvedAt: new Date(),
+                qrCode: generateQRCodeString(participant.id, participant.createdAt)
+            };
+
+            // Only link to Admin table if the user is actually an Admin (not SuperAdmin)
+            // SuperAdmins are in a separate table and cannot satisfy the Foreign Key constraint to Admin table.
+            if (req.user.role === 'admin') {
+                updateData.approvedById = adminId;
+            }
+
             const updatedParticipant = await prisma.participant.update({
                 where: { id },
-                data: {
-                    approved: true,
-                    approvedById: adminId,
-                    approvedAt: new Date(),
-                    qrCode: generateQRCodeString(participant.id, participant.createdAt)
-                },
+                data: updateData,
                 include: { approvedBy: true }
             });
 
-            await prisma.approvalLog.create({
-                data: {
-                    participantId: id,
-                    adminId: adminId,
-                    notes: notes || 'Approved via Admin Panel'
-                }
-            });
+            // Only create ApprovalLog if user is Admin, because ApprovalLog requires a valid Admin ID
+            if (req.user.role === 'admin') {
+                await prisma.approvalLog.create({
+                    data: {
+                        participantId: id,
+                        adminId: adminId,
+                        notes: notes || 'Approved via Admin Panel'
+                    }
+                });
+            }
 
             return updatedParticipant;
         });
@@ -116,10 +136,21 @@ const approveParticipant = async (req, res) => {
         res.json({
             success: true,
             participantId: result.id,
-            approvedBy: { id: result.approvedBy.id, name: result.approvedBy.name },
+            approvedBy: result.approvedBy ? { id: result.approvedBy.id, name: result.approvedBy.name } : null,
             approvedAt: result.approvedAt
         });
+
+        // Realtime Update
+        if (req.io) {
+            req.io.emit('participantUpdated', {
+                id: result.id,
+                approved: true,
+                approvedBy: result.approvedBy ? { id: result.approvedBy.id, name: result.approvedBy.name } : null,
+                approvedAt: result.approvedAt
+            });
+        }
     } catch (error) {
+        console.error('[Admin] Error in approveParticipant:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -133,6 +164,16 @@ const rejectParticipant = async (req, res) => {
             data: { approved: false, approvedById: null, approvedAt: null }
         });
         res.json({ message: 'Participant rejected' });
+
+        // Realtime Update
+        if (req.io) {
+            req.io.emit('participantUpdated', {
+                id,
+                approved: false,
+                approvedBy: null,
+                approvedAt: null
+            });
+        }
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

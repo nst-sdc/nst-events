@@ -3,7 +3,7 @@ import { storage } from '../utils/storage';
 
 import { BACKEND_URL } from '../constants/config';
 
-interface Participant {
+export interface Participant {
     id: string;
     name: string;
     email: string;
@@ -32,6 +32,7 @@ interface AdminState {
     approveParticipant: (id: string) => Promise<void>;
     rejectParticipant: (id: string) => Promise<void>;
     sendAlert: (title: string, message: string, options?: { targetScope: 'all' | 'event', targetEventIds?: string[] }) => Promise<void>;
+    updateParticipantInList: (participant: Participant) => void;
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
@@ -114,10 +115,16 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         set({ isLoading: true });
         try {
             const token = await storage.getItem('token');
-            await fetch(`${BACKEND_URL}/admin/approve/${id}`, {
+            const response = await fetch(`${BACKEND_URL}/admin/approve/${id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            const resData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(resData.message || 'Approval failed');
+            }
 
             // Refresh stats
             await get().fetchStats();
@@ -165,5 +172,30 @@ export const useAdminStore = create<AdminState>((set, get) => ({
             console.error('Error sending alert:', error);
             set({ isLoading: false });
         }
+    },
+
+    updateParticipantInList: (updatedParticipant: Participant) => {
+        const { participants, stats } = get();
+        const oldParticipant = participants.find(p => p.id === updatedParticipant.id);
+
+        // If not in list, maybe add it? For now just update if exists.
+        if (!oldParticipant) return;
+
+        const newParticipants = participants.map(p =>
+            p.id === updatedParticipant.id ? { ...p, ...updatedParticipant } : p
+        );
+
+        let newStats = { ...stats };
+        if (oldParticipant.approved !== updatedParticipant.approved) {
+            if (updatedParticipant.approved) {
+                newStats.approvedUsers = (newStats.approvedUsers || 0) + 1;
+                newStats.pendingApprovals = Math.max(0, (newStats.pendingApprovals || 0) - 1);
+            } else {
+                newStats.approvedUsers = Math.max(0, (newStats.approvedUsers || 0) - 1);
+                newStats.pendingApprovals = (newStats.pendingApprovals || 0) + 1;
+            }
+        }
+
+        set({ participants: newParticipants, stats: newStats });
     },
 }));

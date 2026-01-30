@@ -15,6 +15,8 @@ interface User {
     xp?: number;
     level?: number;
     pushToken?: string;
+    approvedBy?: { id: string; name: string; email: string };
+    approvedAt?: string;
 }
 
 interface AuthState {
@@ -25,6 +27,7 @@ interface AuthState {
     logout: () => Promise<void>;
     restoreSession: () => Promise<void>;
     setSession: (user: User, token: string) => Promise<void>;
+    updateUser: (updates: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -97,6 +100,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             console.error('Restore session error:', error);
         } finally {
             set({ isLoading: false });
+        }
+    },
+
+    updateUser: (updates: Partial<User>) => {
+        const { user } = get();
+        if (user) {
+            const newUser = { ...user, ...updates };
+            set({ user: newUser });
+            storage.setItem('user', JSON.stringify(newUser));
         }
     },
 }));

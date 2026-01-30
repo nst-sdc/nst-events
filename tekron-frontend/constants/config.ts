@@ -1,4 +1,5 @@
-export const BACKEND_URL = 'https://tekron-2-0-apk.onrender.com';
+// export const BACKEND_URL = 'https://tekron-2-0-apk.onrender.com';
+export const BACKEND_URL = 'http://192.168.140.66:3000';
 
 export const SOCKET_URL = BACKEND_URL;
 console.log('Configured SOCKET_URL:', SOCKET_URL);
