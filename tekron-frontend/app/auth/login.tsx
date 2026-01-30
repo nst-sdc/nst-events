@@ -79,7 +79,7 @@ export default function Login() {
                                 <Ionicons name="person-outline" size={20} color={PALETTE.gray} style={styles.inputIcon} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="user@tekron.com"
+                                    placeholder="Enter your email"
                                     placeholderTextColor={PALETTE.mediumGray}
                                     value={email}
                                     onChangeText={setEmail}

@@ -203,6 +203,8 @@ model LostFoundItem {
     reportedById String
     claimedById  String?
     status       String   @default("PENDING") // PENDING | OPEN | CLAIMED | CLOSED
+    imageUrl     String?
+    isApproved   Boolean  @default(false)
     createdAt    DateTime @default(now())
 
     reportedBy Participant  @relation("ReportedBy", fields: [reportedById], references: [id])
