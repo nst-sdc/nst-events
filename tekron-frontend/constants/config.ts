@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 export const BACKEND_URL = 'https://tekron-2-0-apk.onrender.com';
 
 export const SOCKET_URL = BACKEND_URL;

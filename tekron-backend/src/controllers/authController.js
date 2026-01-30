@@ -147,12 +147,18 @@ const magicLogin = async (req, res) => {
         let user = await prisma.participant.findUnique({ where: { email } });
 
         if (!user) {
-            if (email.endsWith('@superadmin.com')) {
-                role = 'superadmin';
-                user = await prisma.superAdmin.findUnique({ where: { email } });
-            } else if (email.endsWith('@admin.com')) {
-                role = 'admin';
+            // Check SuperAdmin
+            user = await prisma.superAdmin.findUnique({ where: { email } });
+            if (user) role = 'superadmin';
+            else {
+                // Check Admin
                 user = await prisma.admin.findUnique({ where: { email } });
+                if (user) role = 'admin';
+                else {
+                    // Check Volunteer
+                    user = await prisma.volunteer.findUnique({ where: { email } });
+                    if (user) role = 'volunteer';
+                }
             }
         }
 
@@ -212,12 +218,18 @@ const verifyMagicToken = async (req, res) => {
         let user = await prisma.participant.findUnique({ where: { email } });
 
         if (!user) {
-            if (email.endsWith('@superadmin.com')) {
-                role = 'superadmin';
-                user = await prisma.superAdmin.findUnique({ where: { email } });
-            } else if (email.endsWith('@admin.com')) {
-                role = 'admin';
+            // Check SuperAdmin
+            user = await prisma.superAdmin.findUnique({ where: { email } });
+            if (user) role = 'superadmin';
+            else {
+                // Check Admin
                 user = await prisma.admin.findUnique({ where: { email } });
+                if (user) role = 'admin';
+                else {
+                    // Check Volunteer
+                    user = await prisma.volunteer.findUnique({ where: { email } });
+                    if (user) role = 'volunteer';
+                }
             }
         }
 
