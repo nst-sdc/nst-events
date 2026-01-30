@@ -17,19 +17,29 @@ const login = async (req, res) => {
         let user;
         let role;
 
-        // Determine role based on email domain or specific test accounts
-        if (email.endsWith('@superadmin.com') || email === 'superadmin@gmail.com') {
+        // Waterfall check for user in tables
+        // Check SuperAdmin
+        user = await prisma.superAdmin.findUnique({ where: { email } });
+        if (user) {
             role = 'superadmin';
-            user = await prisma.superAdmin.findUnique({ where: { email } });
-        } else if (email.endsWith('@admin.com') || email === 'admin@gmail.com') {
-            role = 'admin';
-            user = await prisma.admin.findUnique({ where: { email } });
-        } else if (email === 'volunteer@gmail.com') {
-            role = 'volunteer';
-            user = await prisma.volunteer.findUnique({ where: { email } });
         } else {
-            role = 'participant';
-            user = await prisma.participant.findUnique({ where: { email } });
+            // Check Admin
+            user = await prisma.admin.findUnique({ where: { email } });
+            if (user) {
+                role = 'admin';
+            } else {
+                // Check Volunteer
+                user = await prisma.volunteer.findUnique({ where: { email } });
+                if (user) {
+                    role = 'volunteer';
+                } else {
+                    // Check Participant
+                    user = await prisma.participant.findUnique({ where: { email } });
+                    if (user) {
+                        role = 'participant';
+                    }
+                }
+            }
         }
 
 
