@@ -82,9 +82,7 @@
     },
     "extra": {
       "router": {},
-      "eas": {
-        "projectId": "ff364b82-b154-419a-8f16-04d0d7e09f69"
-      }
+      "eas": {}
     },
     "runtimeVersion": {
       "policy": "appVersion"
