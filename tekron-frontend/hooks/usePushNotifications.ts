@@ -149,12 +149,12 @@ export const usePushNotifications = () => {
                     const data = response.notification.request.content.data;
                     console.log('Notification Response:', JSON.stringify(response, null, 2));
 
+
                     if (data?.alertId) {
                         // Navigate to alerts list
                         // Use a timeout to ensure navigation happens after any app initialization
                         setTimeout(() => {
-                            // TODO: Add proper routing to alerts page once created for participant
-                            // For now navigate to home or participant dashboard
+                            // Validated: /participant/alerts exists
                             router.push('/participant/alerts');
                             console.log("Navigating to alert:", data.alertId);
                         }, 500);
