@@ -180,7 +180,7 @@ const magicLogin = async (req, res) => {
         });
 
         // Mock Email Sending (Log Deep Link)
-        const deepLink = `tekron://auth/callback?token=${token}`;
+        const deepLink = `nst-events://auth/callback?token=${token}`;
 
 
 

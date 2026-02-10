@@ -1,6 +1,6 @@
-# Tekron @ NST - The Ultimate Tech Showdown
+# NST Events - The Ultimate Tech Showdown
 
-Tekron is the flagship tech fest at *Newton School of Technology - Pune*. This app is your digital pass to the chaos, code, and creativity. We've built a sick backend with strict RBAC and a buttery smooth React Native frontend for all you Hackers and Ops.
+NST Events is the official app for the flagship tech fest at *Newton School of Technology - Pune*. This app is your digital pass to the chaos, code, and creativity. We've built a sick backend with strict RBAC and a buttery smooth React Native frontend for all you Hackers and Ops.
 
 ## Features
 

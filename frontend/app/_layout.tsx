@@ -59,7 +59,7 @@ export default function RootLayout() {
     return (
         <>
             <StatusBar style="dark" backgroundColor={THEME.dark.background} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: THEME.dark.background }, title: 'Tekron' }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: THEME.dark.background }, title: 'NST Events' }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="auth/login" />
                 <Stack.Screen name="admin/dashboard" />

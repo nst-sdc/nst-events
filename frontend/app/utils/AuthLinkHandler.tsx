@@ -35,7 +35,7 @@ export default function AuthLinkHandler() {
 
         try {
             // Extract token from query params
-            // URL format: tekron://auth/callback?token=XYZ
+            // URL format: nst-events://auth/callback?token=XYZ
             const token = new URL(url).searchParams.get('token');
 
             if (!token) {

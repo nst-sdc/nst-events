@@ -149,13 +149,13 @@ async function main() {
         },
     });
 
-    console.log(`🚀 ARPIT LOGIN LINK: tekron://auth/callback?token=${token}`);
+    console.log(`🚀 ARPIT LOGIN LINK: nst-events://auth/callback?token=${token}`);
 
     // 4. Create 2 Admins
-    const admins = ['admin1@tekron.com', 'admin2@tekron.com'];
+    const admins = ['admin1@nst.events', 'admin2@nst.events'];
     for (const adminEmail of admins) {
         let adminPass = faker.internet.password();
-        if (adminEmail === 'admin1@tekron.com') {
+        if (adminEmail === 'admin1@nst.events') {
             adminPass = 'AdminPass123!';
         }
         const adminHash = await bcrypt.hash(adminPass, 10);
@@ -180,7 +180,7 @@ async function main() {
     await prisma.participant.create({
         data: {
             id: testUserId,
-            email: 'testuser@tekron.com',
+            email: 'testuser@nst.events',
             name: 'Test Participant',
             password: testUserPass,
             approved: true,
@@ -189,7 +189,7 @@ async function main() {
             qrCode: generateQRCodeString(testUserId, new Date())
         }
     });
-    console.log(`   [FIXED TEST USER] Email: testuser@tekron.com | Pass: TestPass123!`);
+    console.log(`   [FIXED TEST USER] Email: testuser@nst.events | Pass: TestPass123!`);
 
     for (let i = 0; i < 50; i++) {
         const plainPassword = faker.internet.password();

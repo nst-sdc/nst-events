@@ -1,7 +1,7 @@
 {
-  "name": "tekron-backend",
+  "name": "nst-events-backend",
   "version": "1.0.0",
-  "description": "Backend for Tekron Event Management App",
+  "description": "Backend for NST Events Management App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

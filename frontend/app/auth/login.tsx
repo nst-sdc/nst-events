@@ -55,7 +55,7 @@ export default function Login() {
             >
                 <View style={styles.headerContent}>
                     {/* Logo Removed */}
-                    <Text style={styles.appTitle}>TEKRON 2.0</Text>
+                    <Text style={styles.appTitle}>NST EVENTS</Text>
                     <Text style={styles.appSubtitle}>The Ultimate Tech Showdown</Text>
                 </View>
             </LinearGradient>

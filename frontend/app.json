@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Tekron",
-    "slug": "tekron",
+    "name": "NST Events",
+    "slug": "nst-events",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/appIcon.png",
-    "scheme": "tekron",
+    "scheme": "nst-events",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.newtonschooloftechnology.tekron"
+      "bundleIdentifier": "com.newtonschooloftechnology.nstevents"
     },
     "android": {
       "versionCode": 2,
@@ -32,7 +32,7 @@
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO"
       ],
-      "package": "com.newtonschooloftechnology.tekron"
+      "package": "com.newtonschooloftechnology.nstevents"
     },
     "web": {
       "output": "static",
@@ -70,8 +70,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow Tekron to access your photos.",
-          "savePhotosPermission": "Allow Tekron to save photos.",
+          "photosPermission": "Allow NST Events to access your photos.",
+          "savePhotosPermission": "Allow NST Events to save photos.",
           "isAccessMediaLocationEnabled": true
         }
       ],

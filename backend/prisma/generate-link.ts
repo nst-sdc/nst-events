@@ -19,7 +19,7 @@ async function main() {
         }
     });
 
-    console.log(`LINK: tekron://auth/callback?token=${magicToken}`);
+    console.log(`LINK: nst-events://auth/callback?token=${magicToken}`);
 }
 
 main().finally(() => prisma.$disconnect());
