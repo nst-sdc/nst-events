@@ -11,9 +11,12 @@
 - The app should have a feature to check the about of the app 
 - The app should have a feature to check the help of the app 
 - The app should have a feature to check the logout of the app 
+- have the club-admin & admin feature , club-admin can create events and manage them , admin can manage all the events and users 
 
 ## Frontend Not Decided You can help me with the UI design
 
 ## If you think we can add more features to the app please suggest me
 
 > contact : Arpit Sarang (arpit.sarang@adypu.edu.in)
+
+
