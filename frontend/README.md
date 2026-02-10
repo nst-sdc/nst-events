@@ -1,50 +1,151 @@
-# Welcome to your Expo app 👋
+PLATFORM:
+- React Native (Android + iOS)
+- Mobile-first only (web layout for iOS)
+- Components must map cleanly to React Native primitives
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+DESIGN SYSTEM:
+- Modern, minimal, startup-grade UI
+- Dark mode default, light mode supported
+- Use neutral backgrounds with a strong accent color
+- Rounded cards (12–16 radius)
+- Consistent spacing (8px system)
+- Clear typography hierarchy
+- Touch-friendly buttons (min height 48px)
 
-## Get started
+NAVIGATION:
+- Bottom Tab Navigator for main sections
+- Stack Navigator for drill-down screens
+- Role-based navigation rendering
 
-1. Install dependencies
+BOTTOM TABS:
+- Home
+- Schedule
+- Leaderboard
+- Notifications
+- Profile
 
-   ```bash
-   npm install
-   ```
+SCREENS TO DESIGN:
 
-2. Start the app
+1. LOGIN SCREEN
+- TextInput for NST Pune email (domain restricted)
+- Primary CTA: “Continue”
+- Helper text: “Only NST Pune email IDs allowed”
+- Loading & error state
 
-   ```bash
-   npx expo start
-   ```
+2. HOME / EVENTS LIST
+- Header with app title
+- Search input
+- Horizontal filter chips
+- Scrollable FlatList of Event Cards
+Event Card:
+- Poster image
+- Event title
+- Club name
+- Date & time
+- CTA button (Register / Registered)
 
-In the output, you'll find options to open the app in a
+3. EVENT DETAILS
+- ScrollView layout
+- Banner image at top
+- Event info section:
+  - Title
+  - Club
+  - Date, time, venue
+- Description block
+- Primary CTA: Register / Unregister
+- Disabled state when registration closed
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+4. REGISTRATION SUCCESS
+- Success icon
+- Confirmation message
+- Event summary card
+- CTA buttons:
+  - Add to Schedule
+  - Back to Home
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+5. SCHEDULE SCREEN
+- Calendar-style UI
+- Highlight registered events
+- Upcoming events list
 
-## Get a fresh project
+6. LEADERBOARD SCREEN
+- Toggle: Event-wise / Global
+- Rank list using FlatList
+- Highlight current user row
 
-When you're ready, run:
+7. NOTIFICATIONS SCREEN
+- List of notifications
+- Icon per notification type
+- Unread badge indicator
 
-```bash
-npm run reset-project
-```
+8. PROFILE SCREEN
+- Avatar
+- Name, email, role
+- Stats cards:
+  - Registered
+  - Attended
+  - Points
+- Button: Settings
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+9. SETTINGS SCREEN
+- Dark / Light mode toggle
+- Notification toggles
+- Logout button (destructive)
 
-## Learn more
+10. ABOUT SCREEN
+- App description
+- Purpose
+- Version info
 
-To learn more about developing your project with Expo, look at the following resources:
+11. HELP & SUPPORT SCREEN
+- FAQ accordion
+- Contact support
+- Report issue CTA
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+ROLE-BASED SCREENS:
 
-## Join the community
+12. CLUB ADMIN DASHBOARD
+- Stats cards
+- Button: Create Event
+- List of managed events
+- Actions:
+  - Edit
+  - View registrations
+  - Upload results
+  - Close registrations
 
-Join our community of developers creating universal apps.
+13. CREATE / EDIT EVENT SCREEN
+- Scrollable form
+- Inputs:
+  - Event name
+  - Description
+  - Date & time picker
+  - Venue
+  - Max participants
+- Poster image picker
+- Save / Publish CTA
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+14. SUPER ADMIN PANEL
+- Dashboard overview
+- Manage users
+- Approve / revoke club-admins
+- Manage all events
+- Send global notifications
+
+UX REQUIREMENTS:
+- SafeAreaView usage
+- KeyboardAvoidingView for forms
+- Loading skeletons
+- Empty states
+- Error states
+- Smooth transitions
+
+COMPONENT EXPECTATION:
+- All UI should be feasible with:
+  View, Text, Image, FlatList, ScrollView,
+  Pressable, TextInput, Modal
+
+OUTPUT EXPECTATION:
+- Screen-by-screen UI layouts
+- Clear component hierarchy
+- Consistent spacing & typography
